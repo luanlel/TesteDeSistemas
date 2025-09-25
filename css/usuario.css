@@ -1,0 +1,82 @@
+body {
+  background-color: #e6f0ff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 60px auto;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #0056b3;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #003366;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #aac4e0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.btn-salvar,
+.btn-limpar {
+  width: 48%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.btn-salvar {
+  background-color: #007bff;
+}
+
+.btn-salvar:hover {
+  background-color: #0056b3;
+}
+
+.btn-limpar {
+  background-color: #6c757d;
+}
+
+.btn-limpar:hover {
+  background-color: #495057;
+}
