@@ -1,6 +1,3 @@
-// js/auth.js
-
-// Usuário admin fixo (simulação)
 const adm = {
   email: "adm@email.com",
   senha: "321456"
@@ -9,7 +6,7 @@ const adm = {
 function login(email, senha) {
   if (email === admin.email && senha === admin.senha) {
     localStorage.setItem("logado", "true");
-    window.location.href = "adm.html"; // vai para o painel do admin
+    window.location.href = "adm.html";
     return true;
   } else {
     return false;
