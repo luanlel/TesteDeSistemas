@@ -1,30 +1,52 @@
-// auth.js
-import { auth } from "./firebase-config.js";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+// js/auth.js
+import { db } from "./firebase-config.js";
+import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Login com Firebase
+// Admin fixo
+const admin = {
+  email: "adm@email.com",
+  senha: "321456"
+};
+
+// Função de login
 export async function login(email, senha) {
-  try {
-    await signInWithEmailAndPassword(auth, email, senha);
-    window.location.href = "adm.html"; // redireciona se login for sucesso
+  // Verifica se é admin fixo
+  if (email === admin.email && senha === admin.senha) {
+    localStorage.setItem("logado", "admin");
+    window.location.href = "../html/adm.html";
     return true;
-  } catch (error) {
-    console.error("Erro no login:", error.message);
-    return false;
+  }
+
+  // Se não for admin → busca no Firestore
+  const q = query(
+    collection(db, "usuarios"),
+    where("email", "==", email),
+    where("senha", "==", senha) // ⚠️ só para teste, inseguro
+  );
+
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    localStorage.setItem("logado", "usuario");
+    window.location.href = "../html/vendas.html";
+    return true;
+  }
+
+  return false;
+}
+
+export function logout() {
+  localStorage.removeItem("logado");
+  window.location.href = "../html/index.html";
+}
+
+export function verificarLoginAdmin() {
+  if (localStorage.getItem("logado") !== "admin") {
+    window.location.href = "../html/index.html";
   }
 }
 
-// Logout com Firebase
-export async function logout() {
-  await signOut(auth);
-  window.location.href = "index.html";
-}
-
-// Verificar se está logado
-export function verificarLogin() {
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "index.html"; // se não tiver logado
-    }
-  });
+export function verificarLoginUsuario() {
+  if (localStorage.getItem("logado") !== "usuario") {
+    window.location.href = "../html/index.html";
+  }
 }
