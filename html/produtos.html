@@ -19,6 +19,10 @@
   </style>
 </head>
 <body>
+  <div class="form-container">
+    <h1>Painel Administrativo</h1>
+    <button id="btnLogout" style="margin-bottom:15px;">Sair</button>
+  </div>
 
   <!-- Cadastro -->
   <div class="form-container">
@@ -114,6 +118,17 @@
     <div id="dashboard" style="margin-top: 15px; font-weight: bold;"></div>
   </div>
 
-  <script src="../js/produto.js"></script>
+  <!-- Importando os scripts -->
+  <script type="module">
+    import { verificarLoginAdmin, logout } from "../js/auth.js";
+
+    // Garante que só admin consiga acessar
+    verificarLoginAdmin();
+
+    // Botão de sair
+    document.getElementById("btnLogout").addEventListener("click", logout);
+  </script>
+
+  <script type="module" src="../js/produtos.js"></script>
 </body>
 </html>
