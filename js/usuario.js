@@ -1,6 +1,12 @@
 // js/usuario.js
-import { db } from "./firebase-config.js";
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
+import {
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const telefoneInput = document.getElementById("telefone");
 const form = document.getElementById("cadastroForm");
@@ -77,19 +83,27 @@ form.addEventListener("submit", async function (e) {
 
   if (valido) {
     try {
-      await addDoc(collection(db, "usuários"), {
+      // Cria usuário no Firebase Auth
+      const cred = await createUserWithEmailAndPassword(auth, email, senha);
+
+      // Salva dados adicionais no Firestore usando o UID do Auth
+      await setDoc(doc(db, "usuarios", cred.user.uid), {
         nome,
         email,
-        senha,
         telefone,
+        role: "usuario", // padrão
         criadoEm: new Date()
       });
 
       sucessoMsg.textContent = "Cadastro realizado com sucesso!";
       form.reset();
     } catch (error) {
-      console.error("Erro ao salvar no Firebase: ", error);
-      sucessoMsg.textContent = "Erro ao cadastrar usuário.";
+      console.error("Erro ao cadastrar usuário: ", error);
+      if (error.code === "auth/email-already-in-use") {
+        sucessoMsg.textContent = "Este e-mail já está cadastrado.";
+      } else {
+        sucessoMsg.textContent = "Erro ao cadastrar usuário.";
+      }
     }
   }
 });

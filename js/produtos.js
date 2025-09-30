@@ -1,7 +1,28 @@
-let estoque = JSON.parse(localStorage.getItem("estoque")) || [];
+// js/produtos.js
+import { db } from "./firebase-config.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+let estoque = [];
 let ordemAsc = true;
 
-// Atualiza tabela, dashboard e salva localStorage
+// Carregar produtos do Firestore
+async function carregarProdutos() {
+  estoque = [];
+  const snapshot = await getDocs(collection(db, "produtos"));
+  snapshot.forEach((docSnap) => {
+    estoque.push({ id: docSnap.id, ...docSnap.data() });
+  });
+  atualizarTabela();
+}
+
+// Atualiza tabela e dashboard
 function atualizarTabela(lista = estoque) {
   const tabela = document.getElementById("tabelaEstoque");
   tabela.innerHTML = "";
@@ -15,11 +36,10 @@ function atualizarTabela(lista = estoque) {
   });
 
   atualizarDashboard();
-  localStorage.setItem("estoque", JSON.stringify(estoque));
 }
 
 // Cadastro
-document.getElementById("formProduto").addEventListener("submit", function(e) {
+document.getElementById("formProduto").addEventListener("submit", async function(e) {
   e.preventDefault();
 
   const nome = document.getElementById("nome").value.trim();
@@ -35,37 +55,42 @@ document.getElementById("formProduto").addEventListener("submit", function(e) {
   if (isNaN(preco) || preco <= 0) return document.getElementById("erro-preco").textContent = "Preço inválido.";
   document.getElementById("erro-preco").textContent = "";
 
-  if (estoque.some(p => p.nome.toLowerCase() === nome.toLowerCase())) {
-    document.getElementById("msg-sucesso").textContent = "Produto já existe!";
-    setTimeout(() => document.getElementById("msg-sucesso").textContent = "", 3000);
-    return;
+  try {
+    await addDoc(collection(db, "produtos"), { nome, quantidade, preco });
+    document.getElementById("msg-sucesso").textContent = "Produto cadastrado com sucesso!";
+    this.reset();
+    carregarProdutos();
+  } catch (error) {
+    console.error("Erro ao adicionar produto: ", error);
   }
 
-  estoque.push({ nome, quantidade, preco });
-  atualizarTabela();
-  document.getElementById("msg-sucesso").textContent = "Produto cadastrado com sucesso!";
-  this.reset();
   setTimeout(() => document.getElementById("msg-sucesso").textContent = "", 3000);
 });
 
 // Remover
-function removerProduto() {
+async function removerProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
-  estoque = estoque.filter(p => p.nome.toLowerCase() !== nome.toLowerCase());
-  atualizarTabela();
-  document.getElementById("msg-estoque").textContent = "Produto removido!";
+  const produto = estoque.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+  if (produto) {
+    await deleteDoc(doc(db, "produtos", produto.id));
+    carregarProdutos();
+    document.getElementById("msg-estoque").textContent = "Produto removido!";
+  } else {
+    document.getElementById("msg-estoque").textContent = "Produto não encontrado!";
+  }
   setTimeout(() => document.getElementById("msg-estoque").textContent = "", 3000);
 }
 
 // Comprar
-function comprarProduto() {
+async function comprarProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
   const qtd = parseInt(document.getElementById("acaoQtd").value);
   const produto = estoque.find(p => p.nome.toLowerCase() === nome.toLowerCase());
 
   if (produto && qtd > 0) {
-    produto.quantidade += qtd;
-    atualizarTabela();
+    const ref = doc(db, "produtos", produto.id);
+    await updateDoc(ref, { quantidade: produto.quantidade + qtd });
+    carregarProdutos();
     document.getElementById("msg-estoque").textContent = "Compra registrada!";
   } else {
     document.getElementById("msg-estoque").textContent = "Produto não encontrado ou quantidade inválida!";
@@ -74,14 +99,15 @@ function comprarProduto() {
 }
 
 // Vender
-function venderProduto() {
+async function venderProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
   const qtd = parseInt(document.getElementById("acaoQtd").value);
   const produto = estoque.find(p => p.nome.toLowerCase() === nome.toLowerCase());
 
   if (produto && qtd > 0 && produto.quantidade >= qtd) {
-    produto.quantidade -= qtd;
-    atualizarTabela();
+    const ref = doc(db, "produtos", produto.id);
+    await updateDoc(ref, { quantidade: produto.quantidade - qtd });
+    carregarProdutos();
     document.getElementById("msg-estoque").textContent = "Venda registrada!";
   } else {
     document.getElementById("msg-estoque").textContent = "Produto não encontrado ou estoque insuficiente!";
@@ -90,14 +116,15 @@ function venderProduto() {
 }
 
 // Editar preço
-function editarPreco() {
+async function editarPreco() {
   const nome = document.getElementById("precoNome").value.trim();
   const novoPreco = parseFloat(document.getElementById("novoPreco").value);
   const produto = estoque.find(p => p.nome.toLowerCase() === nome.toLowerCase());
 
   if (produto && novoPreco > 0) {
-    produto.preco = novoPreco;
-    atualizarTabela();
+    const ref = doc(db, "produtos", produto.id);
+    await updateDoc(ref, { preco: novoPreco });
+    carregarProdutos();
     document.getElementById("msg-preco").textContent = "Preço atualizado!";
   } else {
     document.getElementById("msg-preco").textContent = "Produto não encontrado ou preço inválido!";
@@ -146,5 +173,14 @@ function exportarCSV() {
   link.click();
 }
 
-// Inicializa tabela
-atualizarTabela();
+// Inicializa carregando produtos
+carregarProdutos();
+
+// Torna funções acessíveis no HTML
+window.removerProduto = removerProduto;
+window.comprarProduto = comprarProduto;
+window.venderProduto = venderProduto;
+window.editarPreco = editarPreco;
+window.pesquisarProduto = pesquisarProduto;
+window.ordenarPor = ordenarPor;
+window.exportarCSV = exportarCSV;

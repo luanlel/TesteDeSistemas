@@ -1,52 +1,61 @@
 // js/auth.js
-import { db } from "./firebase-config.js";
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Admin fixo
-const admin = {
-  email: "adm@email.com",
-  senha: "321456"
-};
-
-// Função de login
+// Login
 export async function login(email, senha) {
-  // Verifica se é admin fixo
-  if (email === admin.email && senha === admin.senha) {
-    localStorage.setItem("logado", "admin");
-    window.location.href = "../html/adm.html";
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
+
+    // Verifica se usuário é admin (exemplo: pelo Firestore)
+    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+    const userData = userDoc.exists() ? userDoc.data() : null;
+
+    if (userData?.role === "admin") {
+      localStorage.setItem("logado", "admin");
+      window.location.href = "../html/adm.html";
+    } else {
+      localStorage.setItem("logado", "usuario");
+      window.location.href = "../html/vendas.html";
+    }
+
     return true;
+  } catch (error) {
+    console.error("Erro no login:", error);
+    return false;
   }
-
-  // Se não for admin → busca no Firestore
-  const q = query(
-    collection(db, "usuarios"),
-    where("email", "==", email),
-    where("senha", "==", senha) // ⚠️ só para teste, inseguro
-  );
-
-  const snapshot = await getDocs(q);
-  if (!snapshot.empty) {
-    localStorage.setItem("logado", "usuario");
-    window.location.href = "../html/vendas.html";
-    return true;
-  }
-
-  return false;
 }
 
-export function logout() {
+// Logout
+export async function logout() {
+  await signOut(auth);
   localStorage.removeItem("logado");
   window.location.href = "../html/index.html";
 }
 
+// Verificar login admin
 export function verificarLoginAdmin() {
-  if (localStorage.getItem("logado") !== "admin") {
-    window.location.href = "../html/index.html";
-  }
+  onAuthStateChanged(auth, (user) => {
+    if (!user || localStorage.getItem("logado") !== "admin") {
+      window.location.href = "../html/index.html";
+    }
+  });
 }
 
+// Verificar login usuário
 export function verificarLoginUsuario() {
-  if (localStorage.getItem("logado") !== "usuario") {
-    window.location.href = "../html/index.html";
-  }
+  onAuthStateChanged(auth, (user) => {
+    if (!user || localStorage.getItem("logado") !== "usuario") {
+      window.location.href = "../html/index.html";
+    }
+  });
 }
