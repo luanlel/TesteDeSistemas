@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciamento de Usuários</title>
+  <link rel="stylesheet" href="../css/geren_usuario.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Gerenciamento de Usuário</h1>
+
+    <div class="tabela-usuarios">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome Completo</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Excluir</th>
+          </tr>
+        </thead>
+        <tbody id="userTable">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="formulario">
+      <h3>Cadastro Usuário:</h3>
+      <form id="cadastroForm">
+        <div class="form-group">
+          <label>Nome Completo:</label>
+          <input type="text" id="nome" required>
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label>Senha:</label>
+          <input type="password" id="senha" required>
+        </div>
+        <div class="form-group">
+          <label>Telefone:</label>
+          <input type="tel" id="telefone" maxlength="15" placeholder="(00) 00000-0000" required>
+        </div>
+        <button type="submit">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="../js/geren_usuario.js"></script>
+</body>
+</html>
