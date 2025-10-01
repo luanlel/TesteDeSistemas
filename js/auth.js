@@ -10,25 +10,28 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Login
 export async function login(email, senha) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // Verifica se usuário é admin (exemplo: pelo Firestore)
-    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-    const userData = userDoc.exists() ? userDoc.data() : null;
-
-    if (userData?.role === "admin") {
+    // 1º tenta buscar na coleção admins
+    const adminDoc = await getDoc(doc(db, "admins", user.uid));
+    if (adminDoc.exists()) {
       localStorage.setItem("logado", "admin");
-      window.location.href = "../html/adm.html";
-    } else {
-      localStorage.setItem("logado", "usuario");
-      window.location.href = "../html/vendas.html";
+      window.location.href = "../html/pag_adm.html"; // painel de admin
+      return true;
     }
 
-    return true;
+    // 2º senão, busca na coleção usuarios
+    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+    if (userDoc.exists()) {
+      localStorage.setItem("logado", "usuario");
+      window.location.href = "../html/pag_comp_vend.html"; // painel do usuário
+      return true;
+    }
+
+    return false;
   } catch (error) {
     console.error("Erro no login:", error);
     return false;

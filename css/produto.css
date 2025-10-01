@@ -73,3 +73,15 @@ th {
   background: #eee;
   cursor: pointer;
 }
+
+.error-msg {
+      color: #dc3545;
+      font-size: 0.85rem;
+      margin-top: 4px;
+}
+.success-msg {
+      color: #28a745;
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+}

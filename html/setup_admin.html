@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Setup Admin</title>
+</head>
+<body>
+  <h2>Executando setup do Admin...</h2>
+  <script type="module">
+    import { setupAdmin } from "../js/setup_admin.js";
+
+    setupAdmin().then((msg) => {
+      document.body.innerHTML = `<h2>${msg} ✅</h2>
+        <p>Agora você já pode logar com <b>adm@gmail.com / 321456</b></p>`;
+    });
+  </script>
+</body>
+</html>

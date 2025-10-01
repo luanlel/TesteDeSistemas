@@ -1,8 +1,7 @@
 // js/init-admin.js
 import { auth, db } from "./firebase-config.js";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   doc,
@@ -10,50 +9,48 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Dados fixos do admin
-const ADMIN_EMAIL = "adm@email.com";
+const ADMIN_EMAIL = "adm@gmail.com";
 const ADMIN_SENHA = "321456";
 
 export async function initAdmin() {
   try {
-    // Tenta logar com o admin
-    const cred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
-    const uid = cred.user.uid;
+    // Cria usuário admin no Auth (caso não exista ainda)
+    let uid;
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
+      uid = cred.user.uid;
+      console.log("Admin criado no Auth!");
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        console.log("Admin já existe no Auth!");
+        // Se já existe no Auth, pega o UID atual (precisa logar manualmente pelo console ou login)
+        // Aqui não temos signIn automático, mas podemos tratar via login normal
+        return;
+      } else {
+        console.error("Erro no Auth:", error);
+        return;
+      }
+    }
 
-    // Verifica se já existe documento no Firestore
-    const userRef = doc(db, "usuarios", uid);
-    const userSnap = await getDoc(userRef);
+    if (!uid) return;
 
-    if (!userSnap.exists()) {
-      await setDoc(userRef, {
+    // Verifica se existe no Firestore (coleção admins)
+    const adminRef = doc(db, "admins", uid);
+    const adminSnap = await getDoc(adminRef);
+
+    if (!adminSnap.exists()) {
+      await setDoc(adminRef, {
         nome: "Administrador",
         email: ADMIN_EMAIL,
         telefone: "000000000",
-        role: "admin",
         criadoEm: new Date()
       });
-      console.log("Admin criado no Firestore!");
+      console.log("Admin salvo na coleção 'admins'!");
     } else {
-      console.log("Admin já existe no Firestore!");
+      console.log("Admin já existe na coleção 'admins'!");
     }
 
   } catch (error) {
-    // Se não existe no Auth, cria
-    if (error.code === "auth/user-not-found") {
-      const cred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
-      const uid = cred.user.uid;
-
-      await setDoc(doc(db, "usuarios", uid), {
-        nome: "Administrador",
-        email: ADMIN_EMAIL,
-        telefone: "000000000",
-        role: "admin",
-        criadoEm: new Date()
-      });
-
-      console.log("Admin criado no Auth e Firestore!");
-    } else {
-      console.error("Erro ao inicializar admin:", error);
-    }
+    console.error("Erro ao inicializar admin:", error);
   }
 }
