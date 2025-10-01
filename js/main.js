@@ -1,4 +1,3 @@
-// js/main.js
 import { login } from "./auth.js";
 
 document.addEventListener("DOMContentLoaded", () => {

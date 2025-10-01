@@ -28,7 +28,6 @@ aplicarMascaraTelefone(document.getElementById("telefone"));
 const userTable = document.getElementById('userTable');
 const cadastroForm = document.getElementById('cadastroForm');
 
-// Listar usuários
 async function listarUsuarios() {
   userTable.innerHTML = "";
   const querySnapshot = await getDocs(collection(db, "usuarios"));
@@ -46,7 +45,6 @@ async function listarUsuarios() {
   });
 }
 
-// Adicionar usuário
 cadastroForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nome = document.getElementById('nome').value;
@@ -65,11 +63,9 @@ cadastroForm.addEventListener('submit', async (e) => {
   listarUsuarios();
 });
 
-// Excluir usuário
 window.excluirUsuario = async function(id) {
   await deleteDoc(doc(db, "usuarios", id));
   listarUsuarios();
 };
 
-// Carregar usuários ao abrir a página
 listarUsuarios();

@@ -1,4 +1,3 @@
-// js/usuario.js
 import { auth, db } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword
@@ -12,7 +11,6 @@ const telefoneInput = document.getElementById("telefone");
 const form = document.getElementById("cadastroForm");
 const sucessoMsg = document.getElementById("msg-sucesso");
 
-// Máscara de telefone
 telefoneInput.addEventListener("input", function () {
   let numero = this.value.replace(/\D/g, "");
   if (numero.length > 11) {
@@ -30,7 +28,6 @@ telefoneInput.addEventListener("input", function () {
   this.value = numero;
 });
 
-// Valida senha: somente números, mínimo 6 dígitos
 function validarSenha(senha) {
   const regex = /^\d{6,}$/;
   return regex.test(senha);
@@ -83,15 +80,13 @@ form.addEventListener("submit", async function (e) {
 
   if (valido) {
     try {
-      // Cria usuário no Firebase Auth
       const cred = await createUserWithEmailAndPassword(auth, email, senha);
 
-      // Salva dados adicionais no Firestore usando o UID do Auth
       await setDoc(doc(db, "usuarios", cred.user.uid), {
         nome,
         email,
         telefone,
-        role: "usuario", // padrão
+        role: "usuario",
         criadoEm: new Date()
       });
 

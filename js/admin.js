@@ -1,4 +1,3 @@
-// js/init-admin.js
 import { auth, db } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword
@@ -14,7 +13,6 @@ const ADMIN_SENHA = "321456";
 
 export async function initAdmin() {
   try {
-    // Cria usuário admin no Auth (caso não exista ainda)
     let uid;
     try {
       const cred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
@@ -23,8 +21,6 @@ export async function initAdmin() {
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         console.log("Admin já existe no Auth!");
-        // Se já existe no Auth, pega o UID atual (precisa logar manualmente pelo console ou login)
-        // Aqui não temos signIn automático, mas podemos tratar via login normal
         return;
       } else {
         console.error("Erro no Auth:", error);
@@ -34,7 +30,6 @@ export async function initAdmin() {
 
     if (!uid) return;
 
-    // Verifica se existe no Firestore (coleção admins)
     const adminRef = doc(db, "admins", uid);
     const adminSnap = await getDoc(adminRef);
 

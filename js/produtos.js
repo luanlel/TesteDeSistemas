@@ -1,4 +1,3 @@
-// js/produtos.js
 import { db } from "./firebase-config.js";
 import {
   collection,
@@ -12,7 +11,6 @@ import {
 let estoque = [];
 let ordemAsc = true;
 
-// Carregar produtos do Firestore
 async function carregarProdutos() {
   estoque = [];
   const snapshot = await getDocs(collection(db, "produtos"));
@@ -22,7 +20,6 @@ async function carregarProdutos() {
   atualizarTabela();
 }
 
-// Atualiza tabela e dashboard
 function atualizarTabela(lista = estoque) {
   const tabela = document.getElementById("tabelaEstoque");
   tabela.innerHTML = "";
@@ -38,7 +35,6 @@ function atualizarTabela(lista = estoque) {
   atualizarDashboard();
 }
 
-// Cadastro
 document.getElementById("formProduto").addEventListener("submit", async function(e) {
   e.preventDefault();
 
@@ -67,7 +63,6 @@ document.getElementById("formProduto").addEventListener("submit", async function
   setTimeout(() => document.getElementById("msg-sucesso").textContent = "", 3000);
 });
 
-// Remover
 async function removerProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
   const produto = estoque.find(p => p.nome.toLowerCase() === nome.toLowerCase());
@@ -81,7 +76,6 @@ async function removerProduto() {
   setTimeout(() => document.getElementById("msg-estoque").textContent = "", 3000);
 }
 
-// Comprar
 async function comprarProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
   const qtd = parseInt(document.getElementById("acaoQtd").value);
@@ -98,7 +92,6 @@ async function comprarProduto() {
   setTimeout(() => document.getElementById("msg-estoque").textContent = "", 3000);
 }
 
-// Vender
 async function venderProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
   const qtd = parseInt(document.getElementById("acaoQtd").value);
@@ -115,7 +108,6 @@ async function venderProduto() {
   setTimeout(() => document.getElementById("msg-estoque").textContent = "", 3000);
 }
 
-// Editar preço
 async function editarPreco() {
   const nome = document.getElementById("precoNome").value.trim();
   const novoPreco = parseFloat(document.getElementById("novoPreco").value);
@@ -132,14 +124,12 @@ async function editarPreco() {
   setTimeout(() => document.getElementById("msg-preco").textContent = "", 3000);
 }
 
-// Pesquisar
 function pesquisarProduto() {
   const termo = document.getElementById("pesquisa").value.toLowerCase();
   const filtrados = estoque.filter(p => p.nome.toLowerCase().includes(termo));
   atualizarTabela(filtrados);
 }
 
-// Ordenar
 function ordenarPor(campo) {
   estoque.sort((a,b) => {
     if(campo === 'nome') return ordemAsc ? a.nome.localeCompare(b.nome) : b.nome.localeCompare(a.nome);
@@ -149,7 +139,6 @@ function ordenarPor(campo) {
   atualizarTabela();
 }
 
-// Dashboard
 function atualizarDashboard() {
   const totalProdutos = estoque.length;
   const totalQuantidade = estoque.reduce((acc,p)=>acc+p.quantidade,0);
@@ -162,7 +151,6 @@ function atualizarDashboard() {
   `;
 }
 
-// Exportar CSV
 function exportarCSV() {
   let csv = "Produto,Quantidade,Preço\n";
   estoque.forEach(p=>csv+=`${p.nome},${p.quantidade},${p.preco}\n`);
@@ -173,10 +161,8 @@ function exportarCSV() {
   link.click();
 }
 
-// Inicializa carregando produtos
 carregarProdutos();
 
-// Torna funções acessíveis no HTML
 window.removerProduto = removerProduto;
 window.comprarProduto = comprarProduto;
 window.venderProduto = venderProduto;

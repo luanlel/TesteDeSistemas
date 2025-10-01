@@ -1,4 +1,3 @@
-// js/setupAdmin.js
 import { auth, db } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword,
@@ -17,7 +16,6 @@ export async function setupAdmin() {
   try {
     let uid;
 
-    // 1. Tenta criar o admin no Auth
     try {
       const cred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
       uid = cred.user.uid;
@@ -25,7 +23,6 @@ export async function setupAdmin() {
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         console.log("Admin já existe no Auth. Tentando logar para recuperar UID...");
-        // Faz login com o admin para recuperar o UID
         const cred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
         uid = cred.user.uid;
       } else {
@@ -36,7 +33,6 @@ export async function setupAdmin() {
 
     if (!uid) return "Não foi possível obter UID do admin";
 
-    // 2. Cria documento na coleção "admins"
     const adminRef = doc(db, "admins", uid);
     const snap = await getDoc(adminRef);
 

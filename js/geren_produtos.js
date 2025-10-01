@@ -1,12 +1,10 @@
-// js/geren_produtos.js
 import { db } from "./firebase-config.js";
 import { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const produtoForm = document.getElementById("produtoForm");
 const tabelaEstoque = document.getElementById("tabelaEstoque").querySelector("tbody");
-const produtosRef = collection(db, "produtos"); // coleção no Firestore
+const produtosRef = collection(db, "produtos");
 
-// ====== CADASTRAR PRODUTO ======
 produtoForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -30,10 +28,9 @@ produtoForm.addEventListener("submit", async (e) => {
   }
 });
 
-// ====== LISTAR PRODUTOS EM TEMPO REAL ======
 function carregarProdutos() {
   onSnapshot(produtosRef, (snapshot) => {
-    tabelaEstoque.innerHTML = ""; // limpa tabela
+    tabelaEstoque.innerHTML = "";
     let contadorID = 1;
 
     snapshot.forEach((docSnap) => {
@@ -54,7 +51,6 @@ function carregarProdutos() {
   });
 }
 
-// ====== EXCLUIR PRODUTO ======
 window.excluirProduto = async function (id) {
   try {
     await deleteDoc(doc(db, "produtos", id));
@@ -64,5 +60,4 @@ window.excluirProduto = async function (id) {
   }
 };
 
-// Chama a função para carregar os produtos ao iniciar
 carregarProdutos();

@@ -1,0 +1,110 @@
+body {
+  background-color: #e6f0ff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+header h1 {
+  color: #0056b3;
+  margin: 0;
+}
+
+main h2 {
+    text-align: center;
+    color: #0056b3;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.produtos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+.produto-card {
+  background-color: #ffffff;
+  border: 1px solid #aac4e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.produto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.produto-card h3 {
+  margin-top: 0;
+  color: #003366;
+}
+
+.produto-card .preco {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #28a745;
+  margin: 10px 0;
+}
+
+.produto-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  color: white;
+  background-color: #007bff;
+  transition: background-color 0.3s;
+}
+
+.produto-card button:hover {
+  background-color: #0056b3;
+}
+
+#carrinho-resumo {
+  background-color: #f2f6fc;
+  padding: 20px;
+  border: 1px solid #aac4e0;
+  border-radius: 12px;
+  min-width: 280px;
+}
+
+#carrinho-resumo h2 {
+    text-align: center;
+    color: #003366;
+    margin-bottom: 15px;
+    margin-top: 0;
+}
+
+#btnFinalizarCompra {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  color: white;
+  background-color: #28a745;
+  transition: background-color 0.3s;
+}
+
+#btnFinalizarCompra:hover {
+  background-color: #218838;
+}
