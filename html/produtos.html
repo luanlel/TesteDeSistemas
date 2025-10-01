@@ -5,7 +5,7 @@
   <title>Gerenciamento de Produtos - Mercadinho</title>
   <link rel="stylesheet" href="../css/produto.css" />
 </head>
-<body>
+<body style="display: none;">
   <div class="form-container">
     <h1>Painel Administrativo</h1>
     <button id="btnLogout" style="margin-bottom:15px;">Sair</button>
@@ -104,7 +104,9 @@
   <script type="module">
     import { verificarLoginAdmin, logout } from "../js/auth.js";
 
-    verificarLoginAdmin();
+    verificarLoginAdmin(() => {
+      document.body.style.display = 'block';
+    });
 
     document.getElementById("btnLogout").addEventListener("click", logout);
   </script>

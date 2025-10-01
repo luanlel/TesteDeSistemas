@@ -4,8 +4,14 @@
   <meta charset="UTF-8">
   <title>Loja</title>
   <link rel="stylesheet" href="../css/loja.css">
+  <script type="module">
+    import { verificarLoginUsuario } from "../js/auth.js";
+    verificarLoginUsuario(() => {
+      document.body.style.display = 'block';
+    });
+  </script>
 </head>
-<body>
+<body style="display: none;">
 
   <header>
     <h1>Mercadinho Resenhalel</h1>

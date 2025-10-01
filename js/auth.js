@@ -41,17 +41,21 @@ export async function logout() {
   window.location.href = "../html/index.html";
 }
 
-export function verificarLoginAdmin() {
+export function verificarLoginAdmin(onSuccess) {
   onAuthStateChanged(auth, (user) => {
-    if (!user || localStorage.getItem("logado") !== "admin") {
+    if (user && localStorage.getItem("logado") === "admin") {
+      if (onSuccess) onSuccess();
+    } else {
       window.location.href = "../html/index.html";
     }
   });
 }
 
-export function verificarLoginUsuario() {
+export function verificarLoginUsuario(onSuccess) {
   onAuthStateChanged(auth, (user) => {
-    if (!user || localStorage.getItem("logado") !== "usuario") {
+    if (user && localStorage.getItem("logado") === "usuario") {
+      if (onSuccess) onSuccess();
+    } else {
       window.location.href = "../html/index.html";
     }
   });

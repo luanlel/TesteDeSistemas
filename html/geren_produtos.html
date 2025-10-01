@@ -4,8 +4,14 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="../css/geren_produto.css">
   <title>Gerenciamento de Produtos</title>
+  <script type="module">
+    import { verificarLoginAdmin } from "../js/auth.js";
+    verificarLoginAdmin(() => {
+      document.body.style.display = 'block';
+    });
+  </script>
 </head>
-<body>
+<body style="display: none;">
 
   <h1>Gerenciamento de Produtos</h1>
 
@@ -53,4 +59,3 @@
 
 </body>
 </html>
-
