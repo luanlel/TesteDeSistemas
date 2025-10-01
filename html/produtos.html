@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gerenciamento de Produtos - Mercadinho</title>
+  <link rel="stylesheet" href="../css/produto.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h1>Painel Administrativo</h1>
+    <button id="btnLogout" style="margin-bottom:15px;">Sair</button>
+  </div>
+
+  <div class="form-container">
+    <h2>Cadastro de Produto</h2>
+    <form id="formProduto" novalidate>
+      <div class="form-group">
+        <label for="nome">Nome do Produto:</label>
+        <input type="text" id="nome" name="nome" required />
+        <div class="error-msg" id="erro-nome"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="quantidade">Quantidade Inicial:</label>
+        <input type="number" id="quantidade" name="quantidade" required />
+        <div class="error-msg" id="erro-quantidade"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="preco">Preço:</label>
+        <input type="number" step="0.01" id="preco" name="preco" required />
+        <div class="error-msg" id="erro-preco"></div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit" class="btn-salvar">Cadastrar</button>
+        <button type="reset" class="btn-limpar">Limpar</button>
+      </div>
+    </form>
+    <div class="success-msg" id="msg-sucesso"></div>
+  </div>
+
+  <div class="form-container">
+    <h2>Gerenciar Estoque</h2>
+    <div class="form-group">
+      <label for="acaoNome">Nome do Produto:</label>
+      <input type="text" id="acaoNome" />
+    </div>
+
+    <div class="form-group">
+      <label for="acaoQtd">Quantidade:</label>
+      <input type="number" id="acaoQtd" />
+    </div>
+
+    <div class="form-buttons">
+      <button type="button" onclick="comprarProduto()" class="btn-salvar">Comprar</button>
+      <button type="button" onclick="venderProduto()" class="btn-salvar">Vender</button>
+      <button type="button" onclick="removerProduto()" class="btn-limpar">Remover</button>
+    </div>
+    <div class="success-msg" id="msg-estoque"></div>
+  </div>
+
+  <div class="form-container">
+    <h2>Editar Preço</h2>
+    <div class="form-group">
+      <label for="precoNome">Nome do Produto:</label>
+      <input type="text" id="precoNome" />
+    </div>
+
+    <div class="form-group">
+      <label for="novoPreco">Novo Preço:</label>
+      <input type="number" step="0.01" id="novoPreco" />
+    </div>
+
+    <div class="form-buttons">
+      <button type="button" onclick="editarPreco()" class="btn-salvar">Atualizar Preço</button>
+    </div>
+    <div class="success-msg" id="msg-preco"></div>
+  </div>
+
+  <div class="form-container">
+    <h2>Estoque Atual</h2>
+    <div class="form-group">
+      <label for="pesquisa">Pesquisar Produto:</label>
+      <input type="text" id="pesquisa" placeholder="Digite para buscar..." onkeyup="pesquisarProduto()" />
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th onclick="ordenarPor('nome')">Produto ⬍</th>
+          <th onclick="ordenarPor('quantidade')">Quantidade ⬍</th>
+          <th onclick="ordenarPor('preco')">Preço ⬍</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaEstoque"></tbody>
+    </table>
+
+    <button class="btn-salvar" onclick="exportarCSV()">Exportar CSV</button>
+
+    <div id="dashboard" style="margin-top: 15px; font-weight: bold;"></div>
+  </div>
+
+  <script type="module">
+    import { verificarLoginAdmin, logout } from "../js/auth.js";
+
+    verificarLoginAdmin();
+
+    document.getElementById("btnLogout").addEventListener("click", logout);
+  </script>
+
+  <script type="module" src="../js/produtos.js"></script>
+</body>
+</html>
