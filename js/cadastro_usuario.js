@@ -11,6 +11,7 @@ const telefoneInput = document.getElementById("telefone");
 const form = document.getElementById("cadastroForm");
 const sucessoMsg = document.getElementById("msg-sucesso");
 
+// ---------- Máscara de telefone ----------
 telefoneInput.addEventListener("input", function () {
   let numero = this.value.replace(/\D/g, "");
   if (numero.length > 11) {
@@ -25,14 +26,16 @@ telefoneInput.addEventListener("input", function () {
   if (numero.length > 10) {
     numero = numero.slice(0, 10) + "-" + numero.slice(10);
   }
-  this.value = numero;
+  this.value = numero; // agora fica formatado no input
 });
 
+// ---------- Validação de senha ----------
 function validarSenha(senha) {
   const regex = /^\d{6,}$/;
   return regex.test(senha);
 }
 
+// ---------- Helpers ----------
 function mostrarErro(id, msg) {
   document.getElementById(id).textContent = msg;
 }
@@ -44,6 +47,7 @@ function limparErros() {
   sucessoMsg.textContent = "";
 }
 
+// ---------- Cadastro ----------
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
   limparErros();
@@ -53,7 +57,7 @@ form.addEventListener("submit", async function (e) {
   const nome = form.nome.value.trim();
   const email = form.email.value.trim();
   const senha = form.senha.value;
-  const telefone = form.telefone.value.replace(/\D/g, "");
+  const telefone = form.telefone.value.trim(); // pega o valor formatado
 
   if (nome.length < 3) {
     mostrarErro("erro-nome", "Informe um nome completo válido.");
@@ -73,7 +77,7 @@ form.addEventListener("submit", async function (e) {
     valido = false;
   }
 
-  if (telefone.length < 10) {
+  if (telefone.replace(/\D/g, "").length < 10) {
     mostrarErro("erro-telefone", "Informe um telefone válido (10 ou 11 dígitos).");
     valido = false;
   }
@@ -85,19 +89,19 @@ form.addEventListener("submit", async function (e) {
       await setDoc(doc(db, "usuarios", cred.user.uid), {
         nome,
         email,
-        telefone,
+        telefone, // agora vai formatado
         role: "usuario",
         criadoEm: new Date()
       });
 
-      sucessoMsg.textContent = "Cadastro realizado com sucesso!";
+      sucessoMsg.textContent = "✅ Cadastro realizado com sucesso!";
       form.reset();
     } catch (error) {
       console.error("Erro ao cadastrar usuário: ", error);
       if (error.code === "auth/email-already-in-use") {
-        sucessoMsg.textContent = "Este e-mail já está cadastrado.";
+        sucessoMsg.textContent = "⚠️ Este e-mail já está cadastrado.";
       } else {
-        sucessoMsg.textContent = "Erro ao cadastrar usuário.";
+        sucessoMsg.textContent = "❌ Erro ao cadastrar usuário.";
       }
     }
   }
