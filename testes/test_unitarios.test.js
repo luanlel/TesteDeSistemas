@@ -12,6 +12,44 @@ test("Senha válida deve ter ao menos 6 dígitos numéricos", () => {
   expect(validarSenha("abcdef")).toBe(false);
 });
 
+// ---------------- teste de email ----------------
+function validarEmailMock(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+test("Deve validar o formato do email corretamente", () => {
+  expect(validarEmailMock("teste@dominio.com")).toBe(true);
+  expect(validarEmailMock("teste@dominio")).toBe(false);
+  expect(validarEmailMock("teste.com")).toBe(false);
+  expect(validarEmailMock("")).toBe(false);
+});
+
+// ---------------- teste do carrinho ----------------
+function manipularCarrinhoMock(carrinhoInicial, acao, produtoId) {
+  const novoCarrinho = { ...carrinhoInicial };
+
+  if (acao === 'adicionar') {
+    novoCarrinho[produtoId] = (novoCarrinho[produtoId] || 0) + 1;
+  } else if (acao === 'remover') {
+    if (novoCarrinho[produtoId]) {
+      novoCarrinho[produtoId] -= 1;
+      if (novoCarrinho[produtoId] === 0) {
+        delete novoCarrinho[produtoId];
+      }
+    }
+  }
+  return novoCarrinho;
+}
+
+test("Deve adicionar e remover itens do carrinho corretamente", () => {
+  let carrinho = {};
+  carrinho = manipularCarrinhoMock(carrinho, 'adicionar', 'prod1');
+  carrinho = manipularCarrinhoMock(carrinho, 'adicionar', 'prod1');
+  carrinho = manipularCarrinhoMock(carrinho, 'remover', 'prod1');
+  expect(carrinho['prod1']).toBe(1);
+});
+
 // ---------------- teste de compra ----------------
 function atualizarResumoCarrinhoMock(produtos, carrinho) {
   let contagem = 0;
@@ -103,30 +141,6 @@ describe("Ordenação de produtos", () => {
   });
 });
 
-// ---------------- teste do carrinho ----------------
-function manipularCarrinhoMock(carrinhoInicial, acao, produtoId) {
-  const novoCarrinho = { ...carrinhoInicial };
-
-  if (acao === 'adicionar') {
-    novoCarrinho[produtoId] = (novoCarrinho[produtoId] || 0) + 1;
-  } else if (acao === 'remover') {
-    if (novoCarrinho[produtoId]) {
-      novoCarrinho[produtoId] -= 1;
-      if (novoCarrinho[produtoId] === 0) {
-        delete novoCarrinho[produtoId];
-      }
-    }
-  }
-  return novoCarrinho;
-}
-
-test("Deve adicionar e remover itens do carrinho corretamente", () => {
-  let carrinho = {};
-  carrinho = manipularCarrinhoMock(carrinho, 'adicionar', 'prod1');
-  carrinho = manipularCarrinhoMock(carrinho, 'adicionar', 'prod1');
-  carrinho = manipularCarrinhoMock(carrinho, 'remover', 'prod1');
-  expect(carrinho['prod1']).toBe(1);
-});
 
 // ---------------- teste de login ----------------
 function loginMock(email, senha, dbMock) {
@@ -167,15 +181,4 @@ describe("Lógica de Login", () => {
   });
 });
 
-// ---------------- teste de email ----------------
-function validarEmailMock(email) {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-}
 
-test("Deve validar o formato do email corretamente", () => {
-  expect(validarEmailMock("teste@dominio.com")).toBe(true);
-  expect(validarEmailMock("teste@dominio")).toBe(false);
-  expect(validarEmailMock("teste.com")).toBe(false);
-  expect(validarEmailMock("")).toBe(false);
-});
