@@ -10,6 +10,26 @@
       document.body.style.display = 'block';
     });
   </script>
+  <style>
+    .btn-remover {
+      background-color: #e74c3c; /* Vermelho para indicar exclusão */
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-left: 10px;
+      transition: background-color 0.2s;
+    }
+    .btn-remover:hover {
+      background-color: #c0392b; /* Vermelho mais escuro no hover */
+    }
+    .btn-remover:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body style="display: none;">
 
@@ -18,6 +38,7 @@
     <div id="carrinho-resumo">
       <h2>Meu Carrinho</h2>
       <p>Itens: <span id="carrinho-contagem">0</span></p>
+      <ul id="lista-carrinho"></ul>
       <p>Total: R$ <span id="carrinho-total">0.00</span></p>
       <button id="btnFinalizarCompra">Finalizar Compra</button>
     </div>

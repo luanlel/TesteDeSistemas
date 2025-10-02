@@ -35,18 +35,21 @@ function carregarProdutos() {
 
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
-      const id = docSnap.id;
-
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td>${String(contadorID).padStart(3, "0")}</td>
-        <td>${produto.nome}</td>
-        <td>${produto.quantidade}</td>
-        <td>${produto.preco}</td>
-        <td><button onclick="excluirProduto('${id}')">Excluir</button></td>
-      `;
-      tabelaEstoque.appendChild(linha);
-      contadorID++;
+      
+      // Apenas exibe o produto se a quantidade for maior que 0
+      if (produto.quantidade > 0) {
+        const id = docSnap.id;
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+          <td>${String(contadorID).padStart(3, "0")}</td>
+          <td>${produto.nome}</td>
+          <td>${produto.quantidade}</td>
+          <td>${produto.preco}</td>
+          <td><button onclick="excluirProduto('${id}')">Excluir</button></td>
+        `;
+        tabelaEstoque.appendChild(linha);
+        contadorID++;
+      }
     });
   });
 }

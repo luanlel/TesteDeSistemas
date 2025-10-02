@@ -1,82 +1,118 @@
-import { db } from "./firebase-config.js";
-import { collection, getDocs, addDoc, deleteDoc, doc } 
-  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  deleteDoc,
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// ---------- Função de máscara de telefone ----------
-function aplicarMascaraTelefone(input) {
-  input.addEventListener("input", function () {
-    let valor = input.value.replace(/\D/g, ""); // só números
-
-    if (valor.length > 11) valor = valor.slice(0, 11);
-
-    // Monta máscara (XX) XXXXX-XXXX
-    if (valor.length > 0) valor = "(" + valor;
-    if (valor.length > 3) valor = valor.slice(0, 3) + ") " + valor.slice(3);
-    if (valor.length > 10) valor = valor.slice(0, 10) + "-" + valor.slice(10);
-
-    input.value = valor;
-  });
-}
-aplicarMascaraTelefone(document.getElementById("telefone"));
-
-const userTable = document.getElementById("userTable");
 const cadastroForm = document.getElementById("cadastroForm");
+const userTable = document.getElementById("userTable");
+const telefoneInput = document.getElementById("telefone");
 
-// ---------- Listar usuários com IDs sequenciais ----------
-async function listarUsuarios() {
-  userTable.innerHTML = "";
-
-  const querySnapshot = await getDocs(collection(db, "usuarios"));
-  const usuarios = [];
-
-  querySnapshot.forEach((docSnap) => {
-    usuarios.push({ id: docSnap.id, ...docSnap.data() });
-  });
-
-  // Ordena pela data de criação (se existir)
-  usuarios.sort((a, b) => (a.criadoEm?.seconds || 0) - (b.criadoEm?.seconds || 0));
-
-  usuarios.forEach((user, index) => {
-    const idSequencial = String(index + 1).padStart(3, "0"); // 001, 002, 003...
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${idSequencial}</td>
-      <td>${user.nome}</td>
-      <td>${user.email}</td>
-      <td>${user.telefone}</td>
-      <td><button onclick="excluirUsuario('${user.id}')">Excluir</button></td>
-    `;
-    userTable.appendChild(row);
+// Adiciona a máscara de formatação para o campo de telefone
+if (telefoneInput) {
+  telefoneInput.addEventListener("input", function () {
+    let numero = this.value.replace(/\D/g, "");
+    if (numero.length > 11) {
+      numero = numero.slice(0, 11);
+    }
+    if (numero.length > 0) {
+      numero = "(" + numero;
+    }
+    if (numero.length > 3) {
+      numero = numero.slice(0, 3) + ") " + numero.slice(3);
+    }
+    if (numero.length > 10) {
+      numero = numero.slice(0, 10) + "-" + numero.slice(10);
+    }
+    this.value = numero;
   });
 }
 
-// ---------- Cadastro de novo usuário ----------
 cadastroForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const senha = document.getElementById("senha").value.trim();
-  const telefone = document.getElementById("telefone").value.trim(); // já vem formatado
+  const nome = document.getElementById("nome").value;
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+  const telefone = document.getElementById("telefone").value;
 
-  await addDoc(collection(db, "usuarios"), {
-    nome,
-    email,
-    senha,
-    telefone, // salva formatado
-    criadoEm: new Date() // usado para ordenar depois
-  });
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      senha
+    );
+    const user = userCredential.user;
 
-  cadastroForm.reset();
-  listarUsuarios();
+    await setDoc(doc(db, "usuarios", user.uid), {
+      nomeCompleto: nome,
+      email: email,
+      telefone: telefone,
+    });
+
+    alert("Usuário cadastrado com sucesso!");
+    cadastroForm.reset();
+    carregarUsuarios(); 
+  } catch (error) {
+    console.error("Erro ao cadastrar usuário:", error);
+    alert(`Erro ao cadastrar: ${error.message}`);
+  }
 });
 
-// ---------- Excluir usuário ----------
-window.excluirUsuario = async function (id) {
-  await deleteDoc(doc(db, "usuarios", id));
-  listarUsuarios();
-};
+async function carregarUsuarios() {
+  try {
+    const usuariosRef = collection(db, "usuarios");
+    const snapshot = await getDocs(usuariosRef);
 
-// Inicializa tabela
-listarUsuarios();
+    userTable.innerHTML = "";
+
+    if (snapshot.empty) {
+      userTable.innerHTML = '<tr><td colspan="5">Nenhum usuário encontrado.</td></tr>';
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const usuario = docSnap.data();
+      const id = docSnap.id;
+
+      const linha = document.createElement("tr");
+      linha.innerHTML = `
+        <td>${id.substring(0, 8)}...</td>
+        <td>${usuario.nomeCompleto || usuario.nome || 'N/A'}</td>
+        <td>${usuario.email || 'N/A'}</td>
+        <td>${usuario.telefone || 'N/A'}</td>
+        <td><button class="btn-excluir" data-id="${id}">Excluir</button></td>
+      `;
+      userTable.appendChild(linha);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar usuários:", error);
+    alert("Não foi possível carregar a lista de usuários.");
+  }
+}
+
+async function excluirUsuario(id) {
+  if (confirm("Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.")) {
+    try {
+      await deleteDoc(doc(db, "usuarios", id));
+      alert("Usuário excluído com sucesso!");
+      carregarUsuarios();
+    } catch (error) {
+      console.error("Erro ao excluir usuário:", error);
+      alert("Erro ao excluir usuário.");
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", carregarUsuarios);
+
+userTable.addEventListener('click', (e) => {
+  if (e.target.classList.contains('btn-excluir')) {
+    const userId = e.target.dataset.id;
+    excluirUsuario(userId);
+  }
+});
