@@ -11,13 +11,15 @@ produtoForm.addEventListener("submit", async (e) => {
   const nome = document.getElementById("nome").value;
   const quantidade = document.getElementById("quantidade").value;
   const preco = document.getElementById("preco").value;
+  const categoria = document.getElementById("categoria").value;
 
-  if (nome && quantidade && preco) {
+  if (nome && quantidade && preco && categoria) {
     try {
       await addDoc(produtosRef, {
         nome: nome,
         quantidade: parseInt(quantidade),
-        preco: parseFloat(preco).toFixed(2),
+        preco: parseFloat(preco),
+        categoria: categoria,
       });
 
       produtoForm.reset();
@@ -36,7 +38,6 @@ function carregarProdutos() {
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
       
-      // Apenas exibe o produto se a quantidade for maior que 0
       if (produto.quantidade > 0) {
         const id = docSnap.id;
         const linha = document.createElement("tr");
@@ -45,6 +46,7 @@ function carregarProdutos() {
           <td>${produto.nome}</td>
           <td>${produto.quantidade}</td>
           <td>${produto.preco}</td>
+          <td>${produto.categoria || 'N/A'}</td>
           <td><button onclick="excluirProduto('${id}')">Excluir</button></td>
         `;
         tabelaEstoque.appendChild(linha);

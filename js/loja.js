@@ -15,7 +15,6 @@ async function carregarProdutos() {
   onSnapshot(produtosRef, (snapshot) => {
     listaProdutos.innerHTML = ""; 
     produtos = []; 
-
     snapshot.forEach(docSnap => {
       const produto = { id: docSnap.id, ...docSnap.data() };
       produtos.push(produto);
@@ -26,6 +25,7 @@ async function carregarProdutos() {
         card.innerHTML = `
           <h3>${produto.nome}</h3>
           <p class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+          <p class="categoria">Categoria: ${produto.categoria || 'N/A'}</p>
           <p>Estoque: ${produto.quantidade}</p>
           <button data-id="${produto.id}">Adicionar ao Carrinho</button>
         `;
