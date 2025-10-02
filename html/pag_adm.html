@@ -7,17 +7,24 @@
   <title>Página de ADM</title>
   <script type="module">
     import { verificarLoginAdmin } from "../js/auth.js";
-    verificarLoginAdmin(() => {
-      document.body.style.display = 'block';
-    });
+    // Garante que o usuário é admin antes de mostrar o conteúdo
+    verificarLoginAdmin(() => { document.body.style.visibility = 'visible'; });
   </script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Ocupa a altura total da tela */
+      margin: 0; /* Remove margens padrão */
+    }
+  </style>
 </head>
 
-<body style="display: none;">
-  
-  <h1>Administração</h1>
+<body style="visibility: hidden;">
 
   <div class="container">
+    <h1>Administração</h1>
     <h2>Administrador</h2>
     <div class="buttons">
       <button onclick="window.location.href='geren_usuario.html'">Gerenciamento de Usuários</button>
