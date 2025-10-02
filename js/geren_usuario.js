@@ -12,7 +12,6 @@ const cadastroForm = document.getElementById("cadastroForm");
 const userTable = document.getElementById("userTable");
 const telefoneInput = document.getElementById("telefone");
 
-// Adiciona a máscara de formatação para o campo de telefone
 if (telefoneInput) {
   telefoneInput.addEventListener("input", function () {
     let numero = this.value.replace(/\D/g, "");

@@ -11,7 +11,6 @@ let produtos = [];
 let carrinho = {};
 
 async function carregarProdutos() {
-  // Usando onSnapshot para ouvir atualizações em tempo real
   const produtosRef = collection(db, "produtos");
   onSnapshot(produtosRef, (snapshot) => {
     listaProdutos.innerHTML = ""; 
@@ -21,7 +20,6 @@ async function carregarProdutos() {
       const produto = { id: docSnap.id, ...docSnap.data() };
       produtos.push(produto);
 
-      // Apenas exibe o produto se a quantidade for maior que 0
       if (produto.quantidade > 0) {
         const card = document.createElement("div");
         card.className = "produto-card";
@@ -40,10 +38,9 @@ async function carregarProdutos() {
 listaProdutos.addEventListener("click", async (e) => {
   if (e.target.tagName === "BUTTON") {
     const produtoId = e.target.dataset.id;
-    e.target.disabled = true; // Desabilita o botão para evitar cliques duplos
+    e.target.disabled = true;
 
     try {
-      // Usa uma transação para decrementar o estoque de forma segura
       await runTransaction(db, async (transaction) => {
         const produtoRef = doc(db, "produtos", produtoId);
         const sfDoc = await transaction.get(produtoRef);
@@ -60,7 +57,6 @@ listaProdutos.addEventListener("click", async (e) => {
         transaction.update(produtoRef, { quantidade: novaQuantidade });
       });
 
-      // Se a transação for bem-sucedida, atualiza o carrinho local
       carrinho[produtoId] = (carrinho[produtoId] || 0) + 1;
       atualizarResumoCarrinho();
 
@@ -68,7 +64,7 @@ listaProdutos.addEventListener("click", async (e) => {
       console.error("Erro ao adicionar ao carrinho: ", error);
       alert(`Não foi possível adicionar o item: ${error}`);
     } finally {
-      e.target.disabled = false; // Reabilita o botão
+      e.target.disabled = false;
     }
   }
 });
@@ -79,7 +75,6 @@ listaCarrinho.addEventListener("click", async (e) => {
     e.target.disabled = true;
 
     try {
-      // Usa uma transação para incrementar o estoque de forma segura
       await runTransaction(db, async (transaction) => {
         const produtoRef = doc(db, "produtos", produtoId);
         const sfDoc = await transaction.get(produtoRef);
@@ -90,7 +85,6 @@ listaCarrinho.addEventListener("click", async (e) => {
         transaction.update(produtoRef, { quantidade: novaQuantidade });
       });
 
-      // Se a transação for bem-sucedida, atualiza o carrinho local
       carrinho[produtoId] -= 1;
       if (carrinho[produtoId] === 0) {
         delete carrinho[produtoId];
@@ -108,7 +102,7 @@ listaCarrinho.addEventListener("click", async (e) => {
 function atualizarResumoCarrinho() {
   let contagem = 0;
   let total = 0;
-  listaCarrinho.innerHTML = ""; // Limpa a lista de itens do carrinho
+  listaCarrinho.innerHTML = "";
 
   for (const produtoId in carrinho) {
     const quantidade = carrinho[produtoId];
@@ -137,12 +131,11 @@ btnFinalizarCompra.addEventListener("click", () => {
     return;
   }
 
-  // A lógica de estoque já foi tratada. Agora apenas finalizamos.
   alert("Compra finalizada com sucesso!");
   
-  carrinho = {}; // Limpa o carrinho local
-  atualizarResumoCarrinho(); // Zera o resumo do carrinho na tela
-  carregarProdutos(); // Recarrega os produtos para ocultar os que ficaram com estoque 0
+  carrinho = {};
+  atualizarResumoCarrinho();
+  carregarProdutos();
 });
 
 carregarProdutos();
