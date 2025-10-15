@@ -12,6 +12,15 @@ body {
   box-sizing: border-box;
 }
 
+/* Utility classes to replace inline styles */
+.hidden { display:none !important; }
+.invisible { visibility:hidden !important; }
+.help-text { color:#333; font-size:0.9rem; }
+
+/* logout and dashboard helpers used by produtos.html */
+#btnLogout { margin-bottom: 15px; }
+#dashboard { margin-top: 15px; font-weight: bold; }
+
 h1 {
   font-size: 2rem;
   color: #0056b3;
