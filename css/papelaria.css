@@ -1,0 +1,80 @@
+/* Tema papelaria: paleta suave, tipografia amigável */
+:root{
+  --bg:#fffef8; /* fundo papel */
+  --accent:#0b3d91; /* azul escuro */
+  --accent-2:#ff8a00; /* laranja */
+  --muted:#6b7280; /* texto secundário */
+  --card:#ffffff;
+}
+
+body{
+  background: linear-gradient(180deg, #f7f9fc 0%, #fffef8 100%);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937;
+}
+
+header{
+  background: var(--accent);
+  color: #fff;
+  padding: 18px 24px;
+}
+
+.header-title{
+  font-size:1.25rem;
+  font-weight:700;
+}
+
+.btn-primary{
+  background: var(--accent-2);
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-secondary{
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card{
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(11,61,145,0.08);
+}
+
+.product-card .preco{
+  color: var(--accent);
+  font-weight:700;
+}
+
+.produto-card, .product-card{
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(11,61,145,0.06);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.produto-card img, .product-card img{
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.produtos-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap:16px;
+}
+
+.small-muted{ color: var(--muted); font-size:0.9rem; }

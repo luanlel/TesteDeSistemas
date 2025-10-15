@@ -2,6 +2,8 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="../css/pagina_adm.css">
+  <link rel="stylesheet" href="../css/papelaria.css">
   <link rel="stylesheet" href="../css/geren_produto.css">
   <title>Gerenciamento de Produtos</title>
   <script type="module">
@@ -31,8 +33,10 @@
         <input type="number" step="0.01" id="preco" required>
       </div>
       <div class="form-group">
-        <label for="categoria">Categoria:</label>
-        <input type="text" id="categoria" required placeholder="Ex: Alimento, Bebida, Limpeza">
+        <label for="imagem">Imagem do Produto:</label>
+        <input type="file" id="imagem" accept="image/*">
+      </div>
+      <div class="form-group">
       </div>
       <div class="form-buttons">
         <button type="submit" class="btn-salvar">Adicionar Produto</button>
@@ -42,6 +46,7 @@
 
   <div class="estoque-container">
     <h2>Estoque</h2>
+    <p style="color:#333;font-size:0.9rem;">Use o botão "Editar" para alterar dados do produto.</p>
     <table id="tabelaEstoque">
       <thead>
         <tr>
@@ -49,7 +54,6 @@
           <th>Nome do Produto</th>
           <th>Quantidade</th>
           <th>Preço</th>
-          <th>Categoria</th>
           <th>Ação</th>
         </tr>
       </thead>

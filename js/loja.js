@@ -20,12 +20,12 @@ async function carregarProdutos() {
       produtos.push(produto);
 
       if (produto.quantidade > 0) {
-        const card = document.createElement("div");
-        card.className = "produto-card";
+  const card = document.createElement("div");
+  card.className = "produto-card product-card";
         card.innerHTML = `
+          ${produto.imagemDataUrl ? `<img src="${produto.imagemDataUrl}" alt="${produto.nome}" />` : ''}
           <h3>${produto.nome}</h3>
           <p class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
-          <p class="categoria">Categoria: ${produto.categoria || 'N/A'}</p>
           <p>Estoque: ${produto.quantidade}</p>
           <button data-id="${produto.id}">Adicionar ao Carrinho</button>
         `;

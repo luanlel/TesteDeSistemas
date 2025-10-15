@@ -5,6 +5,14 @@ body {
   padding: 20px;
 }
 
+p {
+  color: black;
+}
+
+ul {
+  color: black;
+}
+
 header {
   display: flex;
   justify-content: space-between;

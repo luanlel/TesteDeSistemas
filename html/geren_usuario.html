@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Gerenciamento de Usuários</title>
+  <link rel="stylesheet" href="../css/pagina_adm.css">
+  <link rel="stylesheet" href="../css/papelaria.css">
   <link rel="stylesheet" href="../css/geren_usuario.css">
   <script type="module">
     import { verificarLoginAdmin } from "../js/auth.js";
@@ -16,6 +18,7 @@
     <h1>Gerenciamento de Usuário</h1>
 
     <div class="tabela-usuarios">
+      <p style="color:#333;font-size:0.9rem;">Clique em "Editar" para modificar dados do usuário.</p>
       <table>
         <thead>
           <tr>
@@ -23,7 +26,7 @@
             <th>Nome Completo</th>
             <th>Email</th>
             <th>Telefone</th>
-            <th>Excluir</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody id="userTable">

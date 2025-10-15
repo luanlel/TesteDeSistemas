@@ -6,12 +6,10 @@
 }
 
 body {
-  background-color: #e6f0ff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100vh;
+  background-color: #f6f8fb;
+  margin: 0;
+  padding: 80px 20px 40px 20px; /* mais espaço no topo como na imagem */
+  box-sizing: border-box;
 }
 
 h1 {
@@ -22,18 +20,26 @@ h1 {
 .container {
   background-color: #ffffff;
   border-radius: 12px;
-  padding: 40px;
-  text-align: center;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-  max-width: 600px;
-  width: 100%;
+  padding: 28px 32px;
+  text-align: left;
+  box-shadow: 0px 8px 24px rgba(11,61,145,0.06);
+  max-width: 1100px; /* largura maior para o card */
+  width: calc(100% - 80px);
+  margin: 0 auto;
 }
 
 .container h2 {
-  margin-bottom: 25px;
-  font-size: 1.5rem;
+  margin: 6px 0 20px 0;
+  font-size: 1.1rem;
   color: #003366;
+  font-weight: 700;
 }
+
+.container h1{ font-size:2rem; color:var(--accent); margin-bottom:4px }
+/* Cabeçalho centralizado específico para a página admin */
+.admin-header{ text-align:center; margin-bottom:18px }
+.admin-header h1{ font-size:2.4rem; margin:0; }
+.admin-header h2{ font-size:1.25rem; margin:6px 0 0 0; color:#0b3d91 }
 
 .buttons {
   display: flex;
@@ -43,19 +49,95 @@ h1 {
 }
 
 .buttons button {
-  flex: 1;
-  min-width: 180px;
-  padding: 15px;
+  flex: 1 1 45%;
+  min-width: 220px;
+  height: 56px; /* altura maior como na imagem */
+  padding: 0 24px;
   font-size: 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   border: none;
-  background-color: #007bff;
+  background-color: var(--accent);
   color: #fff;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: background-color 0.18s ease, transform 0.12s ease;
+  box-shadow: 0 6px 18px rgba(11,61,145,0.12);
 }
 
 .buttons button:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
+  background-color: #083a6f;
+  transform: translateY(-2px);
+}
+
+/* Estilos adicionais para páginas de administração */
+.btn-editar {
+  background: #ff8a00; /* laranja papelaria */
+  border: none;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-excluir {
+  background: #d9534f; /* vermelho suave */
+  border: none;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+/* Modal básico (os modais criados pelo JS também respeitam estas regras quando embutidos) */
+.modal-content {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  min-width: 320px;
+}
+
+/* Modal wrapper para sobreposição */
+.modal-overlay{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+
+.modal-card{
+  background: #fff;
+  border-radius: 8px;
+  padding: 18px;
+  min-width: 320px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.modal-card h3{ margin-bottom: 12px; color:#003366 }
+.modal-card form div{ margin-bottom: 8px; }
+.modal-card input{ width:100%; padding:8px; border-radius:6px; border:1px solid #ddd }
+
+.modal-card #previewImagem img{ max-width:160px; border-radius:8px; display:block }
+
+.actions-right{ display:flex; gap:8px; justify-content:flex-end }
+
+@media (max-width: 600px) {
+  .container { padding: 20px; }
+  th, td { font-size: 0.9rem; }
 }

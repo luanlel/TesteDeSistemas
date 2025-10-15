@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Loja</title>
   <link rel="stylesheet" href="../css/loja.css">
+  <link rel="stylesheet" href="../css/papelaria.css">
   <script type="module">
     import { verificarLoginUsuario } from "../js/auth.js";
     verificarLoginUsuario(() => {
@@ -12,7 +13,7 @@
   </script>
   <style>
     .btn-remover {
-      background-color: #e74c3c; /* Vermelho para indicar exclusão */
+      background-color: #e74c3c;
       color: white;
       border: none;
       padding: 4px 8px;
@@ -23,7 +24,7 @@
       transition: background-color 0.2s;
     }
     .btn-remover:hover {
-      background-color: #c0392b; /* Vermelho mais escuro no hover */
+      background-color: #c0392b;
     }
     .btn-remover:disabled {
       background-color: #ccc;
@@ -34,7 +35,7 @@
 <body style="display: none;">
 
   <header>
-    <h1>Mercadinho</h1>
+    <h1>Papelaria</h1>
     <div id="carrinho-resumo">
       <h2>Meu Carrinho</h2>
       <p>Itens: <span id="carrinho-contagem">0</span></p>
@@ -47,7 +48,6 @@
   <main>
     <h2>Produtos Disponíveis</h2>
     <div id="lista-produtos" class="produtos-grid">
-      // *Produtos*
     </div>
   </main>
 
