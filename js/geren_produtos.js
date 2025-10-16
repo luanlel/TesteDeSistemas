@@ -55,26 +55,39 @@ function carregarProdutos() {
 
     snapshot.forEach((docSnap) => {
       const produto = docSnap.data();
-      
-      if (produto.quantidade > 0) {
-        const id = docSnap.id;
-        const linha = document.createElement("tr");
-        linha.innerHTML = `
-              <td>${String(contadorID).padStart(3, "0")}</td>
-              <td>${produto.nome}</td>
-              <td>${produto.quantidade}</td>
-              <td>${produto.preco}</td>
-              <td>
-                <button class="btn-editar" onclick="abrirEditarProduto('${id}')">Editar</button>
-                <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
-              </td>
-            `;
-        tabelaEstoque.appendChild(linha);
-        contadorID++;
-      }
+      const id = docSnap.id;
+
+      // Cria a linha da tabela
+      const linha = document.createElement("tr");
+
+      // Exibe a quantidade e status visual
+      const statusEstoque =
+        produto.quantidade === 0
+          ? `<span style="color: red; font-weight: bold;">Esgotado</span>`
+          : produto.quantidade;
+
+      // Aplica cor diferente para itens esgotados
+      const estiloLinha = produto.quantidade === 0 ? "style='background-color: #ffe6e6;'" : "";
+
+      linha.innerHTML = `
+        <tr ${estiloLinha}>
+          <td>${String(contadorID).padStart(3, "0")}</td>
+          <td>${produto.nome}</td>
+          <td>${statusEstoque}</td>
+          <td>R$ ${parseFloat(produto.preco).toFixed(2)}</td>
+          <td>
+            <button class="btn-editar" onclick="abrirEditarProduto('${id}')">Editar</button>
+            <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
+          </td>
+        </tr>
+      `;
+
+      tabelaEstoque.appendChild(linha);
+      contadorID++;
     });
   });
 }
+
 
 window.excluirProduto = async function (id) {
   try {
