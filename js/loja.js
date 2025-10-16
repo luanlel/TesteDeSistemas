@@ -13,15 +13,18 @@ let carrinho = {};
 async function carregarProdutos() {
   const produtosRef = collection(db, "produtos");
   onSnapshot(produtosRef, (snapshot) => {
-    listaProdutos.innerHTML = ""; 
-    produtos = []; 
+    listaProdutos.innerHTML = "";
+    produtos = [];
+
     snapshot.forEach(docSnap => {
       const produto = { id: docSnap.id, ...docSnap.data() };
       produtos.push(produto);
 
+      const card = document.createElement("div");
+      card.className = "produto-card";
+
+      // Verifica se o produto está esgotado
       if (produto.quantidade > 0) {
-  const card = document.createElement("div");
-  card.className = "produto-card product-card";
         card.innerHTML = `
           ${produto.imagemDataUrl ? `<img src="${produto.imagemDataUrl}" alt="${produto.nome}" />` : ''}
           <h3>${produto.nome}</h3>
@@ -29,8 +32,19 @@ async function carregarProdutos() {
           <p>Estoque: ${produto.quantidade}</p>
           <button data-id="${produto.id}">Adicionar ao Carrinho</button>
         `;
-        listaProdutos.appendChild(card);
+      } else {
+        // Produto esgotado
+        card.classList.add("esgotado");
+        card.innerHTML = `
+          ${produto.imagemDataUrl ? `<img src="${produto.imagemDataUrl}" alt="${produto.nome}" class="img-esgotado"/>` : ''}
+          <h3>${produto.nome}</h3>
+          <p class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+          <p class="status-esgotado">Esgotado</p>
+          <button disabled class="btn-esgotado">Indisponível</button>
+        `;
       }
+
+      listaProdutos.appendChild(card);
     });
   });
 }

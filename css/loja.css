@@ -135,3 +135,37 @@ main h2 {
       background-color: #ccc;
       cursor: not-allowed;
     }
+
+    /* ======== PRODUTOS ESGOTADOS ======== */
+.produto-card.esgotado {
+  opacity: 0.6;
+  position: relative;
+}
+
+.produto-card.esgotado::after {
+  content: "Esgotado";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff4d4d;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.produto-card .btn-esgotado {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.produto-card .status-esgotado {
+  color: #b30000;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.produto-card .img-esgotado {
+  filter: grayscale(100%);
+}
