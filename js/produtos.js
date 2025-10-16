@@ -38,17 +38,30 @@ function atualizarTabela(lista = estoque) {
 document.getElementById("formProduto").addEventListener("submit", async function(e) {
   e.preventDefault();
 
-  const nome = document.getElementById("nome").value.trim();
-  const quantidade = parseInt(document.getElementById("quantidade").value);
-  const preco = parseFloat(document.getElementById("preco").value);
+  let nome = document.getElementById("nome").value.trim();
+  let quantidade = parseInt(document.getElementById("quantidade").value);
+  let preco = parseFloat(document.getElementById("preco").value);
+  // Aplica limites do cliente
+  if (nome.length > 120) nome = nome.slice(0, 120);
+  if (!Number.isInteger(quantidade) || quantidade < 0) quantidade = NaN;
+  if (isNaN(preco) || preco <= 0) preco = NaN;
 
-  if (!nome) return document.getElementById("erro-nome").textContent = "Digite o nome do produto.";
+  if (!nome) {
+    document.getElementById("erro-nome").textContent = "Digite o nome do produto."; 
+    return;
+  }
   document.getElementById("erro-nome").textContent = "";
 
-  if (isNaN(quantidade) || quantidade <= 0) return document.getElementById("erro-quantidade").textContent = "Quantidade inválida.";
+  if (isNaN(quantidade) || quantidade < 0 || quantidade > 100000) {
+    document.getElementById("erro-quantidade").textContent = "Quantidade inválida."; 
+    return;
+  }
   document.getElementById("erro-quantidade").textContent = "";
 
-  if (isNaN(preco) || preco <= 0) return document.getElementById("erro-preco").textContent = "Preço inválido.";
+  if (isNaN(preco) || preco <= 0 || preco > 1000000) {
+    document.getElementById("erro-preco").textContent = "Preço inválido."; 
+    return;
+  }
   document.getElementById("erro-preco").textContent = "";
 
   try {

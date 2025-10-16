@@ -7,10 +7,14 @@ const produtosRef = collection(db, "produtos");
 
 produtoForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  const nome = document.getElementById("nome").value;
-  const quantidade = document.getElementById("quantidade").value;
-  const preco = document.getElementById("preco").value;
+  // coletar e normalizar valores
+  let nome = document.getElementById("nome").value.trim();
+  let quantidade = document.getElementById("quantidade").value;
+  let preco = document.getElementById("preco").value;
+  // aplicar limites do lado do cliente
+  if (nome.length > 120) nome = nome.slice(0, 120);
+  quantidade = Number(quantidade);
+  preco = Number(preco);
   const inputImagem = document.getElementById('imagem');
 
   // Helper para ler arquivo como dataURL
@@ -21,7 +25,13 @@ produtoForm.addEventListener("submit", async (e) => {
     reader.readAsDataURL(file);
   });
 
-  if (nome && quantidade && preco) {
+  // Validações adicionais
+  let valido = true;
+  if (!nome) { document.getElementById('erro-nome').textContent = 'Digite o nome do produto.'; valido = false; } else { document.getElementById('erro-nome').textContent = ''; }
+  if (!Number.isInteger(quantidade) || quantidade < 0 || quantidade > 100000) { document.getElementById('erro-quantidade').textContent = 'Quantidade inválida.'; valido = false; } else { document.getElementById('erro-quantidade').textContent = ''; }
+  if (isNaN(preco) || preco <= 0 || preco > 1000000) { document.getElementById('erro-preco').textContent = 'Preço inválido.'; valido = false; } else { document.getElementById('erro-preco').textContent = ''; }
+
+  if (valido) {
     try {
       const docData = {
         nome: nome,

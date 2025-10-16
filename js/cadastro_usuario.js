@@ -54,9 +54,12 @@ form.addEventListener("submit", async function (e) {
 
   let valido = true;
 
-  const nome = form.nome.value.trim();
-  const email = form.email.value.trim();
+  let nome = form.nome.value.trim();
+  let email = form.email.value.trim();
   const senha = form.senha.value;
+  // Enforce client-side limits (same as input attributes)
+  if (nome.length > 100) nome = nome.slice(0, 100);
+  if (email.length > 100) email = email.slice(0, 100);
   const telefone = form.telefone.value.trim(); // pega o valor formatado
 
   if (nome.length < 3) {
@@ -69,10 +72,11 @@ form.addEventListener("submit", async function (e) {
     valido = false;
   }
 
-  if (!validarSenha(senha)) {
+  // senha: apenas números entre 6 e 20 dígitos
+  if (!/^[0-9]{6,20}$/.test(senha)) {
     mostrarErro(
       "erro-senha",
-      "Senha deve ter apenas números e no mínimo 6 dígitos."
+      "Senha deve conter apenas números e ter entre 6 e 20 dígitos."
     );
     valido = false;
   }
