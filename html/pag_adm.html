@@ -8,7 +8,9 @@
   <title>Página de ADM</title>
   <script type="module">
     import { verificarLoginAdmin } from "../js/auth.js";
-    verificarLoginAdmin(() => { document.body.style.visibility = 'visible'; });
+    verificarLoginAdmin(() => {
+      document.body.classList.remove('invisible');
+    });
   </script>
   <style>
     body {

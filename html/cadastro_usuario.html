@@ -6,6 +6,12 @@
   <link rel="stylesheet" href="../css/cadastro_usuario.css" />
 </head>
 <body>
+  <script type="module">
+    import { verificarLoginAdmin } from "../js/auth.js";
+    verificarLoginAdmin(() => {
+      document.body.classList.remove('hidden');
+    });
+  </script>
   <div class="form-container">
     <h2>Cadastro</h2>
 
@@ -50,6 +56,6 @@
     <div class="success-msg" id="msg-sucesso"></div>
   </div>
 
-  <script type="module" src="../js/cadastro_usuario.js"></script>
+  
 </body>
 </html>
