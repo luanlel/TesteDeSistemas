@@ -1,205 +1,294 @@
+/** ================================
+ *  GERENCIAMENTO DE PRODUTOS (com múltiplas imagens)
+ *  ================================ */
 import { db } from "./firebase-config.js";
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const produtoForm = document.getElementById("produtoForm");
 const tabelaEstoque = document.getElementById("tabelaEstoque").querySelector("tbody");
 const produtosRef = collection(db, "produtos");
 
+/** =============================
+ * FUNÇÃO PARA LER IMAGEM COMO BASE64
+ * ============================= */
+const lerImagemDataUrl = (file) => new Promise((res, rej) => {
+  const reader = new FileReader();
+  reader.onload = () => res(reader.result);
+  reader.onerror = rej;
+  reader.readAsDataURL(file);
+});
+
+/** =============================
+ * ADICIONAR PRODUTO
+ * ============================= */
 produtoForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  // coletar e normalizar valores
-  let nome = document.getElementById("nome").value.trim();
-  let quantidade = document.getElementById("quantidade").value;
-  let preco = document.getElementById("preco").value;
-  // aplicar limites do lado do cliente
-  if (nome.length > 120) nome = nome.slice(0, 120);
-  quantidade = Number(quantidade);
-  preco = Number(preco);
-  const inputImagem = document.getElementById('imagem');
 
-  // Helper para ler arquivo como dataURL
-  const lerImagemDataUrl = (file) => new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result);
-    reader.onerror = rej;
-    reader.readAsDataURL(file);
-  });
+  const nome = document.getElementById("nome").value.trim();
+  const quantidade = document.getElementById("quantidade").value.trim();
+  const preco = document.getElementById("preco").value.trim();
+  const comentario = document.getElementById("comentario").value.trim();
+  const inputImagens = document.getElementById("imagem");
 
-  // Validações adicionais
+  // Validação de número máximo de imagens
+  if (inputImagens?.files?.length > 3) {
+    alert("Você só pode enviar até 3 imagens por produto.");
+    return;
+  }
+
   let valido = true;
-  if (!nome) { document.getElementById('erro-nome').textContent = 'Digite o nome do produto.'; valido = false; } else { document.getElementById('erro-nome').textContent = ''; }
-  if (!Number.isInteger(quantidade) || quantidade < 0 || quantidade > 100000) { document.getElementById('erro-quantidade').textContent = 'Quantidade inválida.'; valido = false; } else { document.getElementById('erro-quantidade').textContent = ''; }
-  if (isNaN(preco) || preco <= 0 || preco > 1000000) { document.getElementById('erro-preco').textContent = 'Preço inválido.'; valido = false; } else { document.getElementById('erro-preco').textContent = ''; }
+  document.querySelectorAll(".error-msg").forEach(el => el.textContent = "");
 
-  if (valido) {
-    try {
-      const docData = {
-        nome: nome,
-        quantidade: parseInt(quantidade),
-        preco: parseFloat(preco),
-      };
+  // Validações
+  if (!nome) {
+    document.getElementById("erro-nome").textContent = "Digite o nome do produto.";
+    valido = false;
+  }
 
-      if (inputImagem && inputImagem.files && inputImagem.files[0]) {
-        try {
-          const dataUrl = await lerImagemDataUrl(inputImagem.files[0]);
-          docData.imagemDataUrl = dataUrl;
-        } catch (err) {
-          console.warn('Erro ao ler imagem local:', err);
-        }
-      }
+  // Quantidade: inteiro positivo
+  const qtdNum = parseInt(quantidade);
+  if (!Number.isInteger(qtdNum) || qtdNum < 0) {
+    document.getElementById("erro-quantidade").textContent = "Quantidade inválida (apenas inteiros positivos).";
+    valido = false;
+  }
 
-      await addDoc(produtosRef, docData);
+  // Preço: número positivo
+  const precoNum = parseFloat(preco);
+  if (isNaN(precoNum) || precoNum <= 0) {
+    document.getElementById("erro-preco").textContent = "Preço inválido (apenas números positivos).";
+    valido = false;
+  }
 
-      produtoForm.reset();
-      console.log("Produto adicionado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao adicionar produto:", error);
+  if (comentario.length > 50) {
+    document.getElementById("erro-comentario").textContent = "Comentário muito longo (máx 50 caracteres).";
+    valido = false;
+  }
+
+  if (!valido) return;
+
+  // Converte imagens para base64
+  const imagens = [];
+  if (inputImagens?.files?.length > 0) {
+    for (let i = 0; i < inputImagens.files.length; i++) {
+      imagens.push(await lerImagemDataUrl(inputImagens.files[i]));
     }
+  }
+
+  try {
+    await addDoc(produtosRef, {
+      nome,
+      quantidade: qtdNum,
+      preco: precoNum,
+      comentario,
+      imagens,
+      createdAt: new Date()
+    });
+    produtoForm.reset();
+    alert("✅ Produto cadastrado com sucesso!");
+  } catch (err) {
+    console.error("Erro ao adicionar produto:", err);
+    alert("❌ Erro ao cadastrar produto.");
   }
 });
 
+/** =============================
+ * CARREGAR PRODUTOS EM TEMPO REAL
+ * ============================= */
 function carregarProdutos() {
   onSnapshot(produtosRef, (snapshot) => {
-    tabelaEstoque.innerHTML = "";
-    let contadorID = 1;
-
+    const produtos = [];
     snapshot.forEach((docSnap) => {
-      const produto = docSnap.data();
-      const id = docSnap.id;
+      produtos.push({ id: docSnap.id, ...docSnap.data() });
+    });
 
-      // Cria a linha da tabela
+    produtos.sort((a, b) => (a.createdAt?.toMillis?.() || 0) - (b.createdAt?.toMillis?.() || 0));
+
+    tabelaEstoque.innerHTML = "";
+    produtos.forEach((p, index) => {
+      const statusEstoque = p.quantidade === 0
+        ? `<span style="color:red;font-weight:bold;">Esgotado</span>`
+        : p.quantidade;
+      const estilo = p.quantidade === 0 ? "style='background-color:#ffe6e6;'" : "";
+
       const linha = document.createElement("tr");
-
-      // Exibe a quantidade e status visual
-      const statusEstoque =
-        produto.quantidade === 0
-          ? `<span style="color: red; font-weight: bold;">Esgotado</span>`
-          : produto.quantidade;
-
-      // Aplica cor diferente para itens esgotados
-      const estiloLinha = produto.quantidade === 0 ? "style='background-color: #ffe6e6;'" : "";
-
       linha.innerHTML = `
-        <tr ${estiloLinha}>
-          <td>${String(contadorID).padStart(3, "0")}</td>
-          <td>${produto.nome}</td>
+        <tr ${estilo}>
+          <td>${String(index + 1).padStart(3, "0")}</td>
+          <td>${p.nome}</td>
           <td>${statusEstoque}</td>
-          <td>R$ ${parseFloat(produto.preco).toFixed(2)}</td>
+          <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
+          <td>${p.comentario || "-"}</td>
           <td>
-            <button class="btn-editar" onclick="abrirEditarProduto('${id}')">Editar</button>
-            <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
+            <button class="btn-editar" onclick="abrirEditarProduto('${p.id}')">Editar</button>
+            <button class="btn-excluir" onclick="excluirProduto('${p.id}')">Excluir</button>
           </td>
-        </tr>
-      `;
-
+        </tr>`;
       tabelaEstoque.appendChild(linha);
-      contadorID++;
     });
   });
 }
+carregarProdutos();
 
-
+/** =============================
+ * EXCLUIR PRODUTO
+ * ============================= */
 window.excluirProduto = async function (id) {
   try {
     await deleteDoc(doc(db, "produtos", id));
-    console.log("Produto excluído com sucesso!");
-  } catch (error) {
-    console.error("Erro ao excluir produto:", error);
+    alert("🗑️ Produto excluído com sucesso!");
+  } catch (err) {
+    console.error("Erro ao excluir produto:", err);
+    alert("❌ Erro ao excluir produto.");
   }
 };
 
-carregarProdutos();
+/** =============================
+ * EDITAR PRODUTO (mantém imagens antigas)
+ * ============================= */
+window.abrirEditarProduto = async function (id) {
+  const docs = await getDocs(produtosRef);
+  const docSnap = docs.docs.find(d => d.id === id);
+  if (!docSnap) return alert("Produto não encontrado");
+  const p = docSnap.data();
 
-    window.abrirEditarProduto = async function (id) {
-      try {
-        const produtosRef = collection(db, "produtos");
-        const snapshot = await getDocs(produtosRef);
-        const docSnap = snapshot.docs.find(d => d.id === id);
-        if (!docSnap) return alert('Produto não encontrado');
-        const p = docSnap.data();
+  let modal = document.getElementById("modalEdicaoProduto");
+  if (modal) modal.remove();
 
-        let modal = document.getElementById('modalEdicaoProduto');
-        if (!modal) {
-          modal = document.createElement('div');
-          modal.id = 'modalEdicaoProduto';
-          modal.className = 'modal-overlay';
-          modal.innerHTML = `
-            <div class="modal-card">
-              <h3>Editar Produto</h3>
-                  <form id="formEditarProduto">
-                    <div><label>Nome:</label><input id="editNome" required></div>
-                    <div><label>Quantidade:</label><input id="editQuantidade" type="number" required></div>
-                    <div><label>Preço:</label><input id="editPreco" type="number" step="0.01" required></div>
-                    <div><label>Imagem atual:</label><div id="previewImagem" style="margin-top:6px"></div></div>
-                    <div><label>Trocar imagem:</label><input id="editImagem" type="file" accept="image/*"></div>
-                    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-                      <button type="submit" class="btn-primary">Salvar</button>
-                      <button type="button" id="removerImagem" class="btn-secondary">Remover imagem</button>
-                      <button type="button" id="cancelEdit" class="btn-secondary">Cancelar</button>
-                    </div>
-                  </form>
-            </div>`;
-          document.body.appendChild(modal);
+  modal = document.createElement("div");
+  modal.id = "modalEdicaoProduto";
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-card">
+      <h3>Editar Produto</h3>
+      <form id="formEditarProduto">
+        <div><label>Nome:</label><input id="editNome" required></div>
+        <div><label>Quantidade:</label><input id="editQuantidade" type="number" min="0" required></div>
+        <div><label>Preço:</label><input id="editPreco" type="number" step="0.01" min="0.01" required></div>
+        <div><label>Comentário:</label><input id="editComentario" maxlength="50"></div>
 
-          const cancelar = () => modal.remove();
-          document.getElementById('cancelEdit').addEventListener('click', cancelar);
+        <div><label>Imagens atuais:</label>
+          <div id="previewImagens" style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"></div>
+        </div>
 
-          // Preview da imagem atual
-          const previewDiv = document.getElementById('previewImagem');
-          previewDiv.innerHTML = p.imagemDataUrl ? `<img src="${p.imagemDataUrl}" style="max-width:160px;border-radius:8px;object-fit:cover;display:block" />` : '<span class="small-muted">Sem imagem</span>';
+        <div><label>Adicionar novas (máx 3):</label>
+          <input id="editImagens" type="file" accept="image/*" multiple>
+        </div>
 
-          document.getElementById('removerImagem').addEventListener('click', async ()=>{
-            if (!confirm('Remover a imagem deste produto?')) return;
-            try {
-              await updateDoc(doc(db, 'produtos', id), { imagemDataUrl: null });
-              alert('Imagem removida');
-              carregarProdutos();
-              cancelar();
-            } catch (err) {
-              console.error('Erro ao remover imagem', err);
-              alert('Erro ao remover imagem');
-            }
-          });
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button type="submit" class="btn-primary">Salvar</button>
+          <button type="button" id="cancelEdit" class="btn-secondary">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
 
-          document.getElementById('formEditarProduto').addEventListener('submit', async (e)=>{
-            e.preventDefault();
-            const novo = document.getElementById('editNome').value.trim();
-            const qtd = parseInt(document.getElementById('editQuantidade').value);
-            const preco = parseFloat(document.getElementById('editPreco').value);
-            const inputEditImg = document.getElementById('editImagem');
+  // Preenche os campos
+  document.getElementById("editNome").value = p.nome || "";
+  document.getElementById("editQuantidade").value = p.quantidade || 0;
+  document.getElementById("editPreco").value = p.preco || 0;
+  document.getElementById("editComentario").value = p.comentario || "";
 
-            // Função para ler arquivo
-            const lerImagemDataUrl = (file) => new Promise((res, rej) => {
-              const reader = new FileReader();
-              reader.onload = () => res(reader.result);
-              reader.onerror = rej;
-              reader.readAsDataURL(file);
-            });
+  // Mostra imagens antigas
+  const preview = document.getElementById("previewImagens");
+  preview.innerHTML = "";
+  let imagensAtuais = p.imagens ? [...p.imagens] : [];
 
-            try {
-              const updates = { nome: novo, quantidade: qtd, preco: preco };
-              if (inputEditImg && inputEditImg.files && inputEditImg.files[0]) {
-                try {
-                  updates.imagemDataUrl = await lerImagemDataUrl(inputEditImg.files[0]);
-                } catch (err) {
-                  console.warn('Erro ao ler nova imagem:', err);
-                }
-              }
-              await updateDoc(doc(db, 'produtos', id), updates);
-              modal.remove();
-            } catch (err) {
-              console.error('Erro ao atualizar produto', err);
-              alert('Erro ao atualizar produto');
-            }
-          });
-        }
+  function atualizarPreview() {
+    preview.innerHTML = "";
+    if (imagensAtuais.length === 0) {
+      preview.innerHTML = "<span class='small-muted'>Sem imagens</span>";
+    } else {
+      imagensAtuais.forEach((url, i) => {
+        const container = document.createElement("div");
+        container.style.position = "relative";
+        container.style.display = "inline-block";
 
-        document.getElementById('editNome').value = p.nome || '';
-        document.getElementById('editQuantidade').value = p.quantidade || 0;
-        document.getElementById('editPreco').value = p.preco || 0;
-        
-      } catch (error) {
-        console.error(error);
-        alert('Erro ao abrir edição');
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.width = "80px";
+        img.style.borderRadius = "6px";
+        img.title = `Imagem ${i + 1}`;
+
+        const btnRemover = document.createElement("button");
+        btnRemover.textContent = "X";
+        btnRemover.style.position = "absolute";
+        btnRemover.style.top = "0";
+        btnRemover.style.right = "0";
+        btnRemover.style.background = "red";
+        btnRemover.style.color = "white";
+        btnRemover.style.border = "none";
+        btnRemover.style.borderRadius = "50%";
+        btnRemover.style.cursor = "pointer";
+        btnRemover.style.width = "20px";
+        btnRemover.style.height = "20px";
+        btnRemover.addEventListener("click", () => {
+          imagensAtuais.splice(i, 1);
+          atualizarPreview();
+        });
+
+        container.appendChild(img);
+        container.appendChild(btnRemover);
+        preview.appendChild(container);
+      });
+    }
+  }
+  atualizarPreview();
+
+  document.getElementById("cancelEdit").addEventListener("click", () => modal.remove());
+
+  document.getElementById("formEditarProduto").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById("editNome").value.trim();
+    const qtd = parseInt(document.getElementById("editQuantidade").value);
+    const preco = parseFloat(document.getElementById("editPreco").value);
+    const comentario = document.getElementById("editComentario").value.trim();
+
+    if (!nome) return alert("Nome inválido.");
+    if (!Number.isInteger(qtd) || qtd < 0) return alert("Quantidade inválida.");
+    if (isNaN(preco) || preco <= 0) return alert("Preço inválido.");
+
+    const inputImgs = document.getElementById("editImagens");
+    let novasImgs = [...imagensAtuais];
+
+    if (inputImgs.files.length > 0) {
+      if (inputImgs.files.length + novasImgs.length > 3) {
+        alert(`O total de imagens não pode exceder 3. Você já possui ${novasImgs.length} imagens.`);
+        return;
+      }
+
+      for (let i = 0; i < inputImgs.files.length; i++) {
+        novasImgs.push(await lerImagemDataUrl(inputImgs.files[i]));
       }
     }
+
+    await updateDoc(doc(db, "produtos", id), {
+      nome,
+      quantidade: qtd,
+      preco,
+      comentario,
+      imagens: novasImgs
+    });
+
+    modal.remove();
+    alert("✅ Produto atualizado com sucesso!");
+  });
+};
+
+/** =============================
+ * CONTADOR DE COMENTÁRIO
+ * ============================= */
+const comentarioInput = document.getElementById("comentario");
+const contadorComentario = document.getElementById("contador-comentario");
+comentarioInput.addEventListener("input", () => {
+  contadorComentario.textContent = `${comentarioInput.value.length} / 50`;
+});

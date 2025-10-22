@@ -1,67 +1,115 @@
+/**
+ * geren_usuario.js
+ * Cadastro de usuários com limite de caracteres em tempo real
+ */
+
 import { auth, db } from "./firebase-config.js";
-import { createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   collection,
   doc,
   setDoc,
   getDocs,
-  deleteDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+// ===============================
+// Elementos
+// ===============================
 const cadastroForm = document.getElementById("cadastroForm");
 const userTable = document.getElementById("userTable");
+const nomeInput = document.getElementById("nome");
+const emailInput = document.getElementById("email");
+const senhaInput = document.getElementById("senha");
 const telefoneInput = document.getElementById("telefone");
 
+// ===============================
+// Limites de caracteres em tempo real
+// ===============================
+if (nomeInput) {
+  nomeInput.setAttribute("maxlength", "100");
+  nomeInput.addEventListener("input", () => {
+    if (nomeInput.value.length > 100) nomeInput.value = nomeInput.value.slice(0, 100);
+  });
+}
+
+if (emailInput) {
+  emailInput.setAttribute("maxlength", "100");
+  emailInput.addEventListener("input", () => {
+    if (emailInput.value.length > 100) emailInput.value = emailInput.value.slice(0, 100);
+  });
+}
+
+if (senhaInput) {
+  senhaInput.setAttribute("maxlength", "20");
+  senhaInput.addEventListener("input", () => {
+    if (senhaInput.value.length > 20) senhaInput.value = senhaInput.value.slice(0, 20);
+  });
+}
+
+// ===============================
+// Máscara e limite de telefone
+// ===============================
 if (telefoneInput) {
+  telefoneInput.setAttribute("maxlength", "15");
   telefoneInput.addEventListener("input", function () {
     let numero = this.value.replace(/\D/g, "");
-    if (numero.length > 11) {
-      numero = numero.slice(0, 11);
-    }
-    if (numero.length > 0) {
-      numero = "(" + numero;
-    }
-    if (numero.length > 3) {
-      numero = numero.slice(0, 3) + ") " + numero.slice(3);
-    }
-    if (numero.length > 10) {
-      numero = numero.slice(0, 10) + "-" + numero.slice(10);
-    }
+    if (numero.length > 11) numero = numero.slice(0, 11);
+    if (numero.length > 0) numero = "(" + numero;
+    if (numero.length > 3) numero = numero.slice(0, 3) + ") " + numero.slice(3);
+    if (numero.length > 10) numero = numero.slice(0, 10) + "-" + numero.slice(10);
     this.value = numero;
   });
 }
 
+// ===============================
+// Cadastro de novo usuário
+// ===============================
 cadastroForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nome = document.getElementById("nome").value;
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
-  const telefone = document.getElementById("telefone").value;
+  const nome = nomeInput.value.trim();
+  const email = emailInput.value.trim();
+  const senha = senhaInput.value.trim();
+  const telefone = telefoneInput.value.trim();
+
+  // Validações
+  if (nome.length < 3) return alert("Informe um nome completo válido.");
+  if (!email.match(/^\S+@\S+\.\S+$/)) return alert("Informe um email válido.");
+  if (senha.length < 6 || senha.length > 20) return alert("Senha deve ter entre 6 e 20 caracteres.");
+  if (telefone.replace(/\D/g, "").length < 10) return alert("Informe um telefone válido (10 ou 11 dígitos).");
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      senha
-    );
+    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
     await setDoc(doc(db, "usuarios", user.uid), {
-      nomeCompleto: nome,
-      email: email,
-      telefone: telefone,
+      nome: nome,
+      email,
+      telefone,
+      dataCadastro: new Date().toISOString(),
+      role: "usuario"
     });
 
-    alert("Usuário cadastrado com sucesso!");
+    alert("✅ Usuário cadastrado com sucesso!");
     cadastroForm.reset();
-    carregarUsuarios(); 
+    carregarUsuarios();
   } catch (error) {
     console.error("Erro ao cadastrar usuário:", error);
-    alert(`Erro ao cadastrar: ${error.message}`);
+    if (error.code === "auth/email-already-in-use") {
+      alert("❌ Este email já está em uso. Tente outro ou redefina a senha.");
+    } else {
+      alert(`❌ Erro ao cadastrar: ${error.message}`);
+    }
   }
 });
 
+// ===============================
+// Carregar usuários
+// ===============================
 async function carregarUsuarios() {
   try {
     const usuariosRef = collection(db, "usuarios");
@@ -74,121 +122,152 @@ async function carregarUsuarios() {
       return;
     }
 
-    snapshot.forEach(docSnap => {
-      const usuario = docSnap.data();
-      const id = docSnap.id;
+    const listaUsuarios = snapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        nome: data.nome || "N/A",
+        email: data.email || "N/A",
+        telefone: data.telefone || "N/A",
+        dataCadastro: data.dataCadastro || null
+      };
+    });
 
+    listaUsuarios.sort((a, b) => {
+      if (!a.dataCadastro && !b.dataCadastro) return 0;
+      if (!a.dataCadastro) return -1;
+      if (!b.dataCadastro) return 1;
+      return new Date(a.dataCadastro) - new Date(b.dataCadastro);
+    });
+
+    listaUsuarios.forEach((usuario, index) => {
+      const idFormatado = String(index + 1).padStart(3, "0");
       const linha = document.createElement("tr");
       linha.innerHTML = `
-        <td>${id.substring(0, 8)}...</td>
-        <td>${usuario.nomeCompleto || usuario.nome || 'N/A'}</td>
-        <td>${usuario.email || 'N/A'}</td>
-        <td>${usuario.telefone || 'N/A'}</td>
+        <td>${idFormatado}</td>
+        <td>${usuario.nome}</td>
+        <td>${usuario.email}</td>
+        <td>${usuario.telefone}</td>
         <td class="acoes-coluna">
-          <button class="btn-editar" data-id="${id}">Editar</button>
-          <button class="btn-secondary" data-email="${usuario.email}" data-action="reset">Redefinir senha</button>
-          <button class="btn-excluir" data-id="${id}">Excluir</button>
+          <button class="btn-editar" data-id="${usuario.id}">Editar</button>
+          <button class="btn-reset" data-email="${usuario.email}" data-action="reset">Redefinir Senha</button>
+          <button class="btn-excluir" data-id="${usuario.id}">Excluir</button>
         </td>
       `;
       userTable.appendChild(linha);
     });
   } catch (error) {
     console.error("Erro ao carregar usuários:", error);
-    alert("Não foi possível carregar a lista de usuários.");
+    alert("⚠️ Não foi possível carregar a lista de usuários.");
   }
 }
 
+// ===============================
+// Excluir usuário
+// ===============================
 async function excluirUsuario(id) {
-  if (confirm("Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.")) {
-    try {
-      await deleteDoc(doc(db, "usuarios", id));
-      alert("Usuário excluído com sucesso!");
-      carregarUsuarios();
-    } catch (error) {
-      console.error("Erro ao excluir usuário:", error);
-      alert("Erro ao excluir usuário.");
-    }
+  if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+  try {
+    await deleteDoc(doc(db, "usuarios", id));
+    alert("🗑️ Usuário excluído com sucesso!");
+    carregarUsuarios();
+  } catch (error) {
+    console.error("Erro ao excluir usuário:", error);
+    alert("Erro ao excluir usuário.");
   }
 }
 
-// Edição de usuário
+// ===============================
+// Editar usuário
+// ===============================
 async function abrirEditarUsuario(id) {
   try {
-    const usuariosRef = collection(db, 'usuarios');
+    const usuariosRef = collection(db, "usuarios");
     const snapshot = await getDocs(usuariosRef);
     const docSnap = snapshot.docs.find(d => d.id === id);
-    if (!docSnap) return alert('Usuário não encontrado');
+    if (!docSnap) return alert("Usuário não encontrado.");
     const u = docSnap.data();
 
-    let modal = document.getElementById('modalEdicaoUsuario');
-    if (!modal) {
-      modal = document.createElement('div');
-        modal.id = 'modalEdicaoUsuario';
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-          <div class="modal-card">
-            <h3>Editar Usuário</h3>
-            <form id="formEditarUsuario">
-              <div><label>Nome:</label><input id="editUserNome" required></div>
-              <div><label>Email:</label><input id="editUserEmail" type="email" required></div>
-              <div><label>Telefone:</label><input id="editUserTelefone"></div>
-              <div class="actions-right">
-                <button type="submit" class="btn-primary">Salvar</button>
-                <button type="button" id="cancelEditUser" class="btn-secondary">Cancelar</button>
-              </div>
-            </form>
-          </div>`;
-        document.body.appendChild(modal);
+    let modal = document.getElementById("modalEdicaoUsuario");
+    if (modal) modal.remove();
 
-        document.getElementById('cancelEditUser').addEventListener('click', ()=> modal.remove());
-        document.getElementById('formEditarUsuario').addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const nome = document.getElementById('editUserNome').value.trim();
-        const email = document.getElementById('editUserEmail').value.trim();
-        const telefone = document.getElementById('editUserTelefone').value.trim();
-        try {
-          await setDoc(doc(db, 'usuarios', id), { nomeCompleto: nome, email, telefone }, { merge: true });
-          modal.remove();
-          carregarUsuarios();
-        } catch (err) {
-          console.error('Erro ao atualizar usuário', err);
-          alert('Erro ao atualizar usuário');
-        }
+    modal = document.createElement("div");
+    modal.id = "modalEdicaoUsuario";
+    modal.className = "modal-overlay";
+    modal.innerHTML = `
+      <div class="modal-card">
+        <h3>Editar Usuário</h3>
+        <form id="formEditarUsuario">
+          <div><label>Nome:</label><input id="editUserNome" maxlength="100" required></div>
+          <div><label>Email:</label><input id="editUserEmail" type="email" maxlength="100" required></div>
+          <div><label>Telefone:</label><input id="editUserTelefone" maxlength="15"></div>
+          <div class="actions-right">
+            <button type="submit" class="btn-primary">Salvar</button>
+            <button type="button" id="cancelEditUser" class="btn-secondary">Cancelar</button>
+          </div>
+        </form>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const editNome = document.getElementById("editUserNome");
+    const editEmail = document.getElementById("editUserEmail");
+    const editTelefone = document.getElementById("editUserTelefone");
+
+    [editNome, editEmail, editTelefone].forEach((input) => {
+      input.addEventListener("input", () => {
+        if (input.id === "editUserNome" && input.value.length > 100) input.value = input.value.slice(0, 100);
+        if (input.id === "editUserEmail" && input.value.length > 100) input.value = input.value.slice(0, 100);
+        if (input.id === "editUserTelefone" && input.value.length > 15) input.value = input.value.slice(0, 15);
       });
-    }
+    });
 
-    document.getElementById('editUserNome').value = u.nomeCompleto || u.nome || '';
-    document.getElementById('editUserEmail').value = u.email || '';
-    document.getElementById('editUserTelefone').value = u.telefone || '';
+    document.getElementById("cancelEditUser").addEventListener("click", () => modal.remove());
+    document.getElementById("formEditarUsuario").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = editNome.value.trim();
+      const email = editEmail.value.trim();
+      const telefone = editTelefone.value.trim();
+
+      try {
+        await setDoc(doc(db, "usuarios", id), { nome, email, telefone }, { merge: true });
+        modal.remove();
+        alert("✅ Usuário atualizado com sucesso!");
+        carregarUsuarios();
+      } catch (err) {
+        console.error("Erro ao atualizar usuário", err);
+        alert("Erro ao atualizar usuário.");
+      }
+    });
+
+    editNome.value = u.nome || "";
+    editEmail.value = u.email || "";
+    editTelefone.value = u.telefone || "";
   } catch (error) {
     console.error(error);
-    alert('Erro ao abrir edição de usuário');
+    alert("Erro ao abrir edição de usuário.");
   }
 }
 
+// ===============================
+// Eventos
+// ===============================
 document.addEventListener("DOMContentLoaded", carregarUsuarios);
 
-userTable.addEventListener('click', async (e) => {
-  if (e.target.classList.contains('btn-excluir')) {
-    const userId = e.target.dataset.id;
-    excluirUsuario(userId);
-  } else if (e.target.classList.contains('btn-editar')) {
-    const userId = e.target.dataset.id;
-    abrirEditarUsuario(userId);
-  } else if (e.target.dataset && e.target.dataset.action === 'reset') {
+userTable.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("btn-excluir")) {
+    excluirUsuario(e.target.dataset.id);
+  } else if (e.target.classList.contains("btn-editar")) {
+    abrirEditarUsuario(e.target.dataset.id);
+  } else if (e.target.dataset.action === "reset") {
     const email = e.target.dataset.email;
-    if (email) {
-      if (confirm(`Enviar email de redefinição de senha para ${email}?`)) {
-        try {
-          await sendPasswordResetEmail(auth, email);
-          alert('Email de redefinição enviado com sucesso.');
-        } catch (err) {
-          console.error('Erro ao enviar email de redefinição:', err);
-          alert('Erro ao enviar email de redefinição.');
-        }
+    if (email && confirm(`Enviar email de redefinição de senha para ${email}?`)) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("📧 Email de redefinição enviado com sucesso.");
+      } catch (err) {
+        console.error("Erro ao enviar email de redefinição:", err);
+        alert("Erro ao enviar email de redefinição.");
       }
-    } else {
-      alert('Usuário não possui email cadastrado.');
     }
   }
 });

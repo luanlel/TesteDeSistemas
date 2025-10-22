@@ -1,3 +1,6 @@
+/* ======================
+   ESTILOS GERAIS
+====================== */
 body {
   background-color: #e6f0ff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -5,11 +8,7 @@ body {
   padding: 20px;
 }
 
-p {
-  color: black;
-}
-
-ul {
+p, ul {
   color: black;
 }
 
@@ -17,7 +16,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
+  background-color: #0056b3; /* fundo azul elegante */
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -25,17 +24,22 @@ header {
 }
 
 header h1 {
-  color: #0056b3;
+  color: #ffffff; /* texto branco para “Ofício Nobre” */
   margin: 0;
+  font-weight: 600;
+  font-size: 1.8rem;
 }
 
 main h2 {
-    text-align: center;
-    color: #0056b3;
-    margin-top: 30px;
-    margin-bottom: 20px;
+  text-align: center;
+  color: #0056b3;
+  margin-top: 30px;
+  margin-bottom: 20px;
 }
 
+/* ======================
+   GRID DE PRODUTOS
+====================== */
 .produtos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -53,8 +57,8 @@ main h2 {
 }
 
 .produto-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .produto-card h3 {
@@ -85,19 +89,22 @@ main h2 {
   background-color: #0056b3;
 }
 
+/* ======================
+   CARRINHO
+====================== */
 #carrinho-resumo {
-  background-color: #f2f6fc;
+  background-color: #ffffff;
   padding: 20px;
   border: 1px solid #aac4e0;
   border-radius: 12px;
   min-width: 280px;
+  color: #0056b3; /* texto azul para contraste */
 }
 
-#carrinho-resumo h2 {
-    text-align: center;
-    color: #003366;
-    margin-bottom: 15px;
-    margin-top: 0;
+#carrinho-resumo h2,
+#carrinho-resumo p,
+#carrinho-resumo li {
+  color: #0056b3; /* todos os textos do carrinho em azul */
 }
 
 #btnFinalizarCompra {
@@ -117,26 +124,33 @@ main h2 {
   background-color: #218838;
 }
 
+/* ======================
+   BOTÃO REMOVER
+====================== */
 .btn-remover {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8em;
-      margin-left: 10px;
-      transition: background-color 0.2s;
-    }
-    .btn-remover:hover {
-      background-color: #c0392b;
-    }
-    .btn-remover:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8em;
+  margin-left: 10px;
+  transition: background-color 0.2s;
+}
 
-    /* ======== PRODUTOS ESGOTADOS ======== */
+.btn-remover:hover {
+  background-color: #c0392b;
+}
+
+.btn-remover:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* ======================
+   PRODUTOS ESGOTADOS
+====================== */
 .produto-card.esgotado {
   opacity: 0.6;
   position: relative;
@@ -166,6 +180,83 @@ main h2 {
   margin: 10px 0;
 }
 
-.produto-card .img-esgotado {
-  filter: grayscale(100%);
+/* ======================
+   CARROSSEL AUTOMÁTICO
+====================== */
+.carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+}
+
+.slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: opacity 1s ease-in-out;
+  opacity: 0;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+/* Botões de navegação aparecem só no hover */
+.carousel button.prev,
+.carousel button.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s, background-color 0.3s;
+}
+
+.carousel:hover button.prev,
+.carousel:hover button.next {
+  opacity: 1;
+}
+
+.carousel button.prev:hover,
+.carousel button.next:hover {
+  background-color: rgba(0,0,0,0.7);
+}
+
+.carousel button.prev {
+  left: 5px;
+}
+
+.carousel button.next {
+  right: 5px;
+}
+
+/* ======================
+   IMAGENS ÚNICAS
+====================== */
+.single-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
 }

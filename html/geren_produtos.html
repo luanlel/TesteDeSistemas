@@ -25,22 +25,31 @@
         <input type="text" id="nome" maxlength="120" required>
         <div class="error-msg" id="erro-nome"></div>
       </div>
+
       <div class="form-group">
         <label for="quantidade">Quantidade:</label>
         <input type="number" id="quantidade" required min="0" max="100000" step="1">
         <div class="error-msg" id="erro-quantidade"></div>
       </div>
+
       <div class="form-group">
         <label for="preco">Preço:</label>
         <input type="number" step="0.01" id="preco" required min="0.01" max="1000000">
         <div class="error-msg" id="erro-preco"></div>
       </div>
+
+      <div class="form-group">
+        <label for="comentario">Comentário (máx. 50 caracteres):</label>
+        <input type="text" id="comentario" maxlength="50" placeholder="Ex: Caneta azul ponta fina">
+        <small id="contador-comentario">0 / 50</small>
+        <div class="error-msg" id="erro-comentario"></div>
+      </div>
+
       <div class="form-group">
         <label for="imagem">Imagem do Produto:</label>
-        <input type="file" id="imagem" accept="image/*">
+        <input id="imagem" type="file" accept="image/*" multiple>
       </div>
-      <div class="form-group">
-      </div>
+
       <div class="form-buttons">
         <button type="submit" class="btn-salvar">Adicionar Produto</button>
       </div>
@@ -49,7 +58,7 @@
 
   <div class="estoque-container">
     <h2>Estoque</h2>
-  <p class="help-text">Use o botão "Editar" para alterar dados do produto.</p>
+    <p class="help-text">Use o botão "Editar" para alterar dados do produto.</p>
     <table id="tabelaEstoque">
       <thead>
         <tr>
@@ -57,12 +66,11 @@
           <th>Nome do Produto</th>
           <th>Quantidade</th>
           <th>Preço</th>
+          <th>Comentário</th>
           <th>Ação</th>
         </tr>
       </thead>
-      <tbody>
-       
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
