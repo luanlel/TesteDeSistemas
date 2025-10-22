@@ -180,6 +180,54 @@ async function excluirUsuario(id) {
 // ===============================
 // Editar usuário
 // ===============================
+function criarModalEdicaoUsuario() {
+    let modal = document.createElement("div");
+    modal.id = "modalEdicaoUsuario";
+    modal.className = "modal-overlay hidden";
+    modal.innerHTML = `
+      <div class="modal-card card">
+        <div class="modal-header">
+            <h3>Editar Usuário</h3>
+            <button class="modal-close" id="btnFecharModalEdicaoUsuario" aria-label="Fechar modal">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="formEditarUsuario" class="form-elegant">
+          <div class="form-group"><label>Nome:</label><input id="editUserNome" maxlength="100" required></div>
+          <div class="form-group"><label>Email:</label><input id="editUserEmail" type="email" maxlength="100" required></div>
+          <div class="form-group"><label>Telefone:</label><input id="editUserTelefone" maxlength="15"></div>
+          <div class="form-buttons actions-right">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+            <button type="button" id="cancelEditUser" class="btn btn-outline"><i class="bi bi-x-lg"></i> Cancelar</button>
+          </div>
+        </form>
+      </div>`;
+    document.body.appendChild(modal);
+
+    document.getElementById("btnFecharModalEdicaoUsuario").addEventListener("click", fecharModalEdicaoUsuario);
+    document.getElementById("cancelEditUser").addEventListener("click", fecharModalEdicaoUsuario);
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            fecharModalEdicaoUsuario();
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+            fecharModalEdicaoUsuario();
+        }
+    });
+}
+
+function fecharModalEdicaoUsuario() {
+    const modal = document.getElementById("modalEdicaoUsuario");
+    modal.classList.add("hidden");
+    document.body.style.overflow = "auto";
+}
+
+criarModalEdicaoUsuario();
+
 async function abrirEditarUsuario(id) {
   try {
     const usuariosRef = collection(db, "usuarios");
@@ -188,41 +236,19 @@ async function abrirEditarUsuario(id) {
     if (!docSnap) return alert("Usuário não encontrado.");
     const u = docSnap.data();
 
-    let modal = document.getElementById("modalEdicaoUsuario");
-    if (modal) modal.remove();
-
-    modal = document.createElement("div");
-    modal.id = "modalEdicaoUsuario";
-    modal.className = "modal-overlay";
-    modal.innerHTML = `
-      <div class="modal-card">
-        <h3>Editar Usuário</h3>
-        <form id="formEditarUsuario">
-          <div><label>Nome:</label><input id="editUserNome" maxlength="100" required></div>
-          <div><label>Email:</label><input id="editUserEmail" type="email" maxlength="100" required></div>
-          <div><label>Telefone:</label><input id="editUserTelefone" maxlength="15"></div>
-          <div class="actions-right">
-            <button type="submit" class="btn-primary">Salvar</button>
-            <button type="button" id="cancelEditUser" class="btn-secondary">Cancelar</button>
-          </div>
-        </form>
-      </div>`;
-    document.body.appendChild(modal);
+    const modal = document.getElementById("modalEdicaoUsuario");
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
 
     const editNome = document.getElementById("editUserNome");
     const editEmail = document.getElementById("editUserEmail");
     const editTelefone = document.getElementById("editUserTelefone");
 
-    [editNome, editEmail, editTelefone].forEach((input) => {
-      input.addEventListener("input", () => {
-        if (input.id === "editUserNome" && input.value.length > 100) input.value = input.value.slice(0, 100);
-        if (input.id === "editUserEmail" && input.value.length > 100) input.value = input.value.slice(0, 100);
-        if (input.id === "editUserTelefone" && input.value.length > 15) input.value = input.value.slice(0, 15);
-      });
-    });
+    editNome.value = u.nome || "";
+    editEmail.value = u.email || "";
+    editTelefone.value = u.telefone || "";
 
-    document.getElementById("cancelEditUser").addEventListener("click", () => modal.remove());
-    document.getElementById("formEditarUsuario").addEventListener("submit", async (e) => {
+    document.getElementById("formEditarUsuario").onsubmit = async (e) => {
       e.preventDefault();
       const nome = editNome.value.trim();
       const email = editEmail.value.trim();
@@ -230,18 +256,15 @@ async function abrirEditarUsuario(id) {
 
       try {
         await setDoc(doc(db, "usuarios", id), { nome, email, telefone }, { merge: true });
-        modal.remove();
+        fecharModalEdicaoUsuario();
         alert("✅ Usuário atualizado com sucesso!");
         carregarUsuarios();
       } catch (err) {
         console.error("Erro ao atualizar usuário", err);
         alert("Erro ao atualizar usuário.");
       }
-    });
+    };
 
-    editNome.value = u.nome || "";
-    editEmail.value = u.email || "";
-    editTelefone.value = u.telefone || "";
   } catch (error) {
     console.error(error);
     alert("Erro ao abrir edição de usuário.");

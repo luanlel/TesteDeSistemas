@@ -153,43 +153,75 @@ window.excluirProduto = async function (id) {
 /** =============================
  * EDITAR PRODUTO (mantém imagens antigas)
  * ============================= */
+
+function criarModalEdicao() {
+    let modal = document.createElement("div");
+    modal.id = "modalEdicaoProduto";
+    modal.className = "modal-overlay hidden";
+    modal.innerHTML = `
+    <div class="modal-card card">
+      <div class="modal-header">
+        <h3>Editar Produto</h3>
+        <button class="modal-close" id="btnFecharModalEdicao" aria-label="Fechar modal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <form id="formEditarProduto" class="form-elegant">
+        <div class="form-group"><label>Nome:</label><input id="editNome" required></div>
+        <div class="form-group"><label>Quantidade:</label><input id="editQuantidade" type="number" min="0" required></div>
+        <div class="form-group"><label>Preço:</label><input id="editPreco" type="number" step="0.01" min="0.01" required></div>
+        <div class="form-group"><label>Comentário:</label><input id="editComentario" maxlength="50"></div>
+
+        <div class="form-group"><label>Imagens atuais:</label>
+          <div id="previewImagens" style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="form-group"><label>Adicionar novas (máx 3):</label>
+          <input id="editImagens" type="file" accept="image/*" multiple>
+        </div>
+
+        <div class="form-buttons" style="display:flex;gap:8px;margin-top:10px;">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+          <button type="button" id="cancelEdit" class="btn btn-outline"><i class="bi bi-x-lg"></i> Cancelar</button>
+        </div>
+      </form>
+    </div>
+  `;
+    document.body.appendChild(modal);
+
+    document.getElementById("btnFecharModalEdicao").addEventListener("click", fecharModalEdicao);
+    document.getElementById("cancelEdit").addEventListener("click", fecharModalEdicao);
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            fecharModalEdicao();
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+            fecharModalEdicao();
+        }
+    });
+}
+
+function fecharModalEdicao() {
+    const modal = document.getElementById("modalEdicaoProduto");
+    modal.classList.add("hidden");
+    document.body.style.overflow = "auto";
+}
+
+criarModalEdicao();
+
 window.abrirEditarProduto = async function (id) {
   const docs = await getDocs(produtosRef);
   const docSnap = docs.docs.find(d => d.id === id);
   if (!docSnap) return alert("Produto não encontrado");
   const p = docSnap.data();
 
-  let modal = document.getElementById("modalEdicaoProduto");
-  if (modal) modal.remove();
-
-  modal = document.createElement("div");
-  modal.id = "modalEdicaoProduto";
-  modal.className = "modal-overlay";
-  modal.innerHTML = `
-    <div class="modal-card">
-      <h3>Editar Produto</h3>
-      <form id="formEditarProduto">
-        <div><label>Nome:</label><input id="editNome" required></div>
-        <div><label>Quantidade:</label><input id="editQuantidade" type="number" min="0" required></div>
-        <div><label>Preço:</label><input id="editPreco" type="number" step="0.01" min="0.01" required></div>
-        <div><label>Comentário:</label><input id="editComentario" maxlength="50"></div>
-
-        <div><label>Imagens atuais:</label>
-          <div id="previewImagens" style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"></div>
-        </div>
-
-        <div><label>Adicionar novas (máx 3):</label>
-          <input id="editImagens" type="file" accept="image/*" multiple>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button type="submit" class="btn-primary">Salvar</button>
-          <button type="button" id="cancelEdit" class="btn-secondary">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  `;
-  document.body.appendChild(modal);
+  const modal = document.getElementById("modalEdicaoProduto");
+  modal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 
   // Preenche os campos
   document.getElementById("editNome").value = p.nome || "";
@@ -243,9 +275,7 @@ window.abrirEditarProduto = async function (id) {
   }
   atualizarPreview();
 
-  document.getElementById("cancelEdit").addEventListener("click", () => modal.remove());
-
-  document.getElementById("formEditarProduto").addEventListener("submit", async (e) => {
+  document.getElementById("formEditarProduto").onsubmit = async (e) => {
     e.preventDefault();
 
     const nome = document.getElementById("editNome").value.trim();
@@ -279,9 +309,9 @@ window.abrirEditarProduto = async function (id) {
       imagens: novasImgs
     });
 
-    modal.remove();
+    fecharModalEdicao();
     alert("✅ Produto atualizado com sucesso!");
-  });
+  };
 };
 
 /** =============================
