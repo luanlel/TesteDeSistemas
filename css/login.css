@@ -1,64 +1,327 @@
-body {
-  background-color: #e6f0ff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* Login e Cadastro Styles */
+
+/* Containers principais */
+.page-container {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  height: 100vh;
-  margin: 0;
+  padding: var(--spacing-lg);
+  background: var(--color-background);
 }
 
-.login-container {
-  background-color: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.site-header {
   text-align: center;
+  margin-bottom: var(--spacing-xl);
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.logo-container i {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+}
+
+.tagline {
+  color: var(--color-text-muted);
+  font-style: italic;
+  animation: fadeIn 1s ease-out 0.3s both;
+}
+
+.main-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
+  position: relative;
+  margin: auto;
 }
 
-.login-container h1 {
-  margin-bottom: 25px;
-  color: #0056b3;
-}
-
-.login-container input {
+/* Card de Login */
+.login-card {
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   width: 100%;
-  padding: 10px 12px;
-  margin: 10px 0;
-  border: 1px solid #aac4e0;
-  border-radius: 6px;
-  font-size: 15px;
-  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.login-container input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+.card-header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
 }
 
-.login-container button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 15px;
+.subtitle {
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+}
+
+/* Formulário */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-password {
+  position: absolute;
+  right: var(--spacing-sm);
+  background: none;
   border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  color: var(--color-text-muted);
   cursor: pointer;
-  color: white;
-  background-color: #007bff;
-  transition: background-color 0.3s, transform 0.2s;
+  padding: var(--spacing-xs);
+  transition: color var(--transition-fast);
 }
 
-.login-container button:hover {
-  background-color: #0056b3;
-  transform: scale(1.03);
+.toggle-password:hover {
+  color: var(--color-primary);
 }
 
-#mensagem {
-  margin-top: 12px;
-  color: #dc3545;
-  font-size: 0.9rem;
+.form-footer {
+  margin-top: var(--spacing-md);
+}
+
+/* Links e mensagens */
+.auth-links {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.link-animated {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: gap var(--transition-fast);
+}
+
+.link-animated:hover {
+  gap: var(--spacing-sm);
+}
+
+.link-animated i {
+  transition: transform var(--transition-fast);
+}
+
+.link-animated:hover i {
+  transform: translateX(4px);
+}
+
+.message-feedback {
+  text-align: center;
+  margin-top: var(--spacing-md);
+  min-height: 24px;
+}
+
+/* Modal de Cadastro */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-overlay);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+}
+
+/* Formulário de Cadastro */
+.form-elegant {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  position: relative;
+}
+
+.error-msg {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+  min-height: 20px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+/* Loading Spinner */
+.spinner {
+  display: none;
+  width: 40px;
+  height: 40px;
+  margin: var(--spacing-md) auto;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner.active {
+  display: block;
+}
+
+/* Mensagem de Sucesso */
+.success-msg {
+  display: none;
+  text-align: center;
+  padding: var(--spacing-md);
+  color: var(--color-success);
+  background: var(--color-success-light);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-md);
+}
+
+.success-msg.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Elementos Decorativos */
+.decorative-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.decorative-elements > div {
+  position: absolute;
+  color: var(--color-primary-light);
+  opacity: 0.2;
+  font-size: 2rem;
+}
+
+.pencil-element {
+  top: -20px;
+  right: 10%;
+  transform: rotate(-15deg);
+  animation: float 6s ease-in-out infinite;
+}
+
+.paper-element {
+  bottom: 10%;
+  left: -20px;
+  transform: rotate(10deg);
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.brush-element {
+  bottom: -10px;
+  right: -10px;
+  transform: rotate(-5deg);
+  animation: float 7s ease-in-out infinite 1s;
+}
+
+/* Animações */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rotation, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--rotation, 0deg));
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .page-container {
+    padding: var(--spacing-md);
+  }
+
+  .login-card,
+  .modal-content {
+    padding: var(--spacing-md);
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .decorative-elements {
+    display: none;
+  }
 }

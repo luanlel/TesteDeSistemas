@@ -3,31 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Sistema de Testes</title>
+  <title>Papelaria Elegante - Login</title>
+  <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/login.css">
-  <link rel="stylesheet" href="../css/papelaria.css">
+  <!-- Para ícones -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 
-<body>
-  <div class="login-container">
-    <h1>Sistema de Testes</h1>
-    <form id="formLogin">
-      <input type="email" id="email" placeholder="E-mail" required>
-      <input type="password" id="senha" placeholder="Senha" required>
-      <button type="submit">Entrar</button>
-    </form>
-    <p id="mensagem"></p>
+<body class="paper-texture">
+  <div class="page-container">
+    <!-- Header decorativo -->
+    <header class="site-header">
+      <div class="logo-container">
+        <i class="bi bi-pencil-fill"></i>
+        <h1>Papelaria LEL</h1>
+      </div>
+      <p class="tagline">Materiais de qualidade para momentos especiais</p>
+    </header>
 
-    <p class="volta">Não tem conta? <a href="../html/cadastro_usuario.html">Cadastre-se aqui</a></p>
+    <!-- Container principal com efeito de cartão -->
+    <main class="main-container">
+      <div class="login-card card slide-up">
+        <div class="card-header">
+          <h2>Bem-vindo(a) de volta</h2>
+          <p class="subtitle">Acesse sua conta para continuar</p>
+        </div>
+
+        <form id="formLogin" class="login-form">
+          <div class="input-group">
+            <label class="input-label" for="loginEmail">
+              <i class="bi bi-envelope"></i>
+              E-mail
+            </label>
+            <input type="email" id="loginEmail" class="input" required>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="loginSenha">
+              <i class="bi bi-lock"></i>
+              Senha
+            </label>
+            <div class="password-input">
+              <input type="password" id="loginSenha" class="input" required>
+              <button type="button" class="toggle-password" aria-label="Mostrar senha">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-box-arrow-in-right"></i>
+              Entrar
+            </button>
+          </div>
+        </form>
+
+        <p id="mensagem" class="message-feedback"></p>
+
+        <div class="auth-links">
+          <p>Não tem conta? 
+            <a href="#" id="btnAbrirCadastro" class="link-animated">
+              Cadastre-se aqui
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Elementos decorativos -->
+      <div class="decorative-elements">
+        <div class="pencil-element" aria-hidden="true">
+          <i class="bi bi-pencil"></i>
+        </div>
+        <div class="paper-element" aria-hidden="true">
+          <i class="bi bi-journal-text"></i>
+        </div>
+        <div class="brush-element" aria-hidden="true">
+          <i class="bi bi-brush"></i>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <script type="module" src="../js/main.js">
-    
-  import { initAdmin } from "../js/admin.js";
+  <!-- Modal de Cadastro -->
+  <div class="modal-overlay" id="modalCadastro" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content card" tabindex="-1">
+      <div class="modal-header">
+        <h2 id="modalTitle">Criar Conta</h2>
+        <button class="modal-close" id="btnFecharModal" aria-label="Fechar modal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
 
-  initAdmin();
+      <form id="cadastroForm" novalidate class="form-elegant">
+        <div class="form-group">
+          <label for="nome" class="input-label">
+            <i class="bi bi-person"></i>
+            Nome Completo
+          </label>
+          <input type="text" id="nome" name="nome" class="input" maxlength="100" required />
+          <div class="error-msg" id="erro-nome"></div>
+        </div>
 
+        <div class="form-group">
+          <label for="email" class="input-label">
+            <i class="bi bi-envelope"></i>
+            E-mail
+          </label>
+          <input type="email" id="email" name="email" class="input" maxlength="100" required />
+          <div class="error-msg" id="erro-email"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="senha" class="input-label">
+            <i class="bi bi-lock"></i>
+            Senha
+          </label>
+          <div class="password-input">
+            <input type="password" id="senha" name="senha" class="input" 
+                   minlength="6" maxlength="20" required />
+            <button type="button" class="toggle-password" aria-label="Mostrar senha">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          <div class="error-msg" id="erro-senha"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="telefone" class="input-label">
+            <i class="bi bi-telephone"></i>
+            Telefone
+          </label>
+          <input type="tel" id="telefone" name="telefone" class="input"
+                 placeholder="(00) 00000-0000" maxlength="15" required />
+          <div class="error-msg" id="erro-telefone"></div>
+        </div>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i>
+            Criar Conta
+          </button>
+          <button type="reset" class="btn btn-outline">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            Limpar
+          </button>
+        </div>
+
+        <div class="spinner"></div>
+      </form>
+      <div class="success-msg" id="msg-sucesso"></div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/main.js"></script>
+  <script type="module" src="../js/cadastro_usuario.js"></script>
+
+  <!-- Script para toggle de senha -->
+  <script>
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', e => {
+        const input = e.currentTarget.parentNode.querySelector('input');
+        const type = input.type === 'password' ? 'text' : 'password';
+        input.type = type;
+        e.currentTarget.querySelector('i').className = 
+          `bi bi-eye${type === 'password' ? '' : '-slash'}`;
+      });
+    });
   </script>
-  
 </body>
 </html>

@@ -1,80 +1,247 @@
-/* Tema papelaria: paleta suave, tipografia amigável */
-:root{
-  --bg:#fffef8; /* fundo papel */
-  --accent:#0b3d91; /* azul escuro */
-  --accent-2:#ff8a00; /* laranja */
-  --muted:#6b7280; /* texto secundário */
-  --card:#ffffff;
+/* Importar tema base */
+@import url('theme.css');
+
+/* Reset e Estilos Base */
+body {
+  min-height: 100vh;
+  padding: var(--spacing-lg);
+  background-color: var(--color-paper);
 }
 
-body{
-  background: linear-gradient(180deg, #f7f9fc 0%, #fffef8 100%);
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1f2937;
+body.hidden {
+  display: none;
 }
 
-header{
-  background: var(--accent);
-  color: #fff;
-  padding: 18px 24px;
+/* Layout */
+.form-container {
+  background-color: var(--color-gray-100);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-md);
 }
 
-.header-title{
-  font-size:1.25rem;
-  font-weight:700;
+.form-container:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-secondary);
 }
 
-.btn-primary{
-  background: var(--accent-2);
-  color: #fff;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 8px;
-  cursor: pointer;
+/* Cabeçalhos */
+h1, h2 {
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  font-family: var(--font-display);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.btn-secondary{
-  background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
+h1 {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--spacing-md);
 }
 
-.card{
-  background: var(--card);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 6px 18px rgba(11,61,145,0.08);
+h2 {
+  font-size: var(--text-2xl);
+  border-bottom: 1px solid var(--color-gray-200);
+  padding-bottom: var(--spacing-md);
 }
 
-.product-card .preco{
-  color: var(--accent);
-  font-weight:700;
+/* Formulários */
+.form-group {
+  margin-bottom: var(--spacing-lg);
 }
 
-.produto-card, .product-card{
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: 0 6px 18px rgba(11,61,145,0.06);
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-white);
+  font-weight: 500;
 }
 
-.produto-card img, .product-card img{
+input {
   width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 8px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-md);
+  color: var(--color-white);
+  transition: all var(--transition-fast);
 }
 
-.produtos-grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap:16px;
+input:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+  background-color: var(--color-gray-100);
 }
 
-.small-muted{ color: var(--muted); font-size:0.9rem; }
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Botões */
+.form-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.btn-salvar,
+.btn-limpar {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 120px;
+}
+
+.btn-salvar {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn-salvar:hover {
+  background-color: var(--color-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+}
+
+.btn-limpar {
+  background-color: transparent;
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-700);
+}
+
+.btn-limpar:hover {
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+#btnLogout {
+  position: absolute;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  background-color: transparent;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+#btnLogout:hover {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+}
+
+/* Tabela de Estoque */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-lg);
+  background-color: var(--color-gray-200);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+th {
+  background-color: var(--color-gray-300);
+  color: var(--color-secondary);
+  font-weight: 600;
+  text-align: left;
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+th:hover {
+  background-color: var(--color-gray-400);
+}
+
+td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-gray-300);
+  color: var(--color-white);
+}
+
+tr:hover {
+  background-color: var(--color-gray-300);
+}
+
+/* Mensagens de Feedback */
+.error-msg {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  margin-top: var(--spacing-xs);
+  min-height: 20px;
+}
+
+.success-msg {
+  display: none;
+  text-align: center;
+  color: var(--color-success);
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid var(--color-success);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-lg);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.success-msg.active {
+  display: block;
+}
+
+/* Dashboard e Gráficos */
+#dashboard {
+  margin-top: var(--spacing-xl);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .form-container {
+    padding: var(--spacing-lg);
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .btn-salvar,
+  .btn-limpar {
+    width: 100%;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  #btnLogout {
+    position: static;
+    width: 100%;
+    margin-top: var(--spacing-md);
+  }
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}

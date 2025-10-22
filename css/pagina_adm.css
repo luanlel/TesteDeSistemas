@@ -1,152 +1,192 @@
-* {
+/* Importar tema base */
+@import url('theme.css');
+
+/* Reset e Estilos Base */
+body {
+  min-height: 100vh;
+  background-color: var(--color-paper);
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-primary);
 }
 
-body {
-  background-color: #f6f8fb;
-  margin: 0;
-  padding: 80px 20px 40px 20px; /* mais espaço no topo como na imagem */
-  box-sizing: border-box;
+body.invisible {
+  display: none !important;
 }
 
-/* Utility classes to replace inline styles */
-.hidden { display:none !important; }
-.invisible { visibility:hidden !important; }
-.help-text { color:#333; font-size:0.9rem; }
-
-/* logout and dashboard helpers used by produtos.html */
-#btnLogout { margin-bottom: 15px; }
-#dashboard { margin-top: 15px; font-weight: bold; }
-
-h1 {
-  font-size: 2rem;
-  color: #0056b3;
-}
-
+/* Container Principal */
 .container {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 28px 32px;
-  text-align: left;
-  box-shadow: 0px 8px 24px rgba(11,61,145,0.06);
-  max-width: 1100px; /* largura maior para o card */
-  width: calc(100% - 80px);
-  margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  padding: var(--spacing-xl);
 }
 
-.container h2 {
-  margin: 6px 0 20px 0;
-  font-size: 1.1rem;
-  color: #003366;
-  font-weight: 700;
+/* Cabeçalho do Admin */
+.admin-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-xl);
+  background-color: var(--color-gray-100);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInDown 0.5s ease-out;
 }
 
-.container h1{ font-size:2rem; color:var(--accent); margin-bottom:4px }
-/* Cabeçalho centralizado específico para a página admin */
-.admin-header{ text-align:center; margin-bottom:18px }
-.admin-header h1{ font-size:2.4rem; margin:0; }
-.admin-header h2{ font-size:1.25rem; margin:6px 0 0 0; color:#0b3d91 }
+.admin-header h1 {
+  color: var(--color-secondary);
+  font-size: var(--text-4xl);
+  margin-bottom: var(--spacing-md);
+  font-family: var(--font-display);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
 
+.admin-header h2 {
+  color: var(--color-gray-700);
+  font-size: var(--text-xl);
+  font-weight: 500;
+}
+
+/* Botões de Navegação */
 .buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
 }
 
 .buttons button {
-  flex: 1 1 45%;
-  min-width: 220px;
-  height: 56px; /* altura maior como na imagem */
-  padding: 0 24px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: none;
-  background-color: var(--accent);
-  color: #fff;
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-white);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--text-lg);
   cursor: pointer;
-  transition: background-color 0.18s ease, transform 0.12s ease;
-  box-shadow: 0 6px 18px rgba(11,61,145,0.12);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  min-height: 200px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.buttons button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  z-index: 1;
 }
 
 .buttons button:hover {
-  background-color: #083a6f;
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-secondary);
 }
 
-/* Estilos adicionais para páginas de administração */
-.btn-editar {
-  background: #ff8a00; /* laranja papelaria */
-  border: none;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
+.buttons button:hover::before {
+  opacity: 0.1;
 }
 
-.btn-excluir {
-  background: #d9534f; /* vermelho suave */
-  border: none;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
+.buttons button span {
+  position: relative;
+  z-index: 2;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+/* Animações */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-th, td {
-  padding: 10px 8px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-/* Modal básico (os modais criados pelo JS também respeitam estas regras quando embutidos) */
-.modal-content {
-  background: #fff;
-  padding: 16px;
-  border-radius: 8px;
-  min-width: 320px;
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-md);
+  }
+
+  .admin-header {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .admin-header h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .admin-header h2 {
+    font-size: var(--text-lg);
+  }
+
+  .buttons {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .buttons button {
+    padding: var(--spacing-lg);
+    min-height: 150px;
+  }
 }
 
-/* Modal wrapper para sobreposição */
-.modal-overlay{
+/* Efeitos de Hover */
+.buttons button:active {
+  transform: translateY(2px);
+}
+
+/* Estado de Loading */
+.loading {
   position: fixed;
-  left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-paper);
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.5);
-  z-index: 9999;
+  align-items: center;
+  z-index: 1000;
 }
 
-.modal-card{
-  background: #fff;
-  border-radius: 8px;
-  padding: 18px;
-  min-width: 320px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+.loading::after {
+  content: '';
+  width: 50px;
+  height: 50px;
+  border: 3px solid var(--color-gray-200);
+  border-radius: 50%;
+  border-top-color: var(--color-secondary);
+  animation: spin 1s linear infinite;
 }
 
-.modal-card h3{ margin-bottom: 12px; color:#003366 }
-.modal-card form div{ margin-bottom: 8px; }
-.modal-card input{ width:100%; padding:8px; border-radius:6px; border:1px solid #ddd }
-
-.modal-card #previewImagem img{ max-width:160px; border-radius:8px; display:block }
-
-.actions-right{ display:flex; gap:8px; justify-content:flex-end }
-
-@media (max-width: 600px) {
-  .container { padding: 20px; }
-  th, td { font-size: 0.9rem; }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

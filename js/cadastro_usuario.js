@@ -7,9 +7,70 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+// Elementos do DOM
+const modalCadastro = document.getElementById("modalCadastro");
+const btnAbrirCadastro = document.getElementById("btnAbrirCadastro");
+const btnFecharModal = document.getElementById("btnFecharModal");
 const telefoneInput = document.getElementById("telefone");
 const form = document.getElementById("cadastroForm");
 const sucessoMsg = document.getElementById("msg-sucesso");
+
+// Controles do Modal
+btnAbrirCadastro?.addEventListener("click", (e) => {
+  e.preventDefault();
+  modalCadastro.classList.add("active");
+  document.body.style.overflow = "hidden"; // Previne scroll do body
+  // Foca no primeiro input após abrir
+  setTimeout(() => {
+    modalCadastro.querySelector("input")?.focus();
+  }, 50);
+});
+
+// Função para fechar o modal
+function fecharModal() {
+  modalCadastro.classList.remove("active");
+  form.reset();
+  limparErros();
+  document.body.style.overflow = "auto"; // Restaura scroll
+}
+
+btnFecharModal?.addEventListener("click", fecharModal);
+
+// Fechar modal clicando fora ou ESC
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modalCadastro.classList.contains("active")) {
+    fecharModal();
+  }
+});
+
+modalCadastro?.addEventListener("click", (e) => {
+  if (e.target === modalCadastro) {
+    fecharModal();
+  }
+});
+
+// Trap focus dentro do modal
+modalCadastro?.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    const focusableElements = modalCadastro.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstFocusable) {
+        lastFocusable.focus();
+        e.preventDefault();
+      }
+    } else {
+      if (document.activeElement === lastFocusable) {
+        firstFocusable.focus();
+        e.preventDefault();
+      }
+    }
+  }
+});
 
 // ---------- Máscara de telefone ----------
 telefoneInput.addEventListener("input", function () {
@@ -87,25 +148,55 @@ form.addEventListener("submit", async function (e) {
   }
 
   if (valido) {
+    form.classList.add("loading");
+    sucessoMsg.textContent = "";
+
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, senha);
 
       await setDoc(doc(db, "usuarios", cred.user.uid), {
         nome,
         email,
-        telefone, // agora vai formatado
+        telefone,
         role: "usuario",
         criadoEm: new Date()
       });
 
-      sucessoMsg.textContent = "✅ Cadastro realizado com sucesso!";
+      form.classList.remove("loading");
+      sucessoMsg.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+        Cadastro realizado com sucesso!
+      `;
       form.reset();
+
+      // Fecha o modal após 1.5s
+      setTimeout(() => {
+        fecharModal();
+      }, 1500);
     } catch (error) {
-      console.error("Erro ao cadastrar usuário: ", error);
+      console.error("Erro ao cadastrar usuário:", error);
+      form.classList.remove("loading");
+
       if (error.code === "auth/email-already-in-use") {
-        sucessoMsg.textContent = "⚠️ Este e-mail já está cadastrado.";
+        sucessoMsg.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0ad4e" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          Este e-mail já está cadastrado.
+        `;
       } else {
-        sucessoMsg.textContent = "❌ Erro ao cadastrar usuário.";
+        sucessoMsg.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          Erro ao cadastrar usuário.
+        `;
       }
     }
   }
