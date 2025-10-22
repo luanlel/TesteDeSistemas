@@ -1,6 +1,6 @@
 /* TESTES UNITÁRIOS */
 
-// ---------------- teste de cadastro ----------------
+// ---------------- teste de cadastro   ----------------
 function validarSenha(senha) {
   const regex = /^\d{6,}$/;
   return regex.test(senha);
@@ -182,3 +182,73 @@ describe("Lógica de Login", () => {
 });
 
 
+/**
+ * ==========================================
+ * TESTES UNITÁRIOS - SISTEMA PAPELARIA
+ * ==========================================
+ * Data de criação: 22/10/2025
+ * Responsável: Luís Felipe de Brito Viana
+ */
+
+/* -------------------------------------------------
+ * TESTE 1 - Cadastro de Produto: Quantidade com entrada alfanumérica
+ * -------------------------------------------------
+ * Descrição:
+ * Verifica se o sistema impede o cadastro de um produto
+ * quando o campo "Quantidade" contém letras ou caracteres não numéricos.
+ */
+function validarQuantidadeMock(quantidade) {
+  // Aceita apenas números inteiros e positivos
+  const regex = /^[0-9]+$/;
+  return regex.test(quantidade) && parseInt(quantidade) > 0;
+}
+
+test("Cadastro de Produto - Quantidade com entrada alfanumérica deve ser inválida", () => {
+  expect(validarQuantidadeMock("10")).toBe(true);        // válido
+  expect(validarQuantidadeMock("abc")).toBe(false);      // inválido - letras
+  expect(validarQuantidadeMock("12a")).toBe(false);      // inválido - mistura
+  expect(validarQuantidadeMock("-5")).toBe(false);       // inválido - negativo
+});
+
+
+/* -------------------------------------------------
+ * TESTE 2 - Cadastro de Usuário: Telefone com entrada alfanumérica
+ * -------------------------------------------------
+ * Descrição:
+ * Verifica se o sistema rejeita valores alfanuméricos no campo "Telefone"
+ * e aceita apenas números no formato brasileiro (com DDD).
+ */
+function validarTelefoneMock(telefone) {
+  // Aceita apenas números e exige entre 10 e 11 dígitos (DDD + número)
+  const regex = /^\d{10,11}$/;
+  return regex.test(telefone);
+}
+
+test("Cadastro de Usuário - Telefone com entrada alfanumérica deve ser rejeitado", () => {
+  expect(validarTelefoneMock("71992829252")).toBe(true);   // válido
+  expect(validarTelefoneMock("1198765432")).toBe(true);    // válido com 10 dígitos
+  expect(validarTelefoneMock("abc12345678")).toBe(false);  // inválido - letras
+  expect(validarTelefoneMock("12345abcde")).toBe(false);   // inválido - letras no meio
+  expect(validarTelefoneMock("")).toBe(false);             // inválido - vazio
+});
+
+
+/* -------------------------------------------------
+ * TESTE 3 - Cadastro de Produto: Preço com número negativo
+ * -------------------------------------------------
+ * Descrição:
+ * Garante que o sistema bloqueia o cadastro de produtos
+ * quando o campo "Preço" possui valores negativos ou zero.
+ */
+function validarPrecoMock(preco) {
+  // Deve ser um número maior que 0
+  const valor = parseFloat(preco);
+  return !isNaN(valor) && valor > 0;
+}
+
+test("Cadastro de Produto - Preço com número negativo deve ser inválido", () => {
+  expect(validarPrecoMock(10.5)).toBe(true);     // válido
+  expect(validarPrecoMock(0)).toBe(false);       // inválido - zero
+  expect(validarPrecoMock(-15)).toBe(false);     // inválido - negativo
+  expect(validarPrecoMock("abc")).toBe(false);   // inválido - texto
+});
