@@ -183,6 +183,34 @@
   background: var(--color-danger-light);
 }
 
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tab-link {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: var(--color-text-muted);
+    transition: all 0.3s ease;
+}
+
+.tab-link.active {
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 /* Formulário de Cadastro */
 .form-elegant {
   padding: var(--spacing-lg);

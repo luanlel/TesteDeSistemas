@@ -24,7 +24,7 @@ export async function login(email, senha) {
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
     if (userDoc.exists()) {
       localStorage.setItem("logado", "usuario");
-      window.location.href = "../html/loja.html";
+      window.location.href = "../html/index.html";
       return true;
     }
 

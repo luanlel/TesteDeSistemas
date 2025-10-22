@@ -1,22 +1,29 @@
 // frontend/js/loja.js
 
-import { db } from "./firebase-config.js";
+import { db, auth } from "./firebase-config.js";
 import {
   collection,
   doc,
   runTransaction,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const listaProdutos = document.getElementById("lista-produtos");
 const carrinhoContagem = document.getElementById("carrinho-contagem");
 const listaCarrinho = document.getElementById("lista-carrinho");
 const carrinhoTotal = document.getElementById("carrinho-total");
 const btnFinalizarCompra = document.getElementById("btnFinalizarCompra");
+const modalCadastro = document.getElementById("modalCadastro");
 
 let produtos = [];
 let carrinho = {};
 let intervalosCarrossel = {}; // Para controlar carrosséis
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+});
 
 /** =============================
  * CARREGAR PRODUTOS E CARROSSEL
@@ -128,6 +135,10 @@ function iniciarCarrosselAutomatico(carousel) {
  * ============================= */
 listaProdutos.addEventListener("click", async (e) => {
   if (e.target.tagName === "BUTTON" && !e.target.classList.contains("prev") && !e.target.classList.contains("next") && !e.target.classList.contains("btn-esgotado")) {
+    if (!currentUser) {
+        modalCadastro.classList.add("active");
+        return;
+    }
     const produtoId = e.target.dataset.id;
     e.target.disabled = true;
 
