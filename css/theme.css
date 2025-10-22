@@ -7,8 +7,11 @@
 :root {
   /* Cores Base - Paleta Jazz/Noturna */
   --color-primary: #654E92;        /* Roxo profundo */
+  --color-primary-dark: #4E3B70;   /* Roxo profundo escuro */
   --color-secondary: #D4AF37;      /* Dourado jazz */
+  --color-secondary-dark: #AA8C2C; /* Dourado jazz escuro */
   --color-accent: #BA4A00;         /* Cobre vintage */
+  --color-accent-dark: #8F3900;    /* Cobre vintage escuro */
   
   /* Tons neutros */
   --color-white: #E6E6FA;          /* Lavanda suave */
@@ -26,9 +29,13 @@
 
   /* Cores de feedback */
   --color-success: #27ae60;
+  --color-success-dark: #1e8449;
   --color-warning: #f39c12;
+  --color-warning-dark: #c27d0e;
   --color-error: #c0392b;
+  --color-error-dark: #962c22;
   --color-info: #3498db;
+  --color-info-dark: #2980b9;
 
   /* Tipografia */
   --font-primary: 'Montserrat', sans-serif;

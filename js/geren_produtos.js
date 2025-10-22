@@ -127,8 +127,8 @@ function carregarProdutos() {
           <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
           <td>${p.comentario || "-"}</td>
           <td>
-            <button class="btn-editar" onclick="abrirEditarProduto('${p.id}')">Editar</button>
-            <button class="btn-excluir" onclick="excluirProduto('${p.id}')">Excluir</button>
+            <button class="btn btn-primary" onclick="abrirEditarProduto('${p.id}')">Editar</button>
+            <button class="btn btn-outline" onclick="excluirProduto('${p.id}')">Excluir</button>
           </td>
         </tr>`;
       tabelaEstoque.appendChild(linha);
