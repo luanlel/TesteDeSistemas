@@ -52,13 +52,13 @@ document.getElementById("formProduto").addEventListener("submit", async function
   }
   document.getElementById("erro-nome").textContent = "";
 
-  if (isNaN(quantidade) || quantidade < 0 || quantidade > 100000) {
+  if (isNaN(quantidade) || quantidade < 0 || quantidade > 10000) {
     document.getElementById("erro-quantidade").textContent = "Quantidade inválida."; 
     return;
   }
   document.getElementById("erro-quantidade").textContent = "";
 
-  if (isNaN(preco) || preco <= 0 || preco > 1000000) {
+  if (isNaN(preco) || preco <= 0 || preco > 10000) {
     document.getElementById("erro-preco").textContent = "Preço inválido."; 
     return;
   }
