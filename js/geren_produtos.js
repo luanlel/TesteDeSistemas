@@ -149,6 +149,20 @@ function carregarProdutos() {
 carregarProdutos();
 
 /** =============================
+ * PESQUISAR PRODUTOS
+ * ============================= */
+const inputPesquisa = document.getElementById("pesquisaProdutos");
+inputPesquisa.addEventListener("input", () => {
+  const termo = inputPesquisa.value.toLowerCase();
+  const linhas = tabelaEstoque.querySelectorAll("tbody tr");
+  linhas.forEach(linha => {
+    const nomeProduto = linha.children[2].textContent.toLowerCase(); // coluna do nome
+    linha.style.display = nomeProduto.includes(termo) ? "" : "none";
+  });
+});
+
+
+/** =============================
  * EXCLUIR PRODUTO
  * ============================= */
 window.excluirProduto = async function (id) {
