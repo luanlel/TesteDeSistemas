@@ -107,6 +107,48 @@ cadastroForm.addEventListener("submit", async (e) => {
   }
 });
 
+
+// ===============================
+// Cadastro de novo ADMINISTRADOR
+// ===============================
+const cadastroAdmForm = document.getElementById("cadastroAdmForm");
+if (cadastroAdmForm) {
+  cadastroAdmForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById("adm-nome").value.trim();
+    const email = document.getElementById("adm-email").value.trim();
+    const senha = document.getElementById("adm-senha").value.trim();
+    const telefone = document.getElementById("adm-telefone").value.trim();
+
+    // Validações simples
+    if (nome.length < 3) return alert("Informe um nome completo válido.");
+    if (!email.match(/^\S+@\S+\.\S+$/)) return alert("Informe um email válido.");
+    if (senha.length < 6 || senha.length > 20) return alert("Senha deve ter entre 6 e 20 caracteres.");
+    if (telefone.replace(/\D/g, "").length < 10) return alert("Informe um telefone válido (10 ou 11 dígitos).");
+
+    try {
+      // Salva diretamente na coleção "admins" (sem criar usuário no Auth)
+      const adminsRef = collection(db, "admins");
+      await setDoc(doc(adminsRef), {
+        nome,
+        email,
+        senha,
+        telefone,
+        criadoEm: new Date().toISOString(),
+        role: "admin"
+      });
+
+      alert("✅ Administrador cadastrado com sucesso!");
+      cadastroAdmForm.reset();
+    } catch (error) {
+      console.error("Erro ao cadastrar administrador:", error);
+      alert("❌ Erro ao cadastrar administrador.");
+    }
+  });
+}
+
+
 // ===============================
 // Carregar usuários
 // ===============================
