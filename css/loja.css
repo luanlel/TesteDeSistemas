@@ -149,7 +149,7 @@ h2 {
 }
 
 .produto-card .comentario {
-    color: var(--color-gray-400);
+    color: var(--color-gray-700);
     font-size: 0.9em;
     margin: 5px 0;
 }

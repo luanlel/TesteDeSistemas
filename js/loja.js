@@ -72,7 +72,10 @@ async function carregarProdutos() {
           ${produto.comentario ? `<p class="comentario">${produto.comentario}</p>` : ""}
           <p class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
           <p>Estoque: ${produto.quantidade}</p>
-          <button data-id="${produto.id}">Adicionar ao Carrinho</button>
+          <div class="controles-compra">
+            <input type="number" id="quantidade-${produto.id}" value="1" min="1" max="${produto.quantidade}" aria-label="Quantidade">
+            <button data-id="${produto.id}">Adicionar ao Carrinho</button>
+          </div>
         `;
       } else {
         card.classList.add("esgotado");
@@ -140,6 +143,14 @@ listaProdutos.addEventListener("click", async (e) => {
         return;
     }
     const produtoId = e.target.dataset.id;
+    const inputQuantidade = document.getElementById(`quantidade-${produtoId}`);
+    const quantidade = parseInt(inputQuantidade.value, 10);
+
+    if (isNaN(quantidade) || quantidade <= 0) {
+      alert("Por favor, insira uma quantidade válida.");
+      return;
+    }
+
     e.target.disabled = true;
 
     try {
@@ -148,12 +159,15 @@ listaProdutos.addEventListener("click", async (e) => {
         const sfDoc = await transaction.get(produtoRef);
 
         if (!sfDoc.exists()) throw "Produto não encontrado!";
-        const novaQuantidade = sfDoc.data().quantidade - 1;
-        if (novaQuantidade < 0) throw "Estoque insuficiente!";
+        
+        const estoqueAtual = sfDoc.data().quantidade;
+        if (quantidade > estoqueAtual) throw "Estoque insuficiente!";
+
+        const novaQuantidade = estoqueAtual - quantidade;
         transaction.update(produtoRef, { quantidade: novaQuantidade });
       });
 
-      carrinho[produtoId] = (carrinho[produtoId] || 0) + 1;
+      carrinho[produtoId] = (carrinho[produtoId] || 0) + quantidade;
       atualizarResumoCarrinho();
     } catch (error) {
       console.error("Erro ao adicionar ao carrinho:", error);
@@ -171,6 +185,14 @@ listaCarrinho.addEventListener("click", async (e) => {
   if (!e.target.classList.contains("btn-remover")) return;
 
   const produtoId = e.target.dataset.id;
+  const inputQuantidade = e.target.parentElement.querySelector(".quantidade-carrinho");
+  const quantidadeParaRemover = parseInt(inputQuantidade.value, 10);
+
+  if (isNaN(quantidadeParaRemover) || quantidadeParaRemover <= 0) {
+    alert("Por favor, insira uma quantidade válida para remover.");
+    return;
+  }
+
   e.target.disabled = true;
 
   try {
@@ -178,12 +200,17 @@ listaCarrinho.addEventListener("click", async (e) => {
       const produtoRef = doc(db, "produtos", produtoId);
       const sfDoc = await transaction.get(produtoRef);
       if (!sfDoc.exists()) throw "Produto não encontrado!";
-      const novaQuantidade = sfDoc.data().quantidade + 1;
+
+      const estoqueAtual = sfDoc.data().quantidade;
+      const novaQuantidade = estoqueAtual + quantidadeParaRemover;
       transaction.update(produtoRef, { quantidade: novaQuantidade });
     });
 
-    carrinho[produtoId] -= 1;
-    if (carrinho[produtoId] === 0) delete carrinho[produtoId];
+    carrinho[produtoId] -= quantidadeParaRemover;
+    if (carrinho[produtoId] <= 0) {
+      delete carrinho[produtoId];
+    }
+    
     atualizarResumoCarrinho();
   } catch (error) {
     console.error("Erro ao remover do carrinho:", error);
@@ -208,8 +235,11 @@ function atualizarResumoCarrinho() {
     if (produto) {
       const item = document.createElement("li");
       item.innerHTML = `
-        ${produto.nome} (x${quantidade})
-        <button class="btn-remover" data-id="${produto.id}">Remover</button>
+        <span>${produto.nome} (x${quantidade})</span>
+        <div class="controles-carrinho">
+          <input type="number" class="quantidade-carrinho" value="1" min="1" max="${quantidade}" data-id="${produto.id}">
+          <button class="btn-remover" data-id="${produto.id}">Remover</button>
+        </div>
       `;
       listaCarrinho.appendChild(item);
       contagem += quantidade;
