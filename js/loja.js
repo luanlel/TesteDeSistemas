@@ -193,6 +193,12 @@ listaCarrinho.addEventListener("click", async (e) => {
     return;
   }
 
+  const quantidadeNoCarrinho = carrinho[produtoId];
+  if (quantidadeParaRemover > quantidadeNoCarrinho) {
+    alert(`Você não pode remover mais do que a quantidade que possui no carrinho (${quantidadeNoCarrinho}).`);
+    return;
+  }
+
   e.target.disabled = true;
 
   try {
