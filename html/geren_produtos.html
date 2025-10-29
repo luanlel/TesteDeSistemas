@@ -57,22 +57,30 @@
   </div>
 
   <div class="estoque-container">
-    <h2>Estoque</h2>
-    <p class="help-text">Use o botão "Editar" para alterar dados do produto.</p>
-    <table id="tabelaEstoque">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome do Produto</th>
-          <th>Quantidade</th>
-          <th>Preço</th>
-          <th>Comentário</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <h2>Estoque</h2>
+  <p class="help-text">Use o botão "Editar" para alterar dados do produto.</p>
+
+  <!-- NOVO BOTÃO DE EXCLUSÃO MÚLTIPLA -->
+  <button id="btnExcluirSelecionados" class="btn btn-outline" style="margin-bottom:10px;">
+    Excluir Selecionados
+  </button>
+
+  <table id="tabelaEstoque">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="checkTodos"></th> <!-- Selecionar todos -->
+        <th>ID</th>
+        <th>Nome do Produto</th>
+        <th>Quantidade</th>
+        <th>Preço</th>
+        <th>Comentário</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
 
   <script type="module" src="../js/firebase-config.js"></script>
   <script type="module" src="../js/geren_produtos.js"></script>

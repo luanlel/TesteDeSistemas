@@ -2,32 +2,45 @@ import { auth, db } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
+  collection,
+  query,
+  where,
+  getDocs,
   doc,
-  getDoc
+  getDoc,
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 export async function login(email, senha) {
   try {
+    // 1️⃣ Faz login no Firebase Authentication
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    const adminDoc = await getDoc(doc(db, "admins", user.uid));
-    if (adminDoc.exists()) {
+    // 2️⃣ Verifica se esse e-mail está na coleção "admins"
+    const adminQuery = query(collection(db, "admins"), where("email", "==", email));
+    const adminSnap = await getDocs(adminQuery);
+
+    if (!adminSnap.empty) {
+      console.log("Login de administrador detectado");
       localStorage.setItem("logado", "admin");
-      window.location.href = "../html/pag_adm.html"; 
+      window.location.href = "../html/pag_adm.html";
       return true;
     }
 
+    // 3️⃣ Se não for admin, verifica se é um usuário comum
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
     if (userDoc.exists()) {
+      console.log("Login de usuário comum detectado");
       localStorage.setItem("logado", "usuario");
       window.location.href = "../html/index.html";
       return true;
     }
 
+    // 4️⃣ Caso não exista em nenhuma coleção
+    console.warn("Usuário não encontrado em admins nem usuarios");
     return false;
   } catch (error) {
     console.error("Erro no login:", error);

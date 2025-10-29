@@ -1,3 +1,13 @@
+/** =============================
+ * SELECIONAR / DESMARCAR TODOS
+ * ============================= */
+const checkTodos = document.getElementById("checkTodos");
+checkTodos.addEventListener("change", () => {
+  const checkboxes = document.querySelectorAll(".check-produto");
+  checkboxes.forEach(cb => cb.checked = checkTodos.checked);
+});
+
+
 /** ================================
  *  GERENCIAMENTO DE PRODUTOS (com múltiplas imagens)
  *  ================================ */
@@ -111,28 +121,29 @@ function carregarProdutos() {
 
     produtos.sort((a, b) => (a.createdAt?.toMillis?.() || 0) - (b.createdAt?.toMillis?.() || 0));
 
-    tabelaEstoque.innerHTML = "";
-    produtos.forEach((p, index) => {
-      const statusEstoque = p.quantidade === 0
-        ? `<span style="color:red;font-weight:bold;">Esgotado</span>`
-        : p.quantidade;
-      const estilo = p.quantidade === 0 ? "style='background-color:#ffe6e6;'" : "";
+      tabelaEstoque.innerHTML = "";
+  produtos.forEach((p, index) => {
+    const statusEstoque = p.quantidade === 0
+      ? `<span style="color:red;font-weight:bold;">Esgotado</span>`
+      : p.quantidade;
+    const estilo = p.quantidade === 0 ? "style='background-color:#ffe6e6;'" : "";
 
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <tr ${estilo}>
-          <td>${String(index + 1).padStart(3, "0")}</td>
-          <td>${p.nome}</td>
-          <td>${statusEstoque}</td>
-          <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
-          <td>${p.comentario || "-"}</td>
-          <td>
-            <button class="btn btn-primary" onclick="abrirEditarProduto('${p.id}')">Editar</button>
-            <button class="btn btn-outline" onclick="excluirProduto('${p.id}')">Excluir</button>
-          </td>
-        </tr>`;
-      tabelaEstoque.appendChild(linha);
-    });
+    const linha = document.createElement("tr");
+    linha.innerHTML = `
+      <td><input type="checkbox" class="check-produto" data-id="${p.id}"></td>
+      <td>${String(index + 1).padStart(3, "0")}</td>
+      <td>${p.nome}</td>
+      <td>${statusEstoque}</td>
+      <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
+      <td>${p.comentario || "-"}</td>
+      <td>
+        <button class="btn btn-primary" onclick="abrirEditarProduto('${p.id}')">Editar</button>
+        <button class="btn btn-outline" onclick="excluirProduto('${p.id}')">Excluir</button>
+      </td>
+    `;
+    tabelaEstoque.appendChild(linha);
+  });
+
   });
 }
 carregarProdutos();
@@ -149,6 +160,31 @@ window.excluirProduto = async function (id) {
     alert("❌ Erro ao excluir produto.");
   }
 };
+
+/** =============================
+ * EXCLUSÃO MÚLTIPLA DE PRODUTOS
+ * ============================= */
+document.getElementById("btnExcluirSelecionados").addEventListener("click", async () => {
+  const selecionados = [...document.querySelectorAll(".check-produto:checked")];
+  if (selecionados.length === 0) {
+    alert("⚠️ Nenhum produto selecionado para exclusão.");
+    return;
+  }
+
+  if (!confirm(`Tem certeza que deseja excluir ${selecionados.length} produto(s)?`)) return;
+
+  try {
+    for (const checkbox of selecionados) {
+      const id = checkbox.getAttribute("data-id");
+      await deleteDoc(doc(db, "produtos", id));
+    }
+    alert(`🗑️ ${selecionados.length} produto(s) excluído(s) com sucesso!`);
+  } catch (err) {
+    console.error("Erro ao excluir múltiplos produtos:", err);
+    alert("❌ Erro ao excluir produtos selecionados.");
+  }
+});
+
 
 /** =============================
  * EDITAR PRODUTO (mantém imagens antigas)
