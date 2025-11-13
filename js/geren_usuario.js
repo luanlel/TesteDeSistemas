@@ -1,6 +1,6 @@
 /**
  * geren_usuario.js
- * Cadastro de usuários com limite de caracteres em tempo real
+ * Cadastro e gerenciamento de usuários
  */
 
 import { auth, db } from "./firebase-config.js";
@@ -27,43 +27,33 @@ const senhaInput = document.getElementById("senha");
 const telefoneInput = document.getElementById("telefone");
 
 // ===============================
-// Limites de caracteres em tempo real
+// Máscara e validação de telefone
 // ===============================
-if (nomeInput) {
-  nomeInput.setAttribute("maxlength", "100");
-  nomeInput.addEventListener("input", () => {
-    if (nomeInput.value.length > 100) nomeInput.value = nomeInput.value.slice(0, 100);
+function aplicarMascaraTelefone(input) {
+  if (!input) return;
+  input.setAttribute("maxlength", "15");
+  input.setAttribute("inputmode", "numeric");
+
+  input.addEventListener("input", function (e) {
+    let valor = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
+    if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+
+    // Aplica máscara (formato brasileiro)
+    if (valor.length > 6) {
+      e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7, 11)}`;
+    } else if (valor.length > 2) {
+      e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}`;
+    } else if (valor.length > 0) {
+      e.target.value = `(${valor}`;
+    } else {
+      e.target.value = "";
+    }
   });
 }
 
-if (emailInput) {
-  emailInput.setAttribute("maxlength", "100");
-  emailInput.addEventListener("input", () => {
-    if (emailInput.value.length > 100) emailInput.value = emailInput.value.slice(0, 100);
-  });
-}
-
-if (senhaInput) {
-  senhaInput.setAttribute("maxlength", "20");
-  senhaInput.addEventListener("input", () => {
-    if (senhaInput.value.length > 20) senhaInput.value = senhaInput.value.slice(0, 20);
-  });
-}
-
-// ===============================
-// Máscara e limite de telefone
-// ===============================
-if (telefoneInput) {
-  telefoneInput.setAttribute("maxlength", "15");
-  telefoneInput.addEventListener("input", function () {
-    let numero = this.value.replace(/\D/g, "");
-    if (numero.length > 11) numero = numero.slice(0, 11);
-    if (numero.length > 0) numero = "(" + numero;
-    if (numero.length > 3) numero = numero.slice(0, 3) + ") " + numero.slice(3);
-    if (numero.length > 10) numero = numero.slice(0, 10) + "-" + numero.slice(10);
-    this.value = numero;
-  });
-}
+// Aplica máscara nos campos de telefone
+aplicarMascaraTelefone(document.getElementById("telefone"));
+aplicarMascaraTelefone(document.getElementById("adm-telefone"));
 
 // ===============================
 // Cadastro de novo usuário
@@ -79,15 +69,17 @@ cadastroForm.addEventListener("submit", async (e) => {
   // Validações
   if (nome.length < 3) return alert("Informe um nome completo válido.");
   if (!email.match(/^\S+@\S+\.\S+$/)) return alert("Informe um email válido.");
-  if (senha.length < 6 || senha.length > 20) return alert("Senha deve ter entre 6 e 20 caracteres.");
-  if (telefone.replace(/\D/g, "").length < 10) return alert("Informe um telefone válido (10 ou 11 dígitos).");
+  if (senha.length < 6 || senha.length > 20)
+    return alert("Senha deve ter entre 6 e 20 caracteres.");
+  if (telefone.replace(/\D/g, "").length < 10)
+    return alert("Informe um telefone válido (10 ou 11 dígitos).");
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
     await setDoc(doc(db, "usuarios", user.uid), {
-      nome: nome,
+      nome,
       email,
       telefone,
       dataCadastro: new Date().toISOString(),
@@ -107,7 +99,6 @@ cadastroForm.addEventListener("submit", async (e) => {
   }
 });
 
-
 // ===============================
 // Cadastro de novo ADMINISTRADOR
 // ===============================
@@ -121,14 +112,14 @@ if (cadastroAdmForm) {
     const senha = document.getElementById("adm-senha").value.trim();
     const telefone = document.getElementById("adm-telefone").value.trim();
 
-    // Validações simples
     if (nome.length < 3) return alert("Informe um nome completo válido.");
     if (!email.match(/^\S+@\S+\.\S+$/)) return alert("Informe um email válido.");
-    if (senha.length < 6 || senha.length > 20) return alert("Senha deve ter entre 6 e 20 caracteres.");
-    if (telefone.replace(/\D/g, "").length < 10) return alert("Informe um telefone válido (10 ou 11 dígitos).");
+    if (senha.length < 6 || senha.length > 20)
+      return alert("Senha deve ter entre 6 e 20 caracteres.");
+    if (telefone.replace(/\D/g, "").length < 10)
+      return alert("Informe um telefone válido (10 ou 11 dígitos).");
 
     try {
-      // Salva diretamente na coleção "admins" (sem criar usuário no Auth)
       const adminsRef = collection(db, "admins");
       await setDoc(doc(adminsRef), {
         nome,
@@ -147,7 +138,6 @@ if (cadastroAdmForm) {
     }
   });
 }
-
 
 // ===============================
 // Carregar usuários
@@ -220,52 +210,48 @@ async function excluirUsuario(id) {
 }
 
 // ===============================
-// Editar usuário
+// Editar usuário (com máscara no telefone)
 // ===============================
 function criarModalEdicaoUsuario() {
-    let modal = document.createElement("div");
-    modal.id = "modalEdicaoUsuario";
-    modal.className = "modal-overlay hidden";
-    modal.innerHTML = `
-      <div class="modal-card card">
-        <div class="modal-header">
-            <h3>Editar Usuário</h3>
-            <button class="modal-close" id="btnFecharModalEdicaoUsuario" aria-label="Fechar modal">
-                <i class="bi bi-x-lg"></i>
-            </button>
+  let modal = document.createElement("div");
+  modal.id = "modalEdicaoUsuario";
+  modal.className = "modal-overlay hidden";
+  modal.innerHTML = `
+    <div class="modal-card card">
+      <div class="modal-header">
+        <h3>Editar Usuário</h3>
+        <button class="modal-close" id="btnFecharModalEdicaoUsuario" aria-label="Fechar modal">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <form id="formEditarUsuario" class="form-elegant">
+        <div class="form-group"><label>Nome:</label><input id="editUserNome" maxlength="100" required></div>
+        <div class="form-group"><label>Email:</label><input id="editUserEmail" type="email" maxlength="100" required></div>
+        <div class="form-group"><label>Telefone:</label><input id="editUserTelefone" maxlength="15" inputmode="numeric"></div>
+        <div class="form-buttons actions-right">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+          <button type="button" id="cancelEditUser" class="btn btn-outline"><i class="bi bi-x-lg"></i> Cancelar</button>
         </div>
-        <form id="formEditarUsuario" class="form-elegant">
-          <div class="form-group"><label>Nome:</label><input id="editUserNome" maxlength="100" required></div>
-          <div class="form-group"><label>Email:</label><input id="editUserEmail" type="email" maxlength="100" required></div>
-          <div class="form-group"><label>Telefone:</label><input id="editUserTelefone" maxlength="15"></div>
-          <div class="form-buttons actions-right">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
-            <button type="button" id="cancelEditUser" class="btn btn-outline"><i class="bi bi-x-lg"></i> Cancelar</button>
-          </div>
-        </form>
-      </div>`;
-    document.body.appendChild(modal);
+      </form>
+    </div>`;
+  document.body.appendChild(modal);
 
-    document.getElementById("btnFecharModalEdicaoUsuario").addEventListener("click", fecharModalEdicaoUsuario);
-    document.getElementById("cancelEditUser").addEventListener("click", fecharModalEdicaoUsuario);
+  document.getElementById("btnFecharModalEdicaoUsuario").addEventListener("click", fecharModalEdicaoUsuario);
+  document.getElementById("cancelEditUser").addEventListener("click", fecharModalEdicaoUsuario);
 
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            fecharModalEdicaoUsuario();
-        }
-    });
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) fecharModalEdicaoUsuario();
+  });
 
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-            fecharModalEdicaoUsuario();
-        }
-    });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) fecharModalEdicaoUsuario();
+  });
 }
 
 function fecharModalEdicaoUsuario() {
-    const modal = document.getElementById("modalEdicaoUsuario");
-    modal.classList.add("hidden");
-    document.body.style.overflow = "auto";
+  const modal = document.getElementById("modalEdicaoUsuario");
+  modal.classList.add("hidden");
+  document.body.style.overflow = "auto";
 }
 
 criarModalEdicaoUsuario();
@@ -290,6 +276,8 @@ async function abrirEditarUsuario(id) {
     editEmail.value = u.email || "";
     editTelefone.value = u.telefone || "";
 
+    aplicarMascaraTelefone(editTelefone);
+
     document.getElementById("formEditarUsuario").onsubmit = async (e) => {
       e.preventDefault();
       const nome = editNome.value.trim();
@@ -306,7 +294,6 @@ async function abrirEditarUsuario(id) {
         alert("Erro ao atualizar usuário.");
       }
     };
-
   } catch (error) {
     console.error(error);
     alert("Erro ao abrir edição de usuário.");
@@ -314,7 +301,7 @@ async function abrirEditarUsuario(id) {
 }
 
 // ===============================
-// Eventos
+// Eventos gerais
 // ===============================
 document.addEventListener("DOMContentLoaded", carregarUsuarios);
 

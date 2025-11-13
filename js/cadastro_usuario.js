@@ -15,30 +15,27 @@ const telefoneInput = document.getElementById("telefone");
 const form = document.getElementById("cadastroForm");
 const sucessoMsg = document.getElementById("msg-sucesso");
 
-// Controles do Modal
+// ---------- Controles do Modal ----------
 btnAbrirCadastro?.addEventListener("click", (e) => {
   e.preventDefault();
   modalCadastro.classList.add("active");
-  document.body.style.overflow = "hidden"; // Previne scroll do body
-  // Foca no primeiro input após abrir
+  document.body.style.overflow = "hidden";
   setTimeout(() => {
     modalCadastro.querySelector("input")?.focus();
   }, 50);
 });
 
-// Função para fechar o modal
 function fecharModal() {
-  modalCadastro.classList.remove("active");
+  modalCadastro?.classList.remove("active");
   form.reset();
   limparErros();
-  document.body.style.overflow = "auto"; // Restaura scroll
+  document.body.style.overflow = "auto";
 }
 
 btnFecharModal?.addEventListener("click", fecharModal);
 
-// Fechar modal clicando fora ou ESC
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && modalCadastro.classList.contains("active")) {
+  if (e.key === "Escape" && modalCadastro?.classList.contains("active")) {
     fecharModal();
   }
 });
@@ -72,23 +69,42 @@ modalCadastro?.addEventListener("keydown", (e) => {
   }
 });
 
-// ---------- Máscara de telefone ----------
-telefoneInput.addEventListener("input", function () {
-  let numero = this.value.replace(/\D/g, "");
-  if (numero.length > 11) {
-    numero = numero.slice(0, 11);
-  }
-  if (numero.length > 0) {
-    numero = "(" + numero;
-  }
-  if (numero.length > 3) {
-    numero = numero.slice(0, 3) + ") " + numero.slice(3);
-  }
-  if (numero.length > 10) {
-    numero = numero.slice(0, 10) + "-" + numero.slice(10);
-  }
-  this.value = numero; // agora fica formatado no input
-});
+// ---------- Máscara de telefone (corrigida) ----------
+function aplicarMascaraTelefone(input) {
+  if (!input) return;
+  input.setAttribute("maxlength", "15");
+  input.setAttribute("inputmode", "numeric");
+
+  let backspacePressionado = false;
+
+  input.addEventListener("keydown", (e) => {
+    backspacePressionado = e.key === "Backspace";
+  });
+
+  input.addEventListener("input", function (e) {
+    let valor = e.target.value.replace(/\D/g, ""); // apenas números
+    if (valor.length > 11) valor = valor.slice(0, 11); // limita a 11 dígitos
+
+    // se o usuário está apagando, não forçar a máscara
+    if (backspacePressionado) {
+      backspacePressionado = false;
+      return;
+    }
+
+    // aplica máscara formatada
+    if (valor.length > 6) {
+      e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7, 11)}`;
+    } else if (valor.length > 2) {
+      e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}`;
+    } else if (valor.length > 0) {
+      e.target.value = `(${valor}`;
+    } else {
+      e.target.value = "";
+    }
+  });
+}
+
+aplicarMascaraTelefone(telefoneInput);
 
 // ---------- Validação de senha ----------
 function validarSenha(senha) {
@@ -114,14 +130,13 @@ form.addEventListener("submit", async function (e) {
   limparErros();
 
   let valido = true;
-
   let nome = form.nome.value.trim();
   let email = form.email.value.trim();
   const senha = form.senha.value;
-  // Enforce client-side limits (same as input attributes)
+  const telefone = form.telefone.value.trim();
+
   if (nome.length > 100) nome = nome.slice(0, 100);
   if (email.length > 100) email = email.slice(0, 100);
-  const telefone = form.telefone.value.trim(); // pega o valor formatado
 
   if (nome.length < 3) {
     mostrarErro("erro-nome", "Informe um nome completo válido.");
@@ -133,7 +148,6 @@ form.addEventListener("submit", async function (e) {
     valido = false;
   }
 
-  // senha: apenas números entre 6 e 20 dígitos
   if (!/^[0-9]{6,20}$/.test(senha)) {
     mostrarErro(
       "erro-senha",
@@ -147,57 +161,56 @@ form.addEventListener("submit", async function (e) {
     valido = false;
   }
 
-  if (valido) {
-    form.classList.add("loading");
-    sucessoMsg.textContent = "";
+  if (!valido) return;
 
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, senha);
+  form.classList.add("loading");
+  sucessoMsg.textContent = "";
 
-      await setDoc(doc(db, "usuarios", cred.user.uid), {
-        nome,
-        email,
-        telefone,
-        role: "usuario",
-        criadoEm: new Date()
-      });
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, senha);
 
-      form.classList.remove("loading");
+    await setDoc(doc(db, "usuarios", cred.user.uid), {
+      nome,
+      email,
+      telefone,
+      role: "usuario",
+      criadoEm: new Date()
+    });
+
+    form.classList.remove("loading");
+    sucessoMsg.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+      Cadastro realizado com sucesso!
+    `;
+    form.reset();
+
+    setTimeout(() => {
+      fecharModal();
+    }, 1500);
+  } catch (error) {
+    console.error("Erro ao cadastrar usuário:", error);
+    form.classList.remove("loading");
+
+    if (error.code === "auth/email-already-in-use") {
       sucessoMsg.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 6L9 17l-5-5"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0ad4e" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
-        Cadastro realizado com sucesso!
+        Este e-mail já está cadastrado.
       `;
-      form.reset();
-
-      // Fecha o modal após 1.5s
-      setTimeout(() => {
-        fecharModal();
-      }, 1500);
-    } catch (error) {
-      console.error("Erro ao cadastrar usuário:", error);
-      form.classList.remove("loading");
-
-      if (error.code === "auth/email-already-in-use") {
-        sucessoMsg.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0ad4e" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          Este e-mail já está cadastrado.
-        `;
-      } else {
-        sucessoMsg.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          Erro ao cadastrar usuário.
-        `;
-      }
+    } else {
+      sucessoMsg.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        Erro ao cadastrar usuário.
+      `;
     }
   }
 });

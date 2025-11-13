@@ -1,190 +1,133 @@
-import { login } from "./auth.js";
+// auth_modal.js
 import { auth, db } from "./firebase-config.js";
-import {
-  createUserWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import {
-  doc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-    const modalAuth = document.getElementById("modalAuth");
-    const btnAbrirLogin = document.getElementById("btnAbrirLogin");
-    const btnAbrirCadastro = document.getElementById("btnAbrirCadastro");
-    const btnFecharModal = document.getElementById("btnFecharModal");
-    const tabs = document.querySelectorAll(".tab-link");
-    const tabContents = document.querySelectorAll('.tab-content');
+// Elementos do DOM
+const modalAuth = document.getElementById("modalAuth");
+const btnAbrirLogin = document.getElementById("btnAbrirLogin");
+const btnAbrirCadastro = document.getElementById("btnAbrirCadastro");
+const btnFecharModal = document.getElementById("btnFecharModal");
+const formCadastro = document.getElementById("cadastroForm");
+const telefoneInput = document.getElementById("telefone");
+const sucessoMsg = document.getElementById("msg-sucesso");
+const tabs = modalAuth.querySelectorAll(".tab-link");
+const tabContents = modalAuth.querySelectorAll(".tab-content");
 
-    const formLogin = document.getElementById("formLogin");
-    const mensagem = document.getElementById("mensagem");
+// ------------------ Funções do Modal ------------------
+function abrirModal(tab = "login") {
+  modalAuth.classList.add("active");
+  document.body.style.overflow = "hidden";
+  trocarTab(tab);
+  setTimeout(() => {
+    modalAuth.querySelector("input")?.focus();
+  }, 50);
+}
 
-    const cadastroForm = document.getElementById("cadastroForm");
-    const sucessoMsg = document.getElementById("msg-sucesso");
+function fecharModal() {
+  modalAuth.classList.remove("active");
+  document.body.style.overflow = "auto";
+  formCadastro?.reset();
+  limparErros();
+  sucessoMsg.textContent = "";
+}
 
-    function openModal(tab) {
-        modalAuth.classList.add("active");
-        document.body.style.overflow = "hidden";
-        switchTab(tab);
+// Abrir modal
+btnAbrirLogin?.addEventListener("click", e => { e.preventDefault(); abrirModal("login"); });
+btnAbrirCadastro?.addEventListener("click", e => { e.preventDefault(); abrirModal("register"); });
+btnFecharModal?.addEventListener("click", fecharModal);
+
+// Fechar modal clicando fora ou ESC
+modalAuth?.addEventListener("click", e => { if (e.target === modalAuth) fecharModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && modalAuth.classList.contains("active")) fecharModal(); });
+
+// Trap focus dentro do modal
+modalAuth?.addEventListener("keydown", e => {
+  if (e.key !== "Tab") return;
+  const focusable = modalAuth.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (e.shiftKey) {
+    if (document.activeElement === first) { last.focus(); e.preventDefault(); }
+  } else {
+    if (document.activeElement === last) { first.focus(); e.preventDefault(); }
+  }
+});
+
+// ------------------ Tabs ------------------
+function trocarTab(tab) {
+  tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  tabContents.forEach(c => c.classList.toggle("active", c.id === tab));
+}
+
+tabs.forEach(t => {
+  t.addEventListener("click", () => trocarTab(t.dataset.tab));
+});
+
+// ------------------ Máscara de telefone ------------------
+telefoneInput?.addEventListener("input", function (e) {
+  let cursor = this.selectionStart;
+  let valor = this.value.replace(/\D/g, "");
+  
+  if (valor.length > 11) valor = valor.slice(0, 11);
+
+  let formatted = "";
+  if (valor.length > 0) formatted += "(" + valor.substring(0, 2);
+  if (valor.length >= 3) formatted += ") " + valor.substring(2, 7);
+  if (valor.length > 7) formatted += "-" + valor.substring(7);
+
+  this.value = formatted;
+
+  // Ajuste do cursor para permitir apagar "-" normalmente
+  if (e.inputType === "deleteContentBackward" && this.value[cursor - 1] === "-" || this.value[cursor - 1] === ")") {
+    this.setSelectionRange(cursor - 1, cursor - 1);
+  }
+});
+
+// ------------------ Validação ------------------
+function mostrarErro(id, msg) { document.getElementById(id).textContent = msg; }
+function limparErros() { ["erro-nome","erro-email","erro-senha","erro-telefone"].forEach(id => document.getElementById(id).textContent = ""); sucessoMsg.textContent = ""; }
+
+// ------------------ Cadastro ------------------
+formCadastro?.addEventListener("submit", async e => {
+  e.preventDefault();
+  limparErros();
+  let valido = true;
+
+  let nome = formCadastro.nome.value.trim().slice(0,100);
+  let email = formCadastro.email.value.trim().slice(0,100);
+  const senha = formCadastro.senha.value;
+  const telefone = formCadastro.telefone.value.trim();
+
+  if (nome.length < 3) { mostrarErro("erro-nome","Informe um nome completo válido."); valido = false; }
+  if (!email.match(/^\S+@\S+\.\S+$/)) { mostrarErro("erro-email","Informe um e-mail válido."); valido = false; }
+  if (!/^[0-9]{6,20}$/.test(senha)) { mostrarErro("erro-senha","Senha deve conter apenas números e ter entre 6 e 20 dígitos."); valido = false; }
+  if (telefone.replace(/\D/g,"").length < 10) { mostrarErro("erro-telefone","Informe um telefone válido (10 ou 11 dígitos)."); valido = false; }
+
+  if (!valido) return;
+
+  formCadastro.classList.add("loading");
+  sucessoMsg.textContent = "";
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth,email,senha);
+    await setDoc(doc(db,"usuarios",cred.user.uid),{
+      nome, email, telefone, role:"usuario", criadoEm: new Date()
+    });
+
+    formCadastro.classList.remove("loading");
+    sucessoMsg.innerHTML = `<i class="bi bi-check-lg"></i> Cadastro realizado com sucesso!`;
+    formCadastro.reset();
+    setTimeout(() => fecharModal(), 1500);
+
+  } catch (error) {
+    console.error("Erro ao cadastrar usuário:", error);
+    formCadastro.classList.remove("loading");
+    if (error.code === "auth/email-already-in-use") {
+      sucessoMsg.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Este e-mail já está cadastrado.`;
+    } else {
+      sucessoMsg.innerHTML = `<i class="bi bi-x-lg"></i> Erro ao cadastrar usuário.`;
     }
-
-    function closeModal() {
-        modalAuth.classList.remove("active");
-        document.body.style.overflow = "auto";
-    }
-
-    function switchTab(tab) {
-        tabs.forEach(t => t.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-
-        const tabLink = document.querySelector(`.tab-link[data-tab='${tab}']`);
-        const tabContent = document.getElementById(tab);
-
-        if (tabLink) tabLink.classList.add('active');
-        if (tabContent) tabContent.classList.add('active');
-    }
-
-    btnAbrirLogin?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openModal('login');
-    });
-
-    btnAbrirCadastro?.addEventListener("click", (e) => {
-        e.preventDefault();
-        openModal('register');
-    });
-
-    btnFecharModal?.addEventListener("click", closeModal);
-
-    modalAuth?.addEventListener("click", (e) => {
-        if (e.target === modalAuth) {
-            closeModal();
-        }
-    });
-
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && modalAuth.classList.contains("active")) {
-            closeModal();
-        }
-    });
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            switchTab(tab.dataset.tab);
-        });
-    });
-
-    formLogin?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const email = document.getElementById("loginEmail").value;
-      const senha = document.getElementById("loginSenha").value;
-
-      const sucesso = await login(email, senha);
-
-      if (!sucesso) {
-        mensagem.textContent = "E-mail ou senha incorretos!";
-      }
-    });
-
-    cadastroForm?.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      limparErros();
-
-      let valido = true;
-
-      let nome = cadastroForm.nome.value.trim();
-      let email = cadastroForm.email.value.trim();
-      const senha = cadastroForm.senha.value;
-      if (nome.length > 100) nome = nome.slice(0, 100);
-      if (email.length > 100) email = email.slice(0, 100);
-      const telefone = cadastroForm.telefone.value.trim();
-
-      if (nome.length < 3) {
-        mostrarErro("erro-nome", "Informe um nome completo válido.");
-        valido = false;
-      }
-
-      if (!email.match(/^\S+@\S+\.\S+$/)) {
-        mostrarErro("erro-email", "Informe um e-mail válido.");
-        valido = false;
-      }
-
-      if (!/^[0-9]{6,20}$/.test(senha)) {
-        mostrarErro(
-          "erro-senha",
-          "Senha deve conter apenas números e ter entre 6 e 20 dígitos."
-        );
-        valido = false;
-      }
-
-      if (telefone.replace(/\D/g, "").length < 10) {
-        mostrarErro("erro-telefone", "Informe um telefone válido (10 ou 11 dígitos).");
-        valido = false;
-      }
-
-      if (valido) {
-        cadastroForm.classList.add("loading");
-        sucessoMsg.textContent = "";
-
-        try {
-          const cred = await createUserWithEmailAndPassword(auth, email, senha);
-
-          await setDoc(doc(db, "usuarios", cred.user.uid), {
-            nome,
-            email,
-            telefone,
-            role: "usuario",
-            criadoEm: new Date()
-          });
-
-          cadastroForm.classList.remove("loading");
-          sucessoMsg.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 6L9 17l-5-5"/>
-            </svg>
-            Cadastro realizado com sucesso!
-          `;
-          cadastroForm.reset();
-
-          setTimeout(() => {
-            closeModal();
-          }, 1500);
-        } catch (error) {
-          console.error("Erro ao cadastrar usuário:", error);
-          cadastroForm.classList.remove("loading");
-
-          if (error.code === "auth/email-already-in-use") {
-            sucessoMsg.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0ad4e" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              Este e-mail já está cadastrado.
-            `;
-          } else {
-            sucessoMsg.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
-              Erro ao cadastrar usuário.
-            `;
-          }
-        }
-      }
-    });
-
-    function mostrarErro(id, msg) {
-      document.getElementById(id).textContent = msg;
-    }
-
-    function limparErros() {
-      ["erro-nome", "erro-email", "erro-senha", "erro-telefone"].forEach(
-        (id) => (document.getElementById(id).textContent = "")
-      );
-      sucessoMsg.textContent = "";
-    }
+  }
 });
