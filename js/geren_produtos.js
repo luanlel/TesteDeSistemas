@@ -61,19 +61,22 @@ produtoForm.addEventListener("submit", async (e) => {
   if (!nome) {
     document.getElementById("erro-nome").textContent = "Digite o nome do produto.";
     valido = false;
+  } else if (nome.length > 120) {
+    document.getElementById("erro-nome").textContent = "Nome muito longo (máx 120 caracteres).";
+    valido = false;
   }
 
   // Quantidade: inteiro positivo
   const qtdNum = parseInt(quantidade);
-  if (!Number.isInteger(qtdNum) || qtdNum < 0) {
-    document.getElementById("erro-quantidade").textContent = "Quantidade inválida (apenas inteiros positivos).";
+  if (!Number.isInteger(qtdNum) || qtdNum < 1 || qtdNum.length > 5) {
+    document.getElementById("erro-quantidade").textContent = "Quantidade inválida (deve ser um inteiro entre 1 e 99999).";
     valido = false;
   }
 
   // Preço: número positivo
   const precoNum = parseFloat(preco);
-  if (isNaN(precoNum) || precoNum <= 0) {
-    document.getElementById("erro-preco").textContent = "Preço inválido (apenas números positivos).";
+  if (isNaN(precoNum) || precoNum <= 1 || precoNum.length > 999) {
+    document.getElementById("erro-preco").textContent = "Preço inválido (deve ser um número entre 1 e 999999).";
     valido = false;
   }
 
