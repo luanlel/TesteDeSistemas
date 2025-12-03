@@ -1,37 +1,85 @@
-// js/geren_usuario.js - CORREÇÃO COMPLETA COM CONTROLES DE SEGURANÇA
+// js/geren_usuario.js - VERSÃO CORRIGIDA COM TODAS AS MELHORIAS
 
 import { auth, db } from "./firebase-config.js";
 import {
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import {
   collection,
-  doc,
-  setDoc,
   getDocs,
+  doc,
+  updateDoc,
   deleteDoc,
-  updateDoc
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// ===============================
-// Elementos
-// ===============================
-const cadastroForm = document.getElementById("cadastroForm");
-const userTable = document.getElementById("userTable");
+// ========== ELEMENTOS DOM ==========
+const listaUsuariosTable = document.getElementById("listaUsuarios");
+const modalEdicao = document.getElementById("modalEdicao");
+const formEditarUsuario = document.getElementById("formEditarUsuario");
+const btnFecharModal = document.getElementById("btnFecharModal");
+const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 
-// ===============================
-// Máscara e validação de telefone
-// ===============================
+let usuarioEditandoId = null;
+let emailOriginal = null;
+
+// ========== CONFIGURAÇÕES ==========
+const CONFIG = {
+  MAX_NOME_LENGTH: 100,
+  MIN_NOME_LENGTH: 3,
+  TELEFONE_LENGTH: 11,
+  TELEFONE_LENGTH_MIN: 10
+};
+
+// ========== MÁSCARA DE TELEFONE (CORRIGIDA) ==========
 function aplicarMascaraTelefone(input) {
   if (!input) return;
+  
+  // Configura atributos do input
   input.setAttribute("maxlength", "15");
   input.setAttribute("inputmode", "numeric");
+  input.setAttribute("placeholder", "(00) 00000-0000");
+  
+  // Previne entrada de não-números
+  input.addEventListener("keypress", function(e) {
+    const char = String.fromCharCode(e.keyCode || e.which);
+    if (!/^[0-9]$/.test(char)) {
+      e.preventDefault();
+      mostrarErro(input, "Digite apenas números.");
+      return false;
+    }
+  });
+  
+  // Previne colar texto não-numérico
+  input.addEventListener("paste", function(e) {
+    e.preventDefault();
+    const texto = (e.clipboardData || window.clipboardData).getData('text');
+    const numeros = texto.replace(/\D/g, '');
+    if (numeros) {
+      input.value = numeros;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
 
+  let ultimoValor = "";
+  
+  // Aplica máscara durante digitação
   input.addEventListener("input", function (e) {
     let valor = e.target.value.replace(/\D/g, "");
-    if (valor.length > 11) valor = valor.slice(0, 11);
+    
+    // Verifica se tentou digitar não-número
+    if (e.target.value !== valor && valor === "") {
+      e.target.value = ultimoValor;
+      return;
+    }
+    
+    // Limita a 11 dígitos
+    if (valor.length > CONFIG.TELEFONE_LENGTH) {
+      valor = valor.slice(0, CONFIG.TELEFONE_LENGTH);
+    }
 
+    // Aplica formatação
     if (valor.length > 6) {
       e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7, 11)}`;
     } else if (valor.length > 2) {
@@ -41,425 +89,508 @@ function aplicarMascaraTelefone(input) {
     } else {
       e.target.value = "";
     }
+    
+    ultimoValor = e.target.value;
+    limparErro(input);
   });
-}
 
-aplicarMascaraTelefone(document.getElementById("telefone"));
-aplicarMascaraTelefone(document.getElementById("adm-telefone"));
-
-// ===============================
-// Cadastro de novo usuário
-// ===============================
-if (cadastroForm) {
-  cadastroForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const nome = document.getElementById("nome").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-
-    if (nome.length < 3) return alert("Informe um nome completo válido.");
-    if (!email.match(/^\S+@\S+\.\S+$/)) return alert("Informe um email válido.");
-    if (senha.length < 6 || senha.length > 20)
-      return alert("Senha deve ter entre 6 e 20 caracteres.");
-    if (telefone.replace(/\D/g, "").length < 10)
-      return alert("Informe um telefone válido (10 ou 11 dígitos).");
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-      const user = userCredential.user;
-
-      await setDoc(doc(db, "usuarios", user.uid), {
-        nome,
-        email,
-        telefone,
-        dataCadastro: new Date().toISOString(),
-        role: "usuario"
-      });
-
-      alert("✅ Usuário cadastrado com sucesso!");
-      cadastroForm.reset();
-      carregarUsuarios();
-    } catch (error) {
-      console.error("Erro ao cadastrar usuário:", error);
-      if (error.code === "auth/email-already-in-use") {
-        alert("❌ Este email já está em uso. Tente outro ou redefina a senha.");
-      } else {
-        alert(`❌ Erro ao cadastrar: ${error.message}`);
-      }
+  // Valida ao sair do campo
+  input.addEventListener("blur", function(e) {
+    const apenasNumeros = e.target.value.replace(/\D/g, "");
+    if (apenasNumeros.length > 0 && apenasNumeros.length < CONFIG.TELEFONE_LENGTH_MIN) {
+      mostrarErro(e.target, `Telefone deve ter ${CONFIG.TELEFONE_LENGTH_MIN} ou ${CONFIG.TELEFONE_LENGTH} dígitos.`);
+    } else {
+      limparErro(e.target);
     }
   });
-}
-
-// ===============================
-// Cadastro de novo ADMINISTRADOR
-// ===============================
-const cadastroAdmForm = document.getElementById("cadastroAdmForm");
-if (cadastroAdmForm) {
-  cadastroAdmForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const nome = document.getElementById("adm-nome").value.trim();
-    const email = document.getElementById("adm-email").value.trim();
-    const senha = document.getElementById("adm-senha").value.trim();
-    const telefone = document.getElementById("adm-telefone").value.trim();
-
-    if (nome.length < 3) return alert("Informe um nome completo válido.");
-    if (!email.match(/^\S+@\S+\.\S+$/)) return alert("Informe um email válido.");
-    if (senha.length < 6 || senha.length > 20)
-      return alert("Senha deve ter entre 6 e 20 caracteres.");
-    if (telefone.replace(/\D/g, "").length < 10)
-      return alert("Informe um telefone válido (10 ou 11 dígitos).");
-
-    try {
-      const adminsRef = collection(db, "admins");
-      await setDoc(doc(adminsRef), {
-        nome,
-        email,
-        senha,
-        telefone,
-        criadoEm: new Date().toISOString(),
-        role: "admin"
-      });
-
-      alert("✅ Administrador cadastrado com sucesso!");
-      cadastroAdmForm.reset();
-    } catch (error) {
-      console.error("Erro ao cadastrar administrador:", error);
-      alert("❌ Erro ao cadastrar administrador.");
-    }
+  
+  // Valida ao focar
+  input.addEventListener("focus", function() {
+    limparErro(input);
   });
 }
 
-// ===============================
-// PESQUISA DE USUÁRIOS (Teste 67)
-// ===============================
-let todosUsuarios = [];
-
-function pesquisarUsuarios(termo) {
-  if (!termo) {
-    renderizarUsuarios(todosUsuarios);
-    return;
+// ========== VALIDAÇÃO DE EMAIL ==========
+function validarEmail(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (!email || email.trim().length === 0) {
+    return { valido: false, erro: 'E-mail é obrigatório' };
   }
   
-  termo = termo.toLowerCase();
-  const filtrados = todosUsuarios.filter(u => 
-    u.nome.toLowerCase().includes(termo) ||
-    u.email.toLowerCase().includes(termo) ||
-    (u.telefone && u.telefone.includes(termo))
-  );
-  
-  renderizarUsuarios(filtrados);
-}
-
-// Adiciona campo de pesquisa se não existir
-function criarCampoPesquisa() {
-  const container = document.querySelector('.tabela-usuarios');
-  if (!container) return;
-  
-  const existente = document.getElementById('pesquisaUsuario');
-  if (existente) return;
-  
-  const div = document.createElement('div');
-  div.className = 'form-group';
-  div.style.marginBottom = '15px';
-  div.innerHTML = `
-    <label for="pesquisaUsuario">Pesquisar Usuário:</label>
-    <input type="text" id="pesquisaUsuario" placeholder="Digite nome, e-mail ou telefone..." 
-           style="width: 100%; padding: 10px; border: 1px solid var(--color-gray-300); 
-                  border-radius: var(--border-radius-md); background-color: var(--color-gray-200); 
-                  color: var(--color-white);">
-  `;
-  
-  container.insertBefore(div, container.querySelector('.help-text'));
-  
-  document.getElementById('pesquisaUsuario').addEventListener('input', (e) => {
-    pesquisarUsuarios(e.target.value.trim());
-  });
-}
-
-// ===============================
-// Carregar e renderizar usuários
-// ===============================
-function renderizarUsuarios(usuarios) {
-  userTable.innerHTML = "";
-
-  if (usuarios.length === 0) {
-    userTable.innerHTML = '<tr><td colspan="5">Nenhum usuário encontrado.</td></tr>';
-    return;
+  if (!regex.test(email)) {
+    return { valido: false, erro: 'E-mail inválido' };
   }
+  
+  // Validações adicionais
+  const partes = email.split('@');
+  if (partes[0].length < 1) {
+    return { valido: false, erro: 'E-mail inválido: parte antes do @ muito curta' };
+  }
+  
+  const dominio = partes[1].split('.');
+  if (dominio[0].length < 1 || dominio[dominio.length - 1].length < 2) {
+    return { valido: false, erro: 'E-mail inválido: domínio incorreto' };
+  }
+  
+  return { valido: true };
+}
 
-  usuarios.forEach((usuario, index) => {
-    const idFormatado = String(index + 1).padStart(3, "0");
-    const linha = document.createElement("tr");
-    linha.innerHTML = `
-      <td>${idFormatado}</td>
-      <td>${usuario.nome}</td>
-      <td>${usuario.email}</td>
-      <td>${usuario.telefone}</td>
-      <td class="acoes-coluna">
-        <button class="btn-editar" data-id="${usuario.id}">Editar</button>
-        <button class="btn-reset" data-email="${usuario.email}">Redefinir Senha</button>
-        <button class="btn-excluir" data-id="${usuario.id}">Excluir</button>
-      </td>
+// ========== VALIDAÇÃO DE NOME ==========
+function validarNome(nome) {
+  if (!nome || nome.trim().length < CONFIG.MIN_NOME_LENGTH) {
+    return {
+      valido: false,
+      erro: `Nome deve ter pelo menos ${CONFIG.MIN_NOME_LENGTH} caracteres`
+    };
+  }
+  
+  if (nome.length > CONFIG.MAX_NOME_LENGTH) {
+    return {
+      valido: false,
+      erro: `Nome muito longo. Máximo: ${CONFIG.MAX_NOME_LENGTH} caracteres`
+    };
+  }
+  
+  // Verifica se tem pelo menos um espaço (nome e sobrenome)
+  if (!nome.trim().includes(' ')) {
+    return {
+      valido: false,
+      erro: 'Digite nome completo (nome e sobrenome)'
+    };
+  }
+  
+  return { valido: true };
+}
+
+// ========== VALIDAÇÃO DE TELEFONE ==========
+function validarTelefone(telefone) {
+  const apenasNumeros = telefone.replace(/\D/g, '');
+  
+  if (apenasNumeros.length < CONFIG.TELEFONE_LENGTH_MIN) {
+    return {
+      valido: false,
+      erro: `Telefone deve ter ${CONFIG.TELEFONE_LENGTH_MIN} ou ${CONFIG.TELEFONE_LENGTH} dígitos`
+    };
+  }
+  
+  // Verifica padrões inválidos
+  const numerosUnicos = new Set(apenasNumeros.split(''));
+  if (numerosUnicos.size === 1) {
+    return {
+      valido: false,
+      erro: 'Telefone inválido: todos os números são iguais'
+    };
+  }
+  
+  return { valido: true };
+}
+
+// ========== FUNÇÕES DE FEEDBACK VISUAL ==========
+function mostrarErro(input, mensagem) {
+  const container = input.parentElement;
+  let erroEl = container.querySelector('.erro-validacao');
+  
+  if (!erroEl) {
+    erroEl = document.createElement('div');
+    erroEl.className = 'erro-validacao';
+    erroEl.style.cssText = `
+      color: var(--color-danger);
+      font-size: 0.85em;
+      margin-top: 5px;
+      display: block;
     `;
-    userTable.appendChild(linha);
+    container.appendChild(erroEl);
+  }
+  
+  erroEl.textContent = mensagem;
+  input.style.borderColor = 'var(--color-danger)';
+}
+
+function limparErro(input) {
+  const container = input.parentElement;
+  const erroEl = container.querySelector('.erro-validacao');
+  
+  if (erroEl) {
+    erroEl.remove();
+  }
+  
+  input.style.borderColor = '';
+}
+
+function limparTodosErros() {
+  document.querySelectorAll('.erro-validacao').forEach(el => el.remove());
+  document.querySelectorAll('input').forEach(input => {
+    input.style.borderColor = '';
   });
 }
 
+// ========== CONTADOR DE CARACTERES ==========
+function adicionarContadorCaracteres(input, maxLength) {
+  if (!input) return;
+  
+  const container = input.parentElement;
+  let contador = container.querySelector('.contador-caracteres');
+  
+  if (!contador) {
+    contador = document.createElement('div');
+    contador.className = 'contador-caracteres';
+    contador.style.cssText = `
+      text-align: right;
+      font-size: 0.85em;
+      color: var(--color-gray-600);
+      margin-top: 5px;
+    `;
+    container.appendChild(contador);
+  }
+  
+  function atualizar() {
+    const atual = input.value.length;
+    contador.textContent = `${atual}/${maxLength} caracteres`;
+    
+    if (atual > maxLength) {
+      contador.style.color = 'var(--color-danger)';
+      input.style.borderColor = 'var(--color-danger)';
+    } else if (atual > maxLength * 0.9) {
+      contador.style.color = 'var(--color-warning)';
+      input.style.borderColor = '';
+    } else {
+      contador.style.color = 'var(--color-gray-600)';
+      input.style.borderColor = '';
+    }
+  }
+  
+  input.addEventListener('input', atualizar);
+  atualizar();
+}
+
+// ========== MODAL ==========
+function abrirModal(usuarioId, usuario) {
+  usuarioEditandoId = usuarioId;
+  emailOriginal = usuario.email;
+  
+  limparTodosErros();
+  
+  // Preenche formulário
+  document.getElementById("editNome").value = usuario.nome || "";
+  document.getElementById("editEmail").value = usuario.email || "";
+  document.getElementById("editTelefone").value = usuario.telefone || "";
+  document.getElementById("editRole").value = usuario.role || "usuario";
+  
+  modalEdicao.classList.add("active");
+  document.body.style.overflow = "hidden";
+  
+  // Foca no primeiro campo
+  setTimeout(() => {
+    document.getElementById("editNome").focus();
+  }, 100);
+}
+
+function fecharModal() {
+  modalEdicao.classList.remove("active");
+  document.body.style.overflow = "auto";
+  formEditarUsuario.reset();
+  usuarioEditandoId = null;
+  emailOriginal = null;
+  limparTodosErros();
+}
+
+btnFecharModal?.addEventListener("click", fecharModal);
+btnCancelarEdicao?.addEventListener("click", fecharModal);
+
+// Fechar modal clicando fora
+modalEdicao?.addEventListener("click", (e) => {
+  if (e.target === modalEdicao) {
+    fecharModal();
+  }
+});
+
+// Fechar modal com ESC
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modalEdicao?.classList.contains("active")) {
+    fecharModal();
+  }
+});
+
+// ========== CARREGAR USUÁRIOS ==========
 async function carregarUsuarios() {
   try {
-    const usuariosRef = collection(db, "usuarios");
-    const snapshot = await getDocs(usuariosRef);
+    const snapshot = await getDocs(collection(db, "usuarios"));
+    listaUsuariosTable.innerHTML = "";
 
-    todosUsuarios = snapshot.docs.map(docSnap => {
-      const data = docSnap.data();
-      return {
-        id: docSnap.id,
-        nome: data.nome || "N/A",
-        email: data.email || "N/A",
-        telefone: data.telefone || "N/A",
-        dataCadastro: data.dataCadastro || null
-      };
+    if (snapshot.empty) {
+      listaUsuariosTable.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align: center; padding: 20px; color: var(--color-gray-600);">
+            👥 Nenhum usuário cadastrado
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const usuario = docSnap.data();
+      const row = document.createElement("tr");
+
+      // Badge de role
+      const roleBadge = usuario.role === "admin"
+        ? '<span style="background: var(--color-warning); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">👑 Admin</span>'
+        : '<span style="background: var(--color-primary); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">👤 Usuário</span>';
+
+      // Formata telefone
+      const telefone = usuario.telefone || '';
+      const telefoneFormatado = telefone.length >= 10
+        ? `(${telefone.slice(0, 2)}) ${telefone.slice(2, 7)}-${telefone.slice(7)}`
+        : telefone;
+
+      row.innerHTML = `
+        <td><strong>${usuario.nome || 'N/A'}</strong></td>
+        <td>${usuario.email || 'N/A'}</td>
+        <td>${telefoneFormatado || 'N/A'}</td>
+        <td>${roleBadge}</td>
+        <td>
+          <button class="btn-editar" data-id="${docSnap.id}">✏️ Editar</button>
+          <button class="btn-excluir" data-id="${docSnap.id}">🗑️ Excluir</button>
+        </td>
+      `;
+
+      listaUsuariosTable.appendChild(row);
     });
-
-    todosUsuarios.sort((a, b) => {
-      if (!a.dataCadastro && !b.dataCadastro) return 0;
-      if (!a.dataCadastro) return -1;
-      if (!b.dataCadastro) return 1;
-      return new Date(a.dataCadastro) - new Date(b.dataCadastro);
-    });
-
-    renderizarUsuarios(todosUsuarios);
-    criarCampoPesquisa();
+    
+    console.log(`✅ ${snapshot.size} usuários carregados`);
   } catch (error) {
     console.error("Erro ao carregar usuários:", error);
-    alert("⚠️ Não foi possível carregar a lista de usuários.");
+    alert("❌ Erro ao carregar usuários: " + error.message);
   }
 }
 
-// ===============================
-// Excluir usuário
-// ===============================
-async function excluirUsuario(id) {
-  if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
-  try {
-    await deleteDoc(doc(db, "usuarios", id));
-    alert("🗑️ Usuário excluído com sucesso!");
-    carregarUsuarios();
-  } catch (error) {
-    console.error("Erro ao excluir usuário:", error);
-    alert("Erro ao excluir usuário.");
-  }
-}
-
-// ===============================
-// MODAL DE EDIÇÃO COM CONTROLE DE DADOS SENSÍVEIS (Testes 69, 70, 81)
-// ===============================
-function criarModalEdicaoUsuario() {
-  let modal = document.createElement("div");
-  modal.id = "modalEdicaoUsuario";
-  modal.className = "modal-overlay hidden";
-  modal.innerHTML = `
-    <div class="modal-card card">
-      <div class="modal-header">
-        <h3>Editar Usuário</h3>
-        <button class="modal-close" id="btnFecharModalEdicaoUsuario" aria-label="Fechar modal">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </div>
-      <form id="formEditarUsuario" class="form-elegant">
-        <div class="form-group">
-          <label>Nome:</label>
-          <input id="editUserNome" maxlength="100" required>
-        </div>
-        
-        <div class="form-group">
-          <label>Email:</label>
-          <input id="editUserEmail" type="email" maxlength="100" disabled 
-                 style="background-color: var(--color-gray-400); cursor: not-allowed;"
-                 title="Email não pode ser alterado por questões de segurança">
-          <small style="color: var(--color-gray-600);">
-            ⚠️ Email não pode ser alterado por motivos de segurança
-          </small>
-        </div>
-        
-        <div class="form-group">
-          <label>Telefone:</label>
-          <input id="editUserTelefone" maxlength="15" inputmode="numeric">
-        </div>
-        
-        <div class="form-group" style="background: rgba(255, 193, 7, 0.1); padding: 10px; border-radius: 5px; margin-top: 15px;">
-          <p style="color: var(--color-secondary); font-weight: bold; margin-bottom: 10px;">
-            🔒 Verificação de Segurança
-          </p>
-          <label>Digite sua senha de administrador para confirmar as alterações:</label>
-          <input type="password" id="senhaSeguranca" required minlength="6"
-                 placeholder="Senha do administrador">
-          <small style="color: var(--color-gray-600);">
-            Esta verificação é necessária para proteger dados sensíveis dos usuários
-          </small>
-        </div>
-        
-        <div class="form-buttons actions-right">
-          <button type="submit" class="btn btn-primary">
-            <i class="bi bi-check-lg"></i> Salvar Alterações
-          </button>
-          <button type="button" id="cancelEditUser" class="btn btn-outline">
-            <i class="bi bi-x-lg"></i> Cancelar
-          </button>
-        </div>
-      </form>
-    </div>`;
-  document.body.appendChild(modal);
-
-  document.getElementById("btnFecharModalEdicaoUsuario").addEventListener("click", fecharModalEdicaoUsuario);
-  document.getElementById("cancelEditUser").addEventListener("click", fecharModalEdicaoUsuario);
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) fecharModalEdicaoUsuario();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-      fecharModalEdicaoUsuario();
-    }
-  });
-}
-
-function fecharModalEdicaoUsuario() {
-  const modal = document.getElementById("modalEdicaoUsuario");
-  modal.classList.add("hidden");
-  document.body.style.overflow = "auto";
-  
-  // Limpa o formulário
-  document.getElementById("formEditarUsuario").reset();
-}
-
-criarModalEdicaoUsuario();
-
-async function abrirEditarUsuario(id) {
-  try {
-    const usuariosRef = collection(db, "usuarios");
-    const snapshot = await getDocs(usuariosRef);
-    const docSnap = snapshot.docs.find(d => d.id === id);
+// ========== EDITAR USUÁRIO ==========
+listaUsuariosTable.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("btn-editar")) {
+    const id = e.target.dataset.id;
     
-    if (!docSnap) {
-      alert("Usuário não encontrado.");
+    try {
+      const snapshot = await getDocs(collection(db, "usuarios"));
+      const usuarioDoc = snapshot.docs.find(d => d.id === id);
+
+      if (usuarioDoc) {
+        abrirModal(id, usuarioDoc.data());
+      } else {
+        alert("❌ Usuário não encontrado");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error);
+      alert("❌ Erro ao carregar dados do usuário: " + error.message);
+    }
+  }
+});
+
+// ========== SALVAR EDIÇÃO ==========
+if (formEditarUsuario) {
+  formEditarUsuario.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    limparTodosErros();
+    
+    const nome = document.getElementById("editNome").value.trim();
+    const email = document.getElementById("editEmail").value.trim();
+    const telefone = document.getElementById("editTelefone").value.trim();
+    const role = document.getElementById("editRole").value;
+    
+    // Validações
+    const validacaoNome = validarNome(nome);
+    if (!validacaoNome.valido) {
+      mostrarErro(document.getElementById("editNome"), validacaoNome.erro);
+      document.getElementById("editNome").focus();
       return;
     }
     
-    const u = docSnap.data();
-
-    const modal = document.getElementById("modalEdicaoUsuario");
-    modal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-
-    const editNome = document.getElementById("editUserNome");
-    const editEmail = document.getElementById("editUserEmail");
-    const editTelefone = document.getElementById("editUserTelefone");
-    const senhaSeguranca = document.getElementById("senhaSeguranca");
-
-    editNome.value = u.nome || "";
-    editEmail.value = u.email || "";
-    editTelefone.value = u.telefone || "";
-    senhaSeguranca.value = "";
-
-    aplicarMascaraTelefone(editTelefone);
-
-    document.getElementById("formEditarUsuario").onsubmit = async (e) => {
-      e.preventDefault();
+    const validacaoEmail = validarEmail(email);
+    if (!validacaoEmail.valido) {
+      mostrarErro(document.getElementById("editEmail"), validacaoEmail.erro);
+      document.getElementById("editEmail").focus();
+      return;
+    }
+    
+    const validacaoTelefone = validarTelefone(telefone);
+    if (!validacaoTelefone.valido) {
+      mostrarErro(document.getElementById("editTelefone"), validacaoTelefone.erro);
+      document.getElementById("editTelefone").focus();
+      return;
+    }
+    
+    // Verifica se email mudou e se já existe
+    if (email !== emailOriginal) {
+      const q = query(
+        collection(db, "usuarios"),
+        where("email", "==", email)
+      );
+      const snapshot = await getDocs(q);
       
-      const nome = editNome.value.trim();
-      const telefone = editTelefone.value.trim();
-      const senhaAdmin = senhaSeguranca.value;
-
-      // VALIDAÇÃO DE SENHA DE SEGURANÇA (Teste 81)
-      if (!senhaAdmin || senhaAdmin.length < 6) {
-        alert("⚠️ Por favor, digite sua senha de administrador para confirmar as alterações.");
-        senhaSeguranca.focus();
+      if (!snapshot.empty) {
+        mostrarErro(
+          document.getElementById("editEmail"),
+          'Este e-mail já está em uso por outro usuário'
+        );
+        document.getElementById("editEmail").focus();
         return;
       }
+    }
+    
+    // Senha de admin obrigatória para editar
+    const senhaAdmin = prompt(
+      "🔐 Para editar usuários, digite a senha de administrador:"
+    );
+    
+    if (!senhaAdmin) {
+      alert("⚠️ Senha de administrador é obrigatória para editar usuários.");
+      return;
+    }
+    
+    const btnSubmit = formEditarUsuario.querySelector('button[type="submit"]');
+    const textoOriginal = btnSubmit.textContent;
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = '⏳ Salvando...';
+    
+    try {
+      // Valida senha de admin
+      await signInWithEmailAndPassword(auth, auth.currentUser.email, senhaAdmin);
+      
+      // Atualiza usuário
+      const apenasNumeros = telefone.replace(/\D/g, '');
+      
+      await updateDoc(doc(db, "usuarios", usuarioEditandoId), {
+        nome: nome.slice(0, CONFIG.MAX_NOME_LENGTH),
+        email,
+        telefone: apenasNumeros,
+        role,
+        atualizadoEm: new Date().toISOString()
+      });
 
-      // Verifica se a senha do admin está correta
-      try {
-        const user = auth.currentUser;
-        if (!user) {
-          alert("⚠️ Você precisa estar logado como administrador.");
-          return;
-        }
-        
-        // CONTROLE DE ACESSO (Teste 69)
-        // Verifica se o usuário logado é admin
-        const adminDoc = await getDocs(collection(db, "admins"));
-        const isAdmin = adminDoc.docs.some(doc => doc.data().email === user.email);
-        
-        if (!isAdmin) {
-          alert("❌ Acesso negado: Você não tem permissão para editar dados de usuários.");
-          fecharModalEdicaoUsuario();
-          return;
-        }
-
-        // Validações básicas
-        if (nome.length < 3) {
-          alert("Nome deve ter pelo menos 3 caracteres.");
-          return;
-        }
-        
-        if (telefone && telefone.replace(/\D/g, "").length < 10) {
-          alert("Telefone inválido.");
-          return;
-        }
-
-        // PROTEÇÃO DE DADOS SENSÍVEIS (Teste 70)
-        // Atualiza apenas campos permitidos (nome e telefone)
-        // Email, CPF/CNPJ e dados bancários NÃO podem ser alterados
-        await updateDoc(doc(db, "usuarios", id), { 
-          nome, 
-          telefone,
-          ultimaAtualizacao: new Date().toISOString(),
-          atualizadoPor: user.email
-        });
-        
-        fecharModalEdicaoUsuario();
-        alert("✅ Dados do usuário atualizados com sucesso!\n\nNota: Email e outros dados sensíveis não podem ser alterados por questões de segurança.");
-        carregarUsuarios();
-      } catch (err) {
-        console.error("Erro ao atualizar usuário:", err);
-        if (err.code === "auth/wrong-password") {
-          alert("❌ Senha de administrador incorreta.");
-        } else {
-          alert("❌ Erro ao atualizar usuário. Verifique sua senha e tente novamente.");
-        }
+      alert("✅ Usuário atualizado com sucesso!");
+      fecharModal();
+      carregarUsuarios();
+      
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      
+      let mensagem = "❌ Erro ao salvar usuário.";
+      
+      if (error.code === "auth/wrong-password") {
+        mensagem = "❌ Senha de administrador incorreta!";
+      } else if (error.code === "auth/too-many-requests") {
+        mensagem = "⚠️ Muitas tentativas. Aguarde alguns minutos.";
+      } else if (error.code === "auth/network-request-failed") {
+        mensagem = "❌ Erro de conexão. Verifique sua internet.";
+      } else {
+        mensagem += "\n\n" + error.message;
       }
-    };
-  } catch (error) {
-    console.error(error);
-    alert("Erro ao abrir edição de usuário.");
-  }
+      
+      alert(mensagem);
+      
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = textoOriginal;
+    }
+  });
 }
 
-// ===============================
-// Eventos gerais
-// ===============================
-document.addEventListener("DOMContentLoaded", carregarUsuarios);
-
-userTable.addEventListener("click", async (e) => {
+// ========== EXCLUIR USUÁRIO ==========
+listaUsuariosTable.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btn-excluir")) {
-    excluirUsuario(e.target.dataset.id);
-  } else if (e.target.classList.contains("btn-editar")) {
-    abrirEditarUsuario(e.target.dataset.id);
-  } else if (e.target.classList.contains("btn-reset")) {
-    const email = e.target.dataset.email;
-    if (email && confirm(`Enviar email de redefinição de senha para ${email}?`)) {
-      try {
-        await sendPasswordResetEmail(auth, email);
-        alert("📧 Email de redefinição enviado com sucesso.");
-      } catch (err) {
-        console.error("Erro ao enviar email de redefinição:", err);
-        alert("Erro ao enviar email de redefinição.");
+    const id = e.target.dataset.id;
+    
+    try {
+      const snapshot = await getDocs(collection(db, "usuarios"));
+      const usuarioDoc = snapshot.docs.find(d => d.id === id);
+      
+      if (!usuarioDoc) {
+        alert("❌ Usuário não encontrado");
+        return;
       }
+      
+      const usuario = usuarioDoc.data();
+      
+      // Previne excluir o próprio usuário
+      if (auth.currentUser && usuario.email === auth.currentUser.email) {
+        alert("⚠️ Você não pode excluir seu próprio usuário!");
+        return;
+      }
+      
+      if (!confirm(`🗑️ Tem certeza que deseja excluir o usuário:\n\n${usuario.nome}\n${usuario.email}?`)) {
+        return;
+      }
+      
+      // Senha de admin obrigatória
+      const senhaAdmin = prompt(
+        "🔐 Para excluir usuários, digite a senha de administrador:"
+      );
+      
+      if (!senhaAdmin) {
+        alert("⚠️ Senha de administrador é obrigatória para excluir usuários.");
+        return;
+      }
+      
+      // Valida senha
+      await signInWithEmailAndPassword(auth, auth.currentUser.email, senhaAdmin);
+      
+      // Exclui usuário
+      await deleteDoc(doc(db, "usuarios", id));
+      
+      alert("✅ Usuário excluído com sucesso!");
+      carregarUsuarios();
+      
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+      
+      let mensagem = "❌ Erro ao excluir usuário.";
+      
+      if (error.code === "auth/wrong-password") {
+        mensagem = "❌ Senha de administrador incorreta!";
+      } else if (error.code === "auth/too-many-requests") {
+        mensagem = "⚠️ Muitas tentativas. Aguarde alguns minutos.";
+      } else {
+        mensagem += "\n\n" + error.message;
+      }
+      
+      alert(mensagem);
     }
   }
+});
+
+// ========== PESQUISA DE USUÁRIOS ==========
+const inputPesquisa = document.getElementById("pesquisaUsuario");
+if (inputPesquisa) {
+  inputPesquisa.addEventListener("input", (e) => {
+    const termo = e.target.value.toLowerCase().trim();
+    const linhas = listaUsuariosTable.querySelectorAll("tr");
+
+    let encontrados = 0;
+    linhas.forEach(linha => {
+      const texto = linha.textContent.toLowerCase();
+      const match = texto.includes(termo);
+      linha.style.display = match ? "" : "none";
+      if (match) encontrados++;
+    });
+    
+    console.log(`🔍 Pesquisa: "${termo}" - ${encontrados} usuário(s) encontrado(s)`);
+  });
+}
+
+// ========== APLICAR MÁSCARAS ==========
+const telefoneInput = document.getElementById("editTelefone");
+if (telefoneInput) {
+  aplicarMascaraTelefone(telefoneInput);
+}
+
+const nomeInput = document.getElementById("editNome");
+if (nomeInput) {
+  adicionarContadorCaracteres(nomeInput, CONFIG.MAX_NOME_LENGTH);
+}
+
+// ========== INICIALIZAÇÃO ==========
+window.addEventListener('DOMContentLoaded', () => {
+  carregarUsuarios();
+  console.log('✅ Gerenciamento de usuários inicializado com validações completas');
 });

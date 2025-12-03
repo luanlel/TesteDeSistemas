@@ -1,9 +1,10 @@
-// js/auth_modal.js - CORREÇÃO COMPLETA COM INTEGRAÇÃO À LOJA
+// js/auth_modal.js - VERSÃO CORRIGIDA COM TODAS AS MELHORIAS
 
 import { auth, db } from "./firebase-config.js";
 import { 
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword 
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -96,14 +97,13 @@ tabs?.forEach(t => {
   t.addEventListener("click", () => trocarTab(t.dataset.tab));
 });
 
-// ========== MÁSCARA DE TELEFONE (CORRIGIDA - Teste 23) ==========
+// ========== MÁSCARA DE TELEFONE ==========
 function aplicarMascaraTelefone(input) {
   if (!input) return;
   
   input.setAttribute("maxlength", "15");
   input.setAttribute("inputmode", "numeric");
 
-  // Bloqueia caracteres não numéricos em tempo real
   input.addEventListener("keypress", function(e) {
     const char = String.fromCharCode(e.keyCode || e.which);
     if (!/^[0-9]$/.test(char)) {
@@ -116,20 +116,16 @@ function aplicarMascaraTelefone(input) {
   let ultimoValor = "";
   
   input.addEventListener("input", function (e) {
-    // Remove tudo que não for número
     let valor = e.target.value.replace(/\D/g, "");
     
-    // Verifica se há caracteres inválidos
     if (e.target.value !== valor && valor === "") {
       mostrarErro("erro-telefone", "Digite apenas números.");
       e.target.value = ultimoValor;
       return;
     }
     
-    // Limita a 11 dígitos
     if (valor.length > 11) valor = valor.slice(0, 11);
 
-    // Aplica máscara formatada
     if (valor.length > 6) {
       e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7, 11)}`;
     } else if (valor.length > 2) {
@@ -142,13 +138,11 @@ function aplicarMascaraTelefone(input) {
     
     ultimoValor = e.target.value;
     
-    // Limpa erro se válido
     if (valor.length >= 10) {
       limparErro("erro-telefone");
     }
   });
 
-  // Validação ao perder foco
   input.addEventListener("blur", function(e) {
     const apenasNumeros = e.target.value.replace(/\D/g, "");
     if (apenasNumeros.length > 0 && apenasNumeros.length < 10) {
@@ -189,7 +183,87 @@ function limparErros() {
   }
 }
 
-// ========== LOGIN (Para a loja) ==========
+// ========== RECUPERAÇÃO DE SENHA (NOVO) ==========
+function exibirRecuperacaoSenha() {
+  const email = document.getElementById("loginEmail")?.value.trim();
+  
+  if (!email) {
+    alert("⚠️ Por favor, digite seu e-mail no campo acima para recuperar a senha.");
+    document.getElementById("loginEmail")?.focus();
+    return;
+  }
+  
+  if (!email.match(/^\S+@\S+\.\S+$/)) {
+    alert("⚠️ Por favor, digite um e-mail válido.");
+    return;
+  }
+  
+  if (confirm(`📧 Deseja enviar um link de recuperação de senha para:\n${email}?`)) {
+    const btnSubmit = formLogin?.querySelector('button[type="submit"]');
+    const textoOriginal = btnSubmit?.textContent;
+    
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = "📧 Enviando...";
+    }
+    
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        alert(
+          `✅ E-mail de recuperação enviado!\n\n` +
+          `Verifique sua caixa de entrada (e spam) do e-mail:\n${email}\n\n` +
+          `Clique no link recebido para redefinir sua senha.`
+        );
+      })
+      .catch((error) => {
+        console.error("Erro ao enviar e-mail:", error);
+        
+        let mensagemErro = "❌ Erro ao enviar e-mail de recuperação.";
+        
+        if (error.code === "auth/user-not-found") {
+          mensagemErro = "❌ E-mail não encontrado no sistema.";
+        } else if (error.code === "auth/invalid-email") {
+          mensagemErro = "❌ E-mail inválido.";
+        } else if (error.code === "auth/too-many-requests") {
+          mensagemErro = "⚠️ Muitas tentativas. Aguarde alguns minutos e tente novamente.";
+        }
+        
+        alert(mensagemErro);
+      })
+      .finally(() => {
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = textoOriginal;
+        }
+      });
+  }
+}
+
+// Adiciona link "Esqueci minha senha" ao formulário de login
+document.addEventListener('DOMContentLoaded', () => {
+  const formFooter = formLogin?.querySelector('.form-footer');
+  if (formFooter && !document.getElementById('link-esqueci-senha')) {
+    const linkRecuperacao = document.createElement('a');
+    linkRecuperacao.id = 'link-esqueci-senha';
+    linkRecuperacao.href = '#';
+    linkRecuperacao.textContent = '🔑 Esqueci minha senha';
+    linkRecuperacao.style.display = 'block';
+    linkRecuperacao.style.textAlign = 'center';
+    linkRecuperacao.style.marginTop = '10px';
+    linkRecuperacao.style.color = 'var(--color-primary)';
+    linkRecuperacao.style.textDecoration = 'none';
+    linkRecuperacao.style.fontSize = '0.9em';
+    
+    linkRecuperacao.addEventListener('click', (e) => {
+      e.preventDefault();
+      exibirRecuperacaoSenha();
+    });
+    
+    formFooter.appendChild(linkRecuperacao);
+  }
+});
+
+// ========== LOGIN ==========
 if (formLogin) {
   formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -222,12 +296,9 @@ if (formLogin) {
         mensagem.style.color = "var(--color-success)";
       }
       
-      // Aguarda um pouco antes de fechar
       await new Promise(resolve => setTimeout(resolve, 800));
       
       fecharModal();
-      
-      // Recarrega a página para atualizar o estado
       window.location.reload();
       
     } catch (error) {
@@ -236,13 +307,17 @@ if (formLogin) {
       let msgErro = "❌ Erro ao fazer login.";
       
       if (error.code === "auth/user-not-found") {
-        msgErro = "❌ Usuário não encontrado.";
+        msgErro = "❌ Usuário não encontrado. Verifique seu e-mail ou cadastre-se.";
       } else if (error.code === "auth/wrong-password") {
-        msgErro = "❌ Senha incorreta.";
+        msgErro = "❌ Senha incorreta. Tente novamente ou use 'Esqueci minha senha'.";
       } else if (error.code === "auth/invalid-email") {
-        msgErro = "❌ Email inválido.";
+        msgErro = "❌ E-mail inválido.";
       } else if (error.code === "auth/invalid-credential") {
-        msgErro = "❌ Email ou senha incorretos.";
+        msgErro = "❌ E-mail ou senha incorretos.";
+      } else if (error.code === "auth/too-many-requests") {
+        msgErro = "⚠️ Muitas tentativas de login. Aguarde alguns minutos e tente novamente.";
+      } else if (error.code === "auth/network-request-failed") {
+        msgErro = "❌ Erro de conexão. Verifique sua internet e tente novamente.";
       }
       
       if (mensagem) {
@@ -258,7 +333,7 @@ if (formLogin) {
   });
 }
 
-// ========== CADASTRO (Para a loja) ==========
+// ========== CADASTRO ==========
 if (formCadastro) {
   formCadastro.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -273,7 +348,7 @@ if (formCadastro) {
 
     // Validações
     if (!nome || nome.length < 3) {
-      mostrarErro("erro-nome", "Informe um nome completo válido.");
+      mostrarErro("erro-nome", "Informe um nome completo válido (mínimo 3 caracteres).");
       valido = false;
     }
     
@@ -317,7 +392,7 @@ if (formCadastro) {
       if (sucessoMsg) {
         sucessoMsg.innerHTML = `
           <i class="bi bi-check-circle-fill"></i>
-          ✅ Cadastro realizado com sucesso!
+          ✅ Cadastro realizado com sucesso! Redirecionando...
         `;
         sucessoMsg.classList.add("active");
         sucessoMsg.style.color = "var(--color-success)";
@@ -325,12 +400,9 @@ if (formCadastro) {
       
       formCadastro.reset();
       
-      // Aguarda um pouco antes de fechar
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       fecharModal();
-      
-      // Recarrega a página para atualizar o estado
       window.location.reload();
 
     } catch (error) {
@@ -340,11 +412,13 @@ if (formCadastro) {
         let msgErro = "❌ Erro ao cadastrar usuário.";
         
         if (error.code === "auth/email-already-in-use") {
-          msgErro = "⚠️ Este e-mail já está cadastrado.";
+          msgErro = "⚠️ Este e-mail já está cadastrado. Faça login ou use 'Esqueci minha senha'.";
         } else if (error.code === "auth/weak-password") {
-          msgErro = "⚠️ Senha muito fraca.";
+          msgErro = "⚠️ Senha muito fraca. Use pelo menos 6 dígitos.";
         } else if (error.code === "auth/invalid-email") {
-          msgErro = "⚠️ Email inválido.";
+          msgErro = "⚠️ E-mail inválido.";
+        } else if (error.code === "auth/network-request-failed") {
+          msgErro = "❌ Erro de conexão. Verifique sua internet e tente novamente.";
         }
         
         sucessoMsg.innerHTML = `<i class="bi bi-x-circle-fill"></i> ${msgErro}`;
@@ -363,4 +437,4 @@ if (formCadastro) {
 // ========== EXPORTA FUNÇÃO PARA USO NA LOJA ==========
 window.abrirModalAuth = abrirModal;
 
-console.log('✅ Auth Modal inicializado');
+console.log('✅ Auth Modal inicializado com recuperação de senha');

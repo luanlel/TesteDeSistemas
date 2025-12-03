@@ -1,0 +1,220 @@
+/* css/melhorias_visuais.css - CORREÇÕES DE INTERFACE E UX */
+
+/* ========== LOGOUT ADMIN VISÍVEL (Teste 14) ========== */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--color-gray-100);
+  border-bottom: 2px solid var(--color-secondary);
+  margin-bottom: 20px;
+}
+
+#btnLogoutAdmin {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-size: 1em;
+}
+
+#btnLogoutAdmin:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+#btnLogoutAdmin::before {
+  content: "🚪";
+  font-size: 1.2em;
+}
+
+/* ========== MELHOR CONTRASTE ========== */
+.produto-card h3 {
+  color: var(--color-secondary);
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  font-size: 1.3em;
+}
+
+.btn-primary {
+  box-shadow: 0 2px 8px rgba(101, 78, 146, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(101, 78, 146, 0.5);
+}
+
+/* ========== STATUS DE ESTOQUE VISUAL ========== */
+.status-baixo {
+  color: #ff9800 !important;
+  font-weight: bold;
+}
+
+.status-esgotado {
+  color: #f44336 !important;
+  font-weight: bold;
+}
+
+.status-ok {
+  color: #4CAF50 !important;
+}
+
+/* ========== NOTIFICAÇÕES TOAST ========== */
+.notificacao-toast {
+  font-family: var(--font-primary);
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ========== MODAL COM BLUR ========== */
+.modal-overlay {
+  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* ========== ACESSIBILIDADE ========== */
+*:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ========== RESPONSIVIDADE ========== */
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  #btnLogoutAdmin {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .form-buttons {
+    flex-direction: column;
+  }
+  
+  .form-buttons button {
+    width: 100%;
+  }
+  
+  .notificacao-toast {
+    max-width: 90%;
+    right: 5%;
+  }
+}
+
+/* ========== ANIMAÇÕES SUAVES ========== */
+@keyframes slideInRight {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(400px); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ========== LOADING STATES ========== */
+.loading {
+  pointer-events: none;
+  opacity: 0.7;
+  position: relative;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-secondary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ========== BADGES E TAGS ========== */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.badge-success { background: #4CAF50; color: white; }
+.badge-warning { background: #ff9800; color: white; }
+.badge-error { background: #f44336; color: white; }
+.badge-info { background: #2196F3; color: white; }
+
+/* ========== FORMULÁRIOS MELHORADOS ========== */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-white);
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--color-gray-300);
+  border-radius: 6px;
+  background: var(--color-gray-200);
+  color: var(--color-white);
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-secondary);
+  background: var(--color-gray-100);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+/* ========== CARDS MELHORADOS ========== */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}

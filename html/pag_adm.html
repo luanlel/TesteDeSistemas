@@ -23,18 +23,29 @@
   </style>
 </head>
 
+<!-- Substituir <body> completo por: -->
 <body class="invisible">
-
   <div class="container">
     <div class="admin-header">
-      <h1>Painel de Administração</h1>
-      <h2>Administrador</h2>
+      <div>
+        <h1>Painel de Administração</h1>
+        <h2>Administrador</h2>
+      </div>
+      <button id="btnLogoutAdmin">Sair</button>
     </div>
     <div class="buttons">
       <button onclick="window.location.href='geren_usuario.html'">Gerenciamento de Usuários</button>
       <button onclick="window.location.href='geren_produtos.html'">Gerenciamento de Produtos</button>
     </div>
   </div>
-
+  <script type="module">
+    import { verificarLoginAdmin, logout } from "../js/auth.js";
+    verificarLoginAdmin(() => { document.body.classList.remove('invisible'); });
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnLogoutAdmin')?.addEventListener('click', async () => {
+        if (confirm('Deseja sair?')) await logout();
+      });
+    });
+  </script>
 </body>
 </html>
