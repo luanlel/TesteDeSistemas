@@ -1,7 +1,5 @@
-/* Importar tema base */
 @import url('theme.css');
 
-/* Reset e Estilos Base */
 body {
   min-height: 100vh;
   background-color: var(--color-paper);
@@ -14,14 +12,12 @@ body.invisible {
   display: none !important;
 }
 
-/* Container Principal */
 .container {
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   padding: var(--spacing-xl);
 }
 
-/* Cabeçalho do Admin - CENTRALIZADO */
 .admin-header {
   text-align: center;
   margin-bottom: var(--spacing-2xl);
@@ -32,7 +28,6 @@ body.invisible {
   box-shadow: var(--shadow-lg);
   animation: fadeInDown 0.5s ease-out;
   
-  /* ⭐ LAYOUT CENTRALIZADO EM COLUNA */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -56,7 +51,6 @@ body.invisible {
   margin-bottom: var(--spacing-md);
 }
 
-/* ========== BOTÃO DE LOGOUT (CENTRALIZADO ABAIXO) ========== */
 #btnLogoutAdmin,
 .btn-logout {
   background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
@@ -103,10 +97,13 @@ body.invisible {
   transform: translateX(-2px);
 }
 
-/* Botões de Navegação */
+/* ============================================
+   BOTÕES EM FORMATO DE PIRÂMIDE INVERTIDA
+   ============================================ */
 .buttons {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* 2 colunas de tamanho igual */
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
   padding: var(--spacing-lg);
 }
@@ -128,6 +125,16 @@ body.invisible {
   justify-content: center;
   position: relative;
   overflow: hidden;
+}
+
+/* Botão de mensagens - ocupa 2 colunas e fica centralizado */
+.buttons button.btn-mensagens-central {
+  /* Posiciona na linha abaixo, ocupando ambas as colunas */
+  grid-column: 1 / -1;
+  /* Largura máxima para não ficar muito esticado */
+  max-width: 500px;
+  /* Centraliza horizontalmente */
+  margin: 0 auto;
 }
 
 .buttons button::before {
@@ -158,7 +165,13 @@ body.invisible {
   z-index: 2;
 }
 
-/* Animações */
+.buttons button:active {
+  transform: translateY(2px);
+}
+
+/* ============================================
+   ANIMAÇÕES
+   ============================================ */
 @keyframes fadeInDown {
   from {
     opacity: 0;
@@ -182,48 +195,9 @@ body.invisible {
   }
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  .container {
-    padding: var(--spacing-md);
-  }
-
-  .admin-header {
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-  }
-
-  .admin-header h1 {
-    font-size: var(--text-3xl);
-  }
-
-  .admin-header h2 {
-    font-size: var(--text-lg);
-  }
-  
-  #btnLogoutAdmin,
-  .btn-logout {
-    width: 100%;
-    max-width: 250px;
-  }
-
-  .buttons {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-
-  .buttons button {
-    padding: var(--spacing-lg);
-    min-height: 150px;
-  }
-}
-
-/* Efeitos de Hover */
-.buttons button:active {
-  transform: translateY(2px);
-}
-
-/* Estado de Loading */
+/* ============================================
+   LOADING
+   ============================================ */
 .loading {
   position: fixed;
   top: 0;
@@ -250,5 +224,61 @@ body.invisible {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   RESPONSIVO
+   ============================================ */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-md);
+  }
+
+  .admin-header {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .admin-header h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .admin-header h2 {
+    font-size: var(--text-lg);
+  }
+  
+  #btnLogoutAdmin,
+  .btn-logout {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  /* Em mobile, todos os botões ficam em coluna única */
+  .buttons {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  /* O botão de mensagens não precisa de tratamento especial em mobile */
+  .buttons button.btn-mensagens-central {
+    grid-column: auto;
+    max-width: none;
+  }
+
+  .buttons button {
+    padding: var(--spacing-lg);
+    min-height: 150px;
+  }
+}
+
+/* Para tablets em landscape */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    max-width: 800px;
+  }
+  
+  .buttons button.btn-mensagens-central {
+    max-width: 450px;
   }
 }

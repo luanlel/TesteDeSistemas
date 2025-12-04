@@ -31,7 +31,7 @@ function validarImagem(file) {
     'image/bmp'
   ];
   
-  const tamanhoMaximo = 5 * 1024 * 1024; // 5MB
+  const tamanhoMaximo = 5 * 1024 * 1024;
   
   if (!tiposPermitidos.includes(file.type)) {
     return {
@@ -85,7 +85,7 @@ function validarArquivosUpload(files) {
   for (let i = 0; i < files.length; i++) {
     const validacao = validarImagem(files[i]);
     if (!validacao.valido) {
-      erros.push(`\n📁 Arquivo ${i + 1}:\n${validacao.mensagem}`);
+      erros.push(`\n Arquivo ${i + 1}:\n${validacao.mensagem}`);
     }
   }
   
@@ -125,7 +125,6 @@ const lerImagemDataUrl = (file) => new Promise((resolve, reject) => {
 });
 
 function mostrarNotificacao(mensagem, tipo = 'info') {
-  // Remove notificações anteriores
   document.querySelectorAll('.notificacao-toast').forEach(n => n.remove());
   
   const cores = {
@@ -234,20 +233,20 @@ if (produtoForm) {
     try {
       if (btnSubmit) {
         btnSubmit.disabled = true;
-        btnSubmit.textContent = '📤 Processando imagens...';
+        btnSubmit.textContent = 'Processando imagens...';
       }
       
       if (inputImagens?.files?.length > 0) {
         for (let i = 0; i < inputImagens.files.length; i++) {
           if (btnSubmit) {
-            btnSubmit.textContent = `📤 Processando imagem ${i + 1}/${inputImagens.files.length}...`;
+            btnSubmit.textContent = `Processando imagem ${i + 1}/${inputImagens.files.length}...`;
           }
           imagens.push(await lerImagemDataUrl(inputImagens.files[i]));
         }
       }
       
       if (btnSubmit) {
-        btnSubmit.textContent = '💾 Salvando no banco...';
+        btnSubmit.textContent = 'Salvando no banco...';
       }
 
       await addDoc(produtosRef, {
@@ -293,7 +292,7 @@ function carregarProdutos() {
       tabelaEstoque.innerHTML = `
         <tr>
           <td colspan="7" style="text-align: center; padding: 20px; color: var(--color-gray-600);">
-            📦 Nenhum produto cadastrado ainda
+             Nenhum produto cadastrado ainda
           </td>
         </tr>
       `;
@@ -341,7 +340,7 @@ if (inputPesquisa) {
       if (match) encontrados++;
     });
     
-    console.log(`🔍 Pesquisa: "${termo}" → ${encontrados} produtos encontrados`);
+    console.log(`Pesquisa: "${termo}" → ${encontrados} produtos encontrados`);
   });
 }
 
@@ -352,7 +351,7 @@ window.excluirProduto = async function (id) {
   
   try {
     await deleteDoc(doc(db, "produtos", id));
-    mostrarNotificacao("🗑️ Produto excluído com sucesso!", 'success');
+    mostrarNotificacao("Produto excluído com sucesso!", 'success');
   } catch (err) {
     console.error("Erro ao excluir produto:", err);
     mostrarNotificacao("❌ Erro ao excluir produto.", 'error');
@@ -388,7 +387,7 @@ if (btnExcluirSelecionados) {
         const id = checkbox.getAttribute("data-id");
         await deleteDoc(doc(db, "produtos", id));
       }
-      mostrarNotificacao(`🗑️ ${selecionados.length} produto(s) excluído(s)!`, 'success');
+      mostrarNotificacao(`${selecionados.length} produto(s) excluído(s)!`, 'success');
       if (checkTodos) checkTodos.checked = false;
     } catch (err) {
       console.error("Erro ao excluir múltiplos:", err);
@@ -407,7 +406,7 @@ function criarModalEdicao() {
   modal.innerHTML = `
     <div class="modal-card card">
       <div class="modal-header">
-        <h3>✏️ Editar Produto</h3>
+        <h3>Editar Produto</h3>
         <button class="modal-close" id="btnFecharModalEdicao" aria-label="Fechar">×</button>
       </div>
       <form id="formEditarProduto" class="form-elegant">
@@ -442,8 +441,8 @@ function criarModalEdicao() {
           <small style="color: var(--color-gray-600);">Apenas: JPEG, PNG, GIF, WebP, SVG (máx 5MB cada)</small>
         </div>
         <div class="form-buttons" style="display:flex;gap:10px;">
-          <button type="submit" class="btn btn-primary">💾 Salvar</button>
-          <button type="button" id="cancelEdit" class="btn btn-outline">❌ Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+          <button type="button" id="cancelEdit" class="btn btn-outline">Cancelar</button>
         </div>
       </form>
     </div>
@@ -603,7 +602,7 @@ window.abrirEditarProduto = async function (id) {
       
       if (btnSubmit) {
         btnSubmit.disabled = true;
-        btnSubmit.textContent = '📤 Processando...';
+        btnSubmit.textContent = 'Processando...';
       }
 
       try {

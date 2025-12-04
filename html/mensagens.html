@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagens de Feedback - Painel Admin</title>
+    <link rel="stylesheet" href="../css/mensagens.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="mensagens-header">
+        <div class="header-container">
+            <div class="header-left">
+                <button class="btn-voltar" id="btnVoltar">
+                    ← Voltar ao Painel
+                </button>
+            </div>
+            
+            <div class="header-center">
+                <h1>Mensagens de Feedback</h1>
+                <p class="header-subtitle">Gerencie o feedback dos usuários</p>
+            </div>
+            
+            <div class="header-right">
+                <button class="btn-atualizar" id="btnAtualizar">
+                    🔄 Atualizar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="estatisticas-section">
+        <div class="container">
+            <div class="estatisticas-grid">
+                <div class="stat-card total">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total de Feedbacks</div>
+                        <div class="stat-value" id="totalFeedbacks">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card novos">
+                    <div class="stat-icon">🔵</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Novos</div>
+                        <div class="stat-value" id="novosFeedbacks">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card lidos">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Lidos</div>
+                        <div class="stat-value" id="lidosFeedbacks">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="filtros-section">
+        <div class="container">
+            <div class="filtros-container">
+                <div class="filtros-buttons">
+                    <button class="filtro-btn active" data-filtro="todos">
+                        📋 Todos
+                    </button>
+                    <button class="filtro-btn" data-filtro="novos">
+                        🔵 Novos
+                    </button>
+                    <button class="filtro-btn" data-filtro="lidos">
+                        ✅ Lidos
+                    </button>
+                </div>
+
+                <div class="busca-container">
+                    <input 
+                        type="text" 
+                        id="buscaFeedback" 
+                        class="busca-input" 
+                        placeholder="Buscar por nome, email ou mensagem..."
+                    >
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feedbacks-section">
+        <div class="container">
+            <div id="loadingFeedbacks" class="loading-container">
+                <div class="loading-spinner"></div>
+                <p>Carregando feedbacks...</p>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-icon">📭</div>
+                <h2>Nenhum feedback encontrado</h2>
+                <p>Quando os usuários enviarem feedbacks, eles aparecerão aqui.</p>
+            </div>
+
+            <div id="feedbacksContainer" class="feedbacks-grid">
+            </div>
+        </div>
+    </section>
+
+    <script type="module" src="../js/mensagens_admin.js"></script>
+</body>
+</html>

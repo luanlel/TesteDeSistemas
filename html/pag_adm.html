@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="../css/pagina_adm.css">
   <link rel="stylesheet" href="../css/melhorias_visuais.css">
   <link rel="stylesheet" href="../css/papelaria.css">
-  <title>Página de ADM</title>
+  <title>Painel de ADM</title>
   <script type="module">
     import { verificarLoginAdmin } from "../js/auth.js";
     verificarLoginAdmin(() => {
@@ -31,13 +31,24 @@
         <h1>Painel de Administração</h1>
         <h2>Administrador</h2>
       </div>
-      <button id="btnLogoutAdmin">Sair</button>
+      <button id="btnLogoutAdmin" class="btn-logout">
+        <span>Sair</span>
+      </button>
     </div>
+    
     <div class="buttons">
-      <button onclick="window.location.href='geren_usuario.html'">Gerenciamento de Usuários</button>
-      <button onclick="window.location.href='geren_produtos.html'">Gerenciamento de Produtos</button>
+      <button onclick="window.location.href='geren_usuario.html'">
+        <span>Gerenciamento de Usuários</span>
+      </button>
+      <button onclick="window.location.href='geren_produtos.html'">
+        <span>Gerenciamento de Produtos</span>
+      </button>
+      <button onclick="window.location.href='mensagens.html'" class="btn-mensagens-central">
+        <span>Mensagens de Feedback</span>
+      </button>
     </div>
   </div>
+  
   <script type="module">
     import { verificarLoginAdmin, logout } from "../js/auth.js";
     verificarLoginAdmin(() => { document.body.classList.remove('invisible'); });
