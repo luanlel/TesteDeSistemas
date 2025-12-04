@@ -1,7 +1,5 @@
-/* Importar tema base */
 @import url('theme.css');
 
-/* Estilos específicos para a página de cadastro */
 body {
   min-height: 100vh;
   display: flex;
@@ -153,7 +151,6 @@ input::placeholder {
   }
 }
 
-/* Animações */
 @keyframes slideUp {
   from {
     opacity: 0;

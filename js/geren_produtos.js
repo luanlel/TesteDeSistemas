@@ -1,6 +1,3 @@
-// js/geren_produtos.js - VERSÃO COMPLETAMENTE CORRIGIDA
-// Resolve Testes: 9, 25, 35, 41, 43, 44, 45, 46, 47, 48, 49, 50
-
 import { db } from "./firebase-config.js";
 import {
   collection,
@@ -16,7 +13,6 @@ const produtoForm = document.getElementById("produtoForm");
 const tabelaEstoque = document.getElementById("tabelaEstoque")?.querySelector("tbody");
 const produtosRef = collection(db, "produtos");
 
-// LIMITES DE CARACTERES (Teste 9 - RESOLVIDO)
 const LIMITES = {
   nome: 120,
   comentario: 50,
@@ -24,11 +20,7 @@ const LIMITES = {
   preco: 999999
 };
 
-/** =============================
- * VALIDAÇÃO DE IMAGEM (Teste 25 - CRÍTICO)
- * ============================= */
 function validarImagem(file) {
-  // Lista completa de tipos MIME permitidos
   const tiposPermitidos = [
     'image/jpeg',
     'image/jpg', 
@@ -41,7 +33,6 @@ function validarImagem(file) {
   
   const tamanhoMaximo = 5 * 1024 * 1024; // 5MB
   
-  // VALIDAÇÃO 1: Tipo MIME
   if (!tiposPermitidos.includes(file.type)) {
     return {
       valido: false,
@@ -49,7 +40,6 @@ function validarImagem(file) {
     };
   }
   
-  // VALIDAÇÃO 2: Extensão do arquivo
   const extensao = file.name.split('.').pop().toLowerCase();
   const extensoesPermitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
   
@@ -60,7 +50,6 @@ function validarImagem(file) {
     };
   }
   
-  // VALIDAÇÃO 3: Tamanho
   if (file.size > tamanhoMaximo) {
     const tamanhoMB = (file.size / 1024 / 1024).toFixed(2);
     return {
@@ -69,7 +58,6 @@ function validarImagem(file) {
     };
   }
   
-  // VALIDAÇÃO 4: Arquivo vazio
   if (file.size === 0) {
     return {
       valido: false,
@@ -80,9 +68,6 @@ function validarImagem(file) {
   return { valido: true };
 }
 
-/** =============================
- * VALIDAÇÃO DE MÚLTIPLOS ARQUIVOS (Teste 25)
- * ============================= */
 function validarArquivosUpload(files) {
   const erros = [];
   
@@ -90,7 +75,6 @@ function validarArquivosUpload(files) {
     return { valido: true, erros: [] };
   }
   
-  // Limite de quantidade
   if (files.length > 3) {
     return {
       valido: false,
@@ -98,7 +82,6 @@ function validarArquivosUpload(files) {
     };
   }
   
-  // Valida cada arquivo individualmente
   for (let i = 0; i < files.length; i++) {
     const validacao = validarImagem(files[i]);
     if (!validacao.valido) {
@@ -112,9 +95,6 @@ function validarArquivosUpload(files) {
   };
 }
 
-/** =============================
- * VERIFICAR PRODUTO DUPLICADO
- * ============================= */
 async function verificarProdutoDuplicado(nome, preco, comentario, idExcluir = null) {
   try {
     const snapshot = await getDocs(produtosRef);
@@ -137,9 +117,6 @@ async function verificarProdutoDuplicado(nome, preco, comentario, idExcluir = nu
   }
 }
 
-/** =============================
- * LER IMAGEM COMO BASE64
- * ============================= */
 const lerImagemDataUrl = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
   reader.onload = () => resolve(reader.result);
@@ -147,9 +124,6 @@ const lerImagemDataUrl = (file) => new Promise((resolve, reject) => {
   reader.readAsDataURL(file);
 });
 
-/** =============================
- * NOTIFICAÇÃO TOAST
- * ============================= */
 function mostrarNotificacao(mensagem, tipo = 'info') {
   // Remove notificações anteriores
   document.querySelectorAll('.notificacao-toast').forEach(n => n.remove());
@@ -189,9 +163,6 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
   }, 6000);
 }
 
-/** =============================
- * ADICIONAR PRODUTO - COM VALIDAÇÕES COMPLETAS
- * ============================= */
 if (produtoForm) {
   produtoForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -204,10 +175,8 @@ if (produtoForm) {
 
     let valido = true;
     
-    // Limpar erros anteriores
     document.querySelectorAll(".error-msg").forEach(el => el.textContent = "");
 
-    // VALIDAÇÃO 1: Nome
     if (!nome) {
       document.getElementById("erro-nome").textContent = "❌ Digite o nome do produto.";
       valido = false;
@@ -216,7 +185,6 @@ if (produtoForm) {
       valido = false;
     }
 
-    // VALIDAÇÃO 2: Quantidade (inteiro positivo)
     const qtdNum = parseInt(quantidade);
     if (!Number.isInteger(qtdNum) || qtdNum < 0 || qtdNum > LIMITES.quantidade) {
       document.getElementById("erro-quantidade").textContent = 
@@ -224,7 +192,6 @@ if (produtoForm) {
       valido = false;
     }
 
-    // VALIDAÇÃO 3: Preço (número positivo)
     const precoNum = parseFloat(preco);
     if (isNaN(precoNum) || precoNum <= 0 || precoNum > LIMITES.preco) {
       document.getElementById("erro-preco").textContent = 
@@ -232,14 +199,12 @@ if (produtoForm) {
       valido = false;
     }
 
-    // VALIDAÇÃO 4: Comentário
     if (comentario.length > LIMITES.comentario) {
       document.getElementById("erro-comentario").textContent = 
         `❌ Comentário muito longo (máximo ${LIMITES.comentario} caracteres).`;
       valido = false;
     }
 
-    // VALIDAÇÃO 5: Imagens (CRÍTICO - Teste 25)
     if (inputImagens?.files?.length > 0) {
       const validacaoArquivos = validarArquivosUpload(inputImagens.files);
       
@@ -254,7 +219,6 @@ if (produtoForm) {
 
     if (!valido) return;
 
-    // VALIDAÇÃO 6: Duplicação
     const ehDuplicado = await verificarProdutoDuplicado(nome, precoNum, comentario);
     if (ehDuplicado) {
       mostrarNotificacao(
@@ -263,8 +227,6 @@ if (produtoForm) {
       );
       return;
     }
-
-    // Processar imagens
     const imagens = [];
     const btnSubmit = produtoForm.querySelector('button[type="submit"]');
     const textoOriginal = btnSubmit?.textContent;
@@ -288,7 +250,6 @@ if (produtoForm) {
         btnSubmit.textContent = '💾 Salvando no banco...';
       }
 
-      // Salvar no Firebase
       await addDoc(produtosRef, {
         nome,
         quantidade: qtdNum,
@@ -315,9 +276,6 @@ if (produtoForm) {
   });
 }
 
-/** =============================
- * CARREGAR PRODUTOS EM TEMPO REAL
- * ============================= */
 function carregarProdutos() {
   if (!tabelaEstoque) return;
   
@@ -327,7 +285,6 @@ function carregarProdutos() {
       produtos.push({ id: docSnap.id, ...docSnap.data() });
     });
 
-    // Ordenar por data de criação
     produtos.sort((a, b) => (a.createdAt?.toMillis?.() || 0) - (b.createdAt?.toMillis?.() || 0));
 
     tabelaEstoque.innerHTML = "";
@@ -370,9 +327,6 @@ function carregarProdutos() {
 
 carregarProdutos();
 
-/** =============================
- * PESQUISAR PRODUTOS
- * ============================= */
 const inputPesquisa = document.getElementById("pesquisaProdutos");
 if (inputPesquisa) {
   inputPesquisa.addEventListener("input", () => {
@@ -391,9 +345,6 @@ if (inputPesquisa) {
   });
 }
 
-/** =============================
- * EXCLUIR PRODUTO
- * ============================= */
 window.excluirProduto = async function (id) {
   if (!confirm("⚠️ ATENÇÃO!\n\nTem certeza que deseja excluir este produto?\n\nEsta ação NÃO pode ser desfeita.")) {
     return;
@@ -408,9 +359,6 @@ window.excluirProduto = async function (id) {
   }
 };
 
-/** =============================
- * EXCLUSÃO MÚLTIPLA
- * ============================= */
 const checkTodos = document.getElementById("checkTodos");
 checkTodos?.addEventListener("change", () => {
   const checkboxes = document.querySelectorAll(".check-produto");
@@ -452,9 +400,6 @@ if (btnExcluirSelecionados) {
   });
 }
 
-/** =============================
- * MODAL DE EDIÇÃO
- * ============================= */
 function criarModalEdicao() {
   let modal = document.createElement("div");
   modal.id = "modalEdicaoProduto";
@@ -533,9 +478,6 @@ function fecharModalEdicao() {
 
 criarModalEdicao();
 
-/** =============================
- * EDITAR PRODUTO - COM VALIDAÇÕES
- * ============================= */
 window.abrirEditarProduto = async function (id) {
   const docs = await getDocs(produtosRef);
   const docSnap = docs.docs.find(d => d.id === id);
@@ -698,9 +640,6 @@ window.abrirEditarProduto = async function (id) {
   };
 };
 
-/** =============================
- * CONTADOR DE COMENTÁRIO
- * ============================= */
 const comentarioInput = document.getElementById("comentario");
 const contadorComentario = document.getElementById("contador-comentario");
 if (comentarioInput && contadorComentario) {

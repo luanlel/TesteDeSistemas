@@ -1,7 +1,6 @@
-/* Importar tema base */
 @import url('theme.css');
 
-/* Reset e Estilos Base */
+
 body {
   min-height: 100vh;
   padding: var(--spacing-lg);
@@ -12,7 +11,6 @@ body.hidden {
   display: none;
 }
 
-/* Layout */
 .form-container {
   background-color: var(--color-gray-100);
   padding: var(--spacing-xl);
@@ -27,7 +25,6 @@ body.hidden {
   border-color: var(--color-secondary);
 }
 
-/* Cabeçalhos */
 h1, h2 {
   color: var(--color-secondary);
   margin-bottom: var(--spacing-lg);
@@ -47,7 +44,6 @@ h2 {
   padding-bottom: var(--spacing-md);
 }
 
-/* Formulários */
 .form-group {
   margin-bottom: var(--spacing-lg);
 }
@@ -86,7 +82,6 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* Botões */
 .form-buttons {
   display: flex;
   gap: var(--spacing-md);
@@ -145,7 +140,6 @@ input[type="number"]::-webkit-inner-spin-button {
   color: var(--color-white);
 }
 
-/* Tabela de Estoque */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -179,7 +173,6 @@ tr:hover {
   background-color: var(--color-gray-300);
 }
 
-/* Mensagens de Feedback */
 .error-msg {
   color: var(--color-danger);
   font-size: var(--text-sm);
@@ -203,12 +196,10 @@ tr:hover {
   display: block;
 }
 
-/* Dashboard e Gráficos */
 #dashboard {
   margin-top: var(--spacing-xl);
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .form-container {
     padding: var(--spacing-lg);
@@ -236,7 +227,6 @@ tr:hover {
   }
 }
 
-/* Animações */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

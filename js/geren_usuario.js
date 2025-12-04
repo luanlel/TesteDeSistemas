@@ -1,5 +1,3 @@
-// js/geren_usuario.js - VERSÃO CORRIGIDA COM TODAS AS MELHORIAS
-
 import { auth, db } from "./firebase-config.js";
 import {
   collection,
@@ -14,7 +12,6 @@ import {
   signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// ========== ELEMENTOS DOM ==========
 const listaUsuariosTable = document.getElementById("listaUsuarios");
 const modalEdicao = document.getElementById("modalEdicao");
 const formEditarUsuario = document.getElementById("formEditarUsuario");
@@ -24,7 +21,6 @@ const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 let usuarioEditandoId = null;
 let emailOriginal = null;
 
-// ========== CONFIGURAÇÕES ==========
 const CONFIG = {
   MAX_NOME_LENGTH: 100,
   MIN_NOME_LENGTH: 3,
@@ -32,16 +28,13 @@ const CONFIG = {
   TELEFONE_LENGTH_MIN: 10
 };
 
-// ========== MÁSCARA DE TELEFONE (CORRIGIDA) ==========
 function aplicarMascaraTelefone(input) {
   if (!input) return;
   
-  // Configura atributos do input
   input.setAttribute("maxlength", "15");
   input.setAttribute("inputmode", "numeric");
   input.setAttribute("placeholder", "(00) 00000-0000");
   
-  // Previne entrada de não-números
   input.addEventListener("keypress", function(e) {
     const char = String.fromCharCode(e.keyCode || e.which);
     if (!/^[0-9]$/.test(char)) {
@@ -51,7 +44,6 @@ function aplicarMascaraTelefone(input) {
     }
   });
   
-  // Previne colar texto não-numérico
   input.addEventListener("paste", function(e) {
     e.preventDefault();
     const texto = (e.clipboardData || window.clipboardData).getData('text');
@@ -64,22 +56,19 @@ function aplicarMascaraTelefone(input) {
 
   let ultimoValor = "";
   
-  // Aplica máscara durante digitação
   input.addEventListener("input", function (e) {
     let valor = e.target.value.replace(/\D/g, "");
     
-    // Verifica se tentou digitar não-número
     if (e.target.value !== valor && valor === "") {
       e.target.value = ultimoValor;
       return;
     }
     
-    // Limita a 11 dígitos
+
     if (valor.length > CONFIG.TELEFONE_LENGTH) {
       valor = valor.slice(0, CONFIG.TELEFONE_LENGTH);
     }
 
-    // Aplica formatação
     if (valor.length > 6) {
       e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7, 11)}`;
     } else if (valor.length > 2) {
@@ -94,7 +83,6 @@ function aplicarMascaraTelefone(input) {
     limparErro(input);
   });
 
-  // Valida ao sair do campo
   input.addEventListener("blur", function(e) {
     const apenasNumeros = e.target.value.replace(/\D/g, "");
     if (apenasNumeros.length > 0 && apenasNumeros.length < CONFIG.TELEFONE_LENGTH_MIN) {
@@ -104,13 +92,11 @@ function aplicarMascaraTelefone(input) {
     }
   });
   
-  // Valida ao focar
   input.addEventListener("focus", function() {
     limparErro(input);
   });
 }
 
-// ========== VALIDAÇÃO DE EMAIL ==========
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
@@ -122,7 +108,6 @@ function validarEmail(email) {
     return { valido: false, erro: 'E-mail inválido' };
   }
   
-  // Validações adicionais
   const partes = email.split('@');
   if (partes[0].length < 1) {
     return { valido: false, erro: 'E-mail inválido: parte antes do @ muito curta' };
@@ -136,7 +121,6 @@ function validarEmail(email) {
   return { valido: true };
 }
 
-// ========== VALIDAÇÃO DE NOME ==========
 function validarNome(nome) {
   if (!nome || nome.trim().length < CONFIG.MIN_NOME_LENGTH) {
     return {
@@ -152,7 +136,6 @@ function validarNome(nome) {
     };
   }
   
-  // Verifica se tem pelo menos um espaço (nome e sobrenome)
   if (!nome.trim().includes(' ')) {
     return {
       valido: false,
@@ -163,7 +146,6 @@ function validarNome(nome) {
   return { valido: true };
 }
 
-// ========== VALIDAÇÃO DE TELEFONE ==========
 function validarTelefone(telefone) {
   const apenasNumeros = telefone.replace(/\D/g, '');
   
@@ -174,7 +156,6 @@ function validarTelefone(telefone) {
     };
   }
   
-  // Verifica padrões inválidos
   const numerosUnicos = new Set(apenasNumeros.split(''));
   if (numerosUnicos.size === 1) {
     return {
@@ -186,7 +167,6 @@ function validarTelefone(telefone) {
   return { valido: true };
 }
 
-// ========== FUNÇÕES DE FEEDBACK VISUAL ==========
 function mostrarErro(input, mensagem) {
   const container = input.parentElement;
   let erroEl = container.querySelector('.erro-validacao');
@@ -225,7 +205,6 @@ function limparTodosErros() {
   });
 }
 
-// ========== CONTADOR DE CARACTERES ==========
 function adicionarContadorCaracteres(input, maxLength) {
   if (!input) return;
   
@@ -264,14 +243,12 @@ function adicionarContadorCaracteres(input, maxLength) {
   atualizar();
 }
 
-// ========== MODAL ==========
 function abrirModal(usuarioId, usuario) {
   usuarioEditandoId = usuarioId;
   emailOriginal = usuario.email;
   
   limparTodosErros();
   
-  // Preenche formulário
   document.getElementById("editNome").value = usuario.nome || "";
   document.getElementById("editEmail").value = usuario.email || "";
   document.getElementById("editTelefone").value = usuario.telefone || "";
@@ -280,7 +257,6 @@ function abrirModal(usuarioId, usuario) {
   modalEdicao.classList.add("active");
   document.body.style.overflow = "hidden";
   
-  // Foca no primeiro campo
   setTimeout(() => {
     document.getElementById("editNome").focus();
   }, 100);
@@ -298,21 +274,18 @@ function fecharModal() {
 btnFecharModal?.addEventListener("click", fecharModal);
 btnCancelarEdicao?.addEventListener("click", fecharModal);
 
-// Fechar modal clicando fora
 modalEdicao?.addEventListener("click", (e) => {
   if (e.target === modalEdicao) {
     fecharModal();
   }
 });
 
-// Fechar modal com ESC
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && modalEdicao?.classList.contains("active")) {
     fecharModal();
   }
 });
 
-// ========== CARREGAR USUÁRIOS ==========
 async function carregarUsuarios() {
   try {
     const snapshot = await getDocs(collection(db, "usuarios"));
@@ -333,12 +306,10 @@ async function carregarUsuarios() {
       const usuario = docSnap.data();
       const row = document.createElement("tr");
 
-      // Badge de role
       const roleBadge = usuario.role === "admin"
         ? '<span style="background: var(--color-warning); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">👑 Admin</span>'
         : '<span style="background: var(--color-primary); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">👤 Usuário</span>';
 
-      // Formata telefone
       const telefone = usuario.telefone || '';
       const telefoneFormatado = telefone.length >= 10
         ? `(${telefone.slice(0, 2)}) ${telefone.slice(2, 7)}-${telefone.slice(7)}`
@@ -365,7 +336,6 @@ async function carregarUsuarios() {
   }
 }
 
-// ========== EDITAR USUÁRIO ==========
 listaUsuariosTable.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btn-editar")) {
     const id = e.target.dataset.id;
@@ -386,7 +356,6 @@ listaUsuariosTable.addEventListener("click", async (e) => {
   }
 });
 
-// ========== SALVAR EDIÇÃO ==========
 if (formEditarUsuario) {
   formEditarUsuario.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -398,7 +367,6 @@ if (formEditarUsuario) {
     const telefone = document.getElementById("editTelefone").value.trim();
     const role = document.getElementById("editRole").value;
     
-    // Validações
     const validacaoNome = validarNome(nome);
     if (!validacaoNome.valido) {
       mostrarErro(document.getElementById("editNome"), validacaoNome.erro);
@@ -420,7 +388,6 @@ if (formEditarUsuario) {
       return;
     }
     
-    // Verifica se email mudou e se já existe
     if (email !== emailOriginal) {
       const q = query(
         collection(db, "usuarios"),
@@ -438,7 +405,6 @@ if (formEditarUsuario) {
       }
     }
     
-    // Senha de admin obrigatória para editar
     const senhaAdmin = prompt(
       "🔐 Para editar usuários, digite a senha de administrador:"
     );
@@ -454,10 +420,8 @@ if (formEditarUsuario) {
     btnSubmit.textContent = '⏳ Salvando...';
     
     try {
-      // Valida senha de admin
       await signInWithEmailAndPassword(auth, auth.currentUser.email, senhaAdmin);
       
-      // Atualiza usuário
       const apenasNumeros = telefone.replace(/\D/g, '');
       
       await updateDoc(doc(db, "usuarios", usuarioEditandoId), {
@@ -496,7 +460,6 @@ if (formEditarUsuario) {
   });
 }
 
-// ========== EXCLUIR USUÁRIO ==========
 listaUsuariosTable.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btn-excluir")) {
     const id = e.target.dataset.id;
@@ -512,7 +475,6 @@ listaUsuariosTable.addEventListener("click", async (e) => {
       
       const usuario = usuarioDoc.data();
       
-      // Previne excluir o próprio usuário
       if (auth.currentUser && usuario.email === auth.currentUser.email) {
         alert("⚠️ Você não pode excluir seu próprio usuário!");
         return;
@@ -522,7 +484,6 @@ listaUsuariosTable.addEventListener("click", async (e) => {
         return;
       }
       
-      // Senha de admin obrigatória
       const senhaAdmin = prompt(
         "🔐 Para excluir usuários, digite a senha de administrador:"
       );
@@ -532,10 +493,8 @@ listaUsuariosTable.addEventListener("click", async (e) => {
         return;
       }
       
-      // Valida senha
       await signInWithEmailAndPassword(auth, auth.currentUser.email, senhaAdmin);
       
-      // Exclui usuário
       await deleteDoc(doc(db, "usuarios", id));
       
       alert("✅ Usuário excluído com sucesso!");
@@ -559,7 +518,6 @@ listaUsuariosTable.addEventListener("click", async (e) => {
   }
 });
 
-// ========== PESQUISA DE USUÁRIOS ==========
 const inputPesquisa = document.getElementById("pesquisaUsuario");
 if (inputPesquisa) {
   inputPesquisa.addEventListener("input", (e) => {
@@ -578,7 +536,6 @@ if (inputPesquisa) {
   });
 }
 
-// ========== APLICAR MÁSCARAS ==========
 const telefoneInput = document.getElementById("editTelefone");
 if (telefoneInput) {
   aplicarMascaraTelefone(telefoneInput);
@@ -589,7 +546,6 @@ if (nomeInput) {
   adicionarContadorCaracteres(nomeInput, CONFIG.MAX_NOME_LENGTH);
 }
 
-// ========== INICIALIZAÇÃO ==========
 window.addEventListener('DOMContentLoaded', () => {
   carregarUsuarios();
   console.log('✅ Gerenciamento de usuários inicializado com validações completas');

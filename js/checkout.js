@@ -1,5 +1,3 @@
-// js/checkout.js - MÓDULO DE CHECKOUT COMPLETO COM CEP E PAGAMENTO
-
 import { db, auth } from "./firebase-config.js";
 import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 

@@ -1,7 +1,5 @@
-/* Importar tema base */
 @import url('papelaria.css');
 
-/* Reset e estilos base */
 body {
     min-height: 100vh;
     background-color: var(--color-paper);
@@ -15,7 +13,6 @@ body.hidden {
     display: none;
 }
 
-/* Header e Título */
 header {
     display: flex;
     justify-content: space-between;
@@ -42,7 +39,6 @@ h2 {
     font-weight: 600;
 }
 
-/* Carrinho */
 #carrinho-resumo {
     background-color: var(--color-gray-200);
     padding: 20px;
@@ -111,7 +107,6 @@ h2 {
     box-shadow: var(--shadow-md);
 }
 
-/* Grid de Produtos */
 .produtos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -122,7 +117,6 @@ h2 {
     box-shadow: var(--shadow-md);
 }
 
-/* Cards de Produto */
 .produto-card {
     background-color: var(--color-gray-200);
     border-radius: var(--border-radius-md);
@@ -184,7 +178,6 @@ h2 {
     cursor: not-allowed;
 }
 
-/* Carrossel de Imagens */
 .carousel {
     position: relative;
     width: 100%;
@@ -240,7 +233,6 @@ h2 {
     right: 10px;
 }
 
-/* Produto Esgotado */
 .produto-card.esgotado {
     opacity: 0.8;
 }
@@ -258,7 +250,6 @@ h2 {
     cursor: not-allowed;
 }
 
-/* Responsividade */
 @media (max-width: 1024px) {
     .produtos-grid {
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -309,7 +300,6 @@ h2 {
     }
 }
 
-/* Animações */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -319,7 +309,6 @@ h2 {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* Scrollbar personalizada */
 #lista-carrinho::-webkit-scrollbar {
     width: 8px;
 }

@@ -1,14 +1,11 @@
-// js/auth_modal.js - VERSÃO CORRIGIDA COM TODAS AS MELHORIAS
-
 import { auth, db } from "./firebase-config.js";
+import { login } from "./auth.js"; // ⭐ IMPORTA A FUNÇÃO LOGIN QUE FAZ VERIFICAÇÃO DE ADMIN
 import { 
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Elementos do DOM
 const modalAuth = document.getElementById("modalAuth");
 const btnFecharModal = document.getElementById("btnFecharModal");
 const formCadastro = document.getElementById("cadastroForm");
@@ -18,7 +15,6 @@ const sucessoMsg = document.getElementById("msg-sucesso");
 const tabs = modalAuth?.querySelectorAll(".tab-link");
 const tabContents = modalAuth?.querySelectorAll(".tab-content");
 
-// ========== FUNÇÕES DO MODAL ==========
 function abrirModal(tab = "login") {
   if (!modalAuth) return;
   
@@ -46,10 +42,8 @@ function fecharModal() {
   if (sucessoMsg) sucessoMsg.textContent = "";
 }
 
-// Botão fechar
 btnFecharModal?.addEventListener("click", fecharModal);
 
-// Fechar modal clicando fora ou ESC
 modalAuth?.addEventListener("click", e => { 
   if (e.target === modalAuth) fecharModal(); 
 });
@@ -60,7 +54,6 @@ document.addEventListener("keydown", e => {
   }
 });
 
-// Trap focus dentro do modal
 modalAuth?.addEventListener("keydown", (e) => {
   if (e.key !== "Tab") return;
   
@@ -83,7 +76,6 @@ modalAuth?.addEventListener("keydown", (e) => {
   }
 });
 
-// ========== TABS ==========
 function trocarTab(tab) {
   if (!tabs || !tabContents) return;
   
@@ -97,7 +89,6 @@ tabs?.forEach(t => {
   t.addEventListener("click", () => trocarTab(t.dataset.tab));
 });
 
-// ========== MÁSCARA DE TELEFONE ==========
 function aplicarMascaraTelefone(input) {
   if (!input) return;
   
@@ -183,7 +174,6 @@ function limparErros() {
   }
 }
 
-// ========== RECUPERAÇÃO DE SENHA (NOVO) ==========
 function exibirRecuperacaoSenha() {
   const email = document.getElementById("loginEmail")?.value.trim();
   
@@ -239,7 +229,6 @@ function exibirRecuperacaoSenha() {
   }
 }
 
-// Adiciona link "Esqueci minha senha" ao formulário de login
 document.addEventListener('DOMContentLoaded', () => {
   const formFooter = formLogin?.querySelector('.form-footer');
   if (formFooter && !document.getElementById('link-esqueci-senha')) {
@@ -263,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ========== LOGIN ==========
 if (formLogin) {
   formLogin.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -289,17 +277,20 @@ if (formLogin) {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, senha);
+      const sucesso = await login(email, senha);
       
-      if (mensagem) {
-        mensagem.textContent = "✅ Login realizado com sucesso!";
-        mensagem.style.color = "var(--color-success)";
+      if (sucesso) {
+        if (mensagem) {
+          mensagem.textContent = "✅ Login realizado com sucesso! Redirecionando...";
+          mensagem.style.color = "var(--color-success)";
+        }
+        
+      } else {
+        if (mensagem) {
+          mensagem.textContent = "❌ E-mail ou senha incorretos.";
+          mensagem.style.color = "var(--color-danger)";
+        }
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      fecharModal();
-      window.location.reload();
       
     } catch (error) {
       console.error("Erro no login:", error);
@@ -333,7 +324,6 @@ if (formLogin) {
   });
 }
 
-// ========== CADASTRO ==========
 if (formCadastro) {
   formCadastro.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -346,7 +336,6 @@ if (formCadastro) {
     const senha = formCadastro.senha?.value;
     const telefone = formCadastro.telefone?.value.trim();
 
-    // Validações
     if (!nome || nome.length < 3) {
       mostrarErro("erro-nome", "Informe um nome completo válido (mínimo 3 caracteres).");
       valido = false;
@@ -392,7 +381,7 @@ if (formCadastro) {
       if (sucessoMsg) {
         sucessoMsg.innerHTML = `
           <i class="bi bi-check-circle-fill"></i>
-          ✅ Cadastro realizado com sucesso! Redirecionando...
+          ✅ Cadastro realizado com sucesso! Você já está logado.
         `;
         sucessoMsg.classList.add("active");
         sucessoMsg.style.color = "var(--color-success)";
@@ -403,6 +392,7 @@ if (formCadastro) {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       fecharModal();
+      
       window.location.reload();
 
     } catch (error) {
@@ -434,7 +424,6 @@ if (formCadastro) {
   });
 }
 
-// ========== EXPORTA FUNÇÃO PARA USO NA LOJA ==========
 window.abrirModalAuth = abrirModal;
 
-console.log('✅ Auth Modal inicializado com recuperação de senha');
+console.log('✅ Auth Modal inicializado com redirecionamento de admin corrigido');

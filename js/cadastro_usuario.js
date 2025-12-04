@@ -1,5 +1,3 @@
-// js/cadastro_usuario.js - CORREÇÃO COMPLETA
-
 import { auth, db } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword
@@ -9,7 +7,6 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Elementos do DOM
 const modalCadastro = document.getElementById("modalCadastro");
 const btnAbrirCadastro = document.getElementById("btnAbrirCadastro");
 const btnFecharModal = document.getElementById("btnFecharModal");
@@ -17,7 +14,6 @@ const telefoneInput = document.getElementById("telefone");
 const form = document.getElementById("cadastroForm");
 const sucessoMsg = document.getElementById("msg-sucesso");
 
-// ---------- Controles do Modal ----------
 btnAbrirCadastro?.addEventListener("click", (e) => {
   e.preventDefault();
   modalCadastro.classList.add("active");
@@ -48,7 +44,6 @@ modalCadastro?.addEventListener("click", (e) => {
   }
 });
 
-// Trap focus dentro do modal
 modalCadastro?.addEventListener("keydown", (e) => {
   if (e.key === "Tab") {
     const focusableElements = modalCadastro.querySelectorAll(
@@ -71,17 +66,14 @@ modalCadastro?.addEventListener("keydown", (e) => {
   }
 });
 
-// ---------- VALIDAÇÃO E MÁSCARA DE TELEFONE (CORRIGIDA) ----------
 function aplicarMascaraTelefone(input) {
   if (!input) return;
   
   input.setAttribute("maxlength", "15");
   input.setAttribute("inputmode", "numeric");
 
-  // Validação em tempo real - bloqueia caracteres não numéricos
   input.addEventListener("keypress", function(e) {
     const char = String.fromCharCode(e.keyCode || e.which);
-    // Permite apenas números
     if (!/^[0-9]$/.test(char)) {
       e.preventDefault();
       mostrarErro("erro-telefone", "Digite apenas números.");
@@ -90,20 +82,16 @@ function aplicarMascaraTelefone(input) {
   });
 
   input.addEventListener("input", function (e) {
-    // Remove tudo que não for número
     let valor = e.target.value.replace(/\D/g, "");
     
-    // Verifica se há caracteres inválidos (letras ou símbolos)
     if (e.target.value !== valor && valor === "") {
       mostrarErro("erro-telefone", "Digite apenas números.");
       e.target.value = "";
       return;
     }
     
-    // Limita a 11 dígitos
     if (valor.length > 11) valor = valor.slice(0, 11);
 
-    // Aplica máscara formatada
     if (valor.length > 6) {
       e.target.value = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7, 11)}`;
     } else if (valor.length > 2) {
@@ -114,13 +102,11 @@ function aplicarMascaraTelefone(input) {
       e.target.value = "";
     }
     
-    // Limpa erro se o valor estiver correto
     if (valor.length >= 10) {
       document.getElementById("erro-telefone").textContent = "";
     }
   });
 
-  // Validação ao perder foco
   input.addEventListener("blur", function(e) {
     const apenasNumeros = e.target.value.replace(/\D/g, "");
     if (apenasNumeros.length > 0 && apenasNumeros.length < 10) {
@@ -131,13 +117,11 @@ function aplicarMascaraTelefone(input) {
 
 aplicarMascaraTelefone(telefoneInput);
 
-// ---------- Validação de senha ----------
 function validarSenha(senha) {
   const regex = /^\d{6,20}$/;
   return regex.test(senha);
 }
 
-// ---------- Helpers ----------
 function mostrarErro(id, msg) {
   const elemento = document.getElementById(id);
   if (elemento) {
@@ -159,7 +143,6 @@ function limparErros() {
   if (sucessoMsg) sucessoMsg.textContent = "";
 }
 
-// ---------- VALIDAÇÃO BACKEND - CADASTRO ----------
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
   limparErros();
@@ -170,23 +153,19 @@ form.addEventListener("submit", async function (e) {
   const senha = form.senha.value;
   const telefone = form.telefone.value.trim();
 
-  // Validação de tamanho
   if (nome.length > 100) nome = nome.slice(0, 100);
   if (email.length > 100) email = email.slice(0, 100);
 
-  // Validação nome
   if (nome.length < 3) {
     mostrarErro("erro-nome", "Informe um nome completo válido.");
     valido = false;
   }
 
-  // Validação email
   if (!email.match(/^\S+@\S+\.\S+$/)) {
     mostrarErro("erro-email", "Informe um e-mail válido.");
     valido = false;
   }
 
-  // Validação senha
   if (!/^[0-9]{6,20}$/.test(senha)) {
     mostrarErro(
       "erro-senha",
@@ -195,16 +174,13 @@ form.addEventListener("submit", async function (e) {
     valido = false;
   }
 
-  // VALIDAÇÃO TELEFONE - Backend
   const apenasNumeros = telefone.replace(/\D/g, "");
   
-  // Verifica se contém apenas números
   if (telefone !== "" && apenasNumeros.length !== telefone.replace(/[\s\(\)\-]/g, "").length) {
     mostrarErro("erro-telefone", "Digite apenas números.");
     valido = false;
   }
   
-  // Verifica quantidade de dígitos
   if (apenasNumeros.length < 10 || apenasNumeros.length > 11) {
     mostrarErro("erro-telefone", "Informe um telefone válido (10 ou 11 dígitos).");
     valido = false;
@@ -221,7 +197,7 @@ form.addEventListener("submit", async function (e) {
     await setDoc(doc(db, "usuarios", cred.user.uid), {
       nome,
       email,
-      telefone: apenasNumeros, // Salva apenas números
+      telefone: apenasNumeros,
       role: "usuario",
       criadoEm: new Date()
     });

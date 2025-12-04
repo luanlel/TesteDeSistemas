@@ -11,9 +11,6 @@ import {
 let estoque = [];
 let ordemAsc = true;
 
-/** =============================
- * CARREGAR PRODUTOS
- * ============================= */
 async function carregarProdutos() {
   estoque = [];
   const snapshot = await getDocs(collection(db, "produtos"));
@@ -24,12 +21,9 @@ async function carregarProdutos() {
   atualizarLoja();
 }
 
-/** =============================
- * ATUALIZAR TABELA DE ESTOQUE
- * ============================= */
 function atualizarTabela(lista = estoque) {
   const tabela = document.getElementById("tabelaEstoque");
-  if (!tabela) return; // caso não exista tabela na página
+  if (!tabela) return;
   tabela.innerHTML = "";
   lista.forEach(produto => {
     tabela.innerHTML += `
@@ -42,12 +36,9 @@ function atualizarTabela(lista = estoque) {
   atualizarDashboard();
 }
 
-/** =============================
- * ATUALIZAR LOJA (CARDS)
- * ============================= */
 function atualizarLoja(lista = estoque) {
   const listaProdutos = document.getElementById("lista-produtos");
-  if (!listaProdutos) return; // caso não exista lista na página
+  if (!listaProdutos) return;
   listaProdutos.innerHTML = "";
   lista.forEach(produto => {
     listaProdutos.innerHTML += `
@@ -59,9 +50,6 @@ function atualizarLoja(lista = estoque) {
   });
 }
 
-/** =============================
- * ADICIONAR PRODUTO
- * ============================= */
 document.getElementById("formProduto")?.addEventListener("submit", async function(e) {
   e.preventDefault();
 
@@ -94,9 +82,6 @@ document.getElementById("formProduto")?.addEventListener("submit", async functio
   setTimeout(() => document.getElementById("msg-sucesso").textContent = "", 3000);
 });
 
-/** =============================
- * REMOVER, COMPRAR, VENDER, EDITAR PREÇO
- * ============================= */
 async function removerProduto() {
   const nome = document.getElementById("acaoNome").value.trim();
   const produto = estoque.find(p => p.nome.toLowerCase() === nome.toLowerCase());
@@ -152,9 +137,6 @@ async function editarPreco() {
   setTimeout(() => document.getElementById("msg-preco").textContent = "", 3000);
 }
 
-/** =============================
- * PESQUISAR PRODUTOS (TABELA E LOJA)
- * ============================= */
 function pesquisarProduto() {
   const termo = document.getElementById("pesquisa")?.value.toLowerCase() || "";
   const filtrados = estoque.filter(p => p.nome.toLowerCase().includes(termo));
@@ -168,9 +150,6 @@ inputPesquisaLoja?.addEventListener("input", () => {
   atualizarLoja(filtrados);
 });
 
-/** =============================
- * ORDENAR, DASHBOARD E EXPORTAR CSV
- * ============================= */
 function ordenarPor(campo) {
   estoque.sort((a,b) => {
     if(campo === 'nome') return ordemAsc ? a.nome.localeCompare(b.nome) : b.nome.localeCompare(a.nome);
@@ -203,14 +182,8 @@ function exportarCSV() {
   link.click();
 }
 
-/** =============================
- * INICIALIZAÇÃO
- * ============================= */
 carregarProdutos();
 
-/** =============================
- * EXPOR FUNÇÕES PARA HTML
- * ============================= */
 window.removerProduto = removerProduto;
 window.comprarProduto = comprarProduto;
 window.venderProduto = venderProduto;

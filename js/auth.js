@@ -15,11 +15,9 @@ import {
 
 export async function login(email, senha) {
   try {
-    // 1️⃣ Faz login no Firebase Authentication
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // 2️⃣ Verifica se esse e-mail está na coleção "admins"
     const adminQuery = query(collection(db, "admins"), where("email", "==", email));
     const adminSnap = await getDocs(adminQuery);
 
@@ -30,7 +28,6 @@ export async function login(email, senha) {
       return true;
     }
 
-    // 3️⃣ Se não for admin, verifica se é um usuário comum
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
     if (userDoc.exists()) {
       console.log("Login de usuário comum detectado");
@@ -39,7 +36,6 @@ export async function login(email, senha) {
       return true;
     }
 
-    // 4️⃣ Caso não exista em nenhuma coleção
     console.warn("Usuário não encontrado em admins nem usuarios");
     return false;
   } catch (error) {

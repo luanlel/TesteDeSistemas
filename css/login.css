@@ -1,6 +1,3 @@
-/* Login e Cadastro Styles */
-
-/* Containers principais */
 .page-container {
   min-height: 100vh;
   display: flex;
@@ -42,7 +39,6 @@
   margin: auto;
 }
 
-/* Card de Login */
 .login-card {
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
@@ -59,7 +55,6 @@
   margin-top: var(--spacing-xs);
 }
 
-/* Formulário */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -97,7 +92,6 @@
   margin-top: var(--spacing-md);
 }
 
-/* Links e mensagens */
 .auth-links {
   text-align: center;
   margin-top: var(--spacing-lg);
@@ -130,7 +124,6 @@
   min-height: 24px;
 }
 
-/* Modal de Cadastro */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -211,7 +204,6 @@
     display: block;
 }
 
-/* Formulário de Cadastro */
 .form-elegant {
   padding: var(--spacing-lg);
   display: flex;
@@ -236,7 +228,6 @@
   margin-top: var(--spacing-lg);
 }
 
-/* Loading Spinner */
 .spinner {
   display: none;
   width: 40px;
@@ -252,7 +243,6 @@
   display: block;
 }
 
-/* Mensagem de Sucesso */
 .success-msg {
   display: none;
   text-align: center;
@@ -268,7 +258,6 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Elementos Decorativos */
 .decorative-elements {
   position: absolute;
   top: 0;
@@ -307,7 +296,6 @@
   animation: float 7s ease-in-out infinite 1s;
 }
 
-/* Animações */
 @keyframes float {
   0%, 100% {
     transform: translateY(0) rotate(var(--rotation, 0deg));
@@ -334,7 +322,6 @@
   }
 }
 
-/* Responsividade */
 @media (max-width: 480px) {
   .page-container {
     padding: var(--spacing-md);

@@ -1,22 +1,16 @@
-/* Theme.css - Sistema base de design para Papelaria Elegante */
-
-/* Importação de fontes */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-/* Variáveis do tema */
+
 :root {
-  /* Cores Base - Paleta Jazz/Noturna */
-  --color-primary: #654E92;        /* Roxo profundo */
-  --color-primary-dark: #4E3B70;   /* Roxo profundo escuro */
-  --color-secondary: #D4AF37;      /* Dourado jazz */
-  --color-secondary-dark: #AA8C2C; /* Dourado jazz escuro */
-  --color-accent: #BA4A00;         /* Cobre vintage */
-  --color-accent-dark: #8F3900;    /* Cobre vintage escuro */
-  
-  /* Tons neutros */
-  --color-white: #E6E6FA;          /* Lavanda suave */
-  --color-paper: #1C1C28;          /* Fundo escuro azulado */
-  --color-cream: #252533;          /* Fundo secundário */
+  --color-primary: #654E92;       
+  --color-primary-dark: #4E3B70;  
+  --color-secondary: #D4AF37;      
+  --color-secondary-dark: #AA8C2C; 
+  --color-accent: #BA4A00;        
+  --color-accent-dark: #8F3900;    
+  --color-white: #E6E6FA;         
+  --color-paper: #1C1C28;          
+  --color-cream: #252533;          
   --color-gray-100: #2D2D3F;
   --color-gray-200: #3D3D4F;
   --color-gray-300: #4D4D5F;
@@ -26,8 +20,6 @@
   --color-gray-700: #9D9DAF;
   --color-gray-800: #ADADBF;
   --color-gray-900: #BDBDCF;
-
-  /* Cores de feedback */
   --color-success: #27ae60;
   --color-success-dark: #1e8449;
   --color-warning: #f39c12;
@@ -36,30 +28,24 @@
   --color-error-dark: #962c22;
   --color-info: #3498db;
   --color-info-dark: #2980b9;
-
-  /* Tipografia */
   --font-primary: 'Montserrat', sans-serif;
   --font-display: 'Playfair Display', serif;
+  --text-xs: 0.75rem;  
+  --text-sm: 0.875rem;  
+  --text-base: 1rem;    
+  --text-lg: 1.125rem;  
+  --text-xl: 1.25rem;   
+  --text-2xl: 1.5rem;  
+  --text-3xl: 1.875rem; 
+  --text-4xl: 2.25rem;  
   
-  /* Tamanhos de fonte */
-  --text-xs: 0.75rem;   /* 12px */
-  --text-sm: 0.875rem;  /* 14px */
-  --text-base: 1rem;    /* 16px */
-  --text-lg: 1.125rem;  /* 18px */
-  --text-xl: 1.25rem;   /* 20px */
-  --text-2xl: 1.5rem;   /* 24px */
-  --text-3xl: 1.875rem; /* 30px */
-  --text-4xl: 2.25rem;  /* 36px */
+  --spacing-xs: 0.25rem;  
+  --spacing-sm: 0.5rem;   
+  --spacing-md: 1rem;     
+  --spacing-lg: 1.5rem;   
+  --spacing-xl: 2rem;    
+  --spacing-2xl: 3rem;   
   
-  /* Espaçamento */
-  --spacing-xs: 0.25rem;  /* 4px */
-  --spacing-sm: 0.5rem;   /* 8px */
-  --spacing-md: 1rem;     /* 16px */
-  --spacing-lg: 1.5rem;   /* 24px */
-  --spacing-xl: 2rem;     /* 32px */
-  --spacing-2xl: 3rem;    /* 48px */
-  
-  /* Bordas e Sombras */
   --border-radius-sm: 0.25rem;
   --border-radius-md: 0.5rem;
   --border-radius-lg: 1rem;
@@ -69,14 +55,12 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   
-  /* Transições */
   --transition-fast: 150ms ease;
   --transition-normal: 300ms ease;
   --transition-slow: 500ms ease;
   --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Reset e estilos base */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -98,7 +82,6 @@ body {
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* Tipografia */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 600;
@@ -115,7 +98,6 @@ h4 { font-size: var(--text-xl); }
 h5 { font-size: var(--text-lg); }
 h6 { font-size: var(--text-base); }
 
-/* Links */
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -126,7 +108,6 @@ a:hover {
   color: var(--color-secondary);
 }
 
-/* Botões */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -179,7 +160,6 @@ a:hover {
   box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
 }
 
-/* Inputs */
 .input-group {
   margin-bottom: var(--spacing-md);
 }
@@ -209,7 +189,6 @@ a:hover {
   background-color: var(--color-gray-100);
 }
 
-/* Cards */
 .card {
   background-color: var(--color-gray-100);
   border-radius: var(--border-radius-lg);
@@ -225,7 +204,6 @@ a:hover {
   border-color: var(--color-secondary);
 }
 
-/* Animações */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -248,7 +226,6 @@ a:hover {
   75% { transform: translateX(4px); }
 }
 
-/* Classes de utilidade para animações */
 .fade-in {
   animation: fadeIn var(--transition-normal);
 }
@@ -261,7 +238,6 @@ a:hover {
   animation: shake 0.5s var(--transition-bounce);
 }
 
-/* Layout Grid e Flex comuns */
 .container {
   width: 100%;
   max-width: 1200px;
@@ -279,7 +255,6 @@ a:hover {
   gap: var(--spacing-md);
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   html {
     font-size: 14px;
@@ -290,7 +265,6 @@ a:hover {
   }
 }
 
-/* Feedback visual */
 .success-message {
   color: var(--color-success);
   padding: var(--spacing-sm);
@@ -315,7 +289,6 @@ a:hover {
   box-shadow: 0 0 15px rgba(192, 57, 43, 0.2);
 }
 
-/* Ícones e decorações */
 .icon {
   width: 24px;
   height: 24px;
@@ -324,7 +297,6 @@ a:hover {
   fill: none;
 }
 
-/* Elementos decorativos de papelaria */
 .paper-texture {
   background-image: 
     linear-gradient(rgba(28, 28, 40, 0.97), rgba(28, 28, 40, 0.97)),

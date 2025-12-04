@@ -1,5 +1,3 @@
-// js/loja.js - VERSÃO CORRIGIDA COM MELHORIAS DE PESQUISA E FEEDBACK
-
 import { db, auth } from "./firebase-config.js";
 import {
   collection,
@@ -21,10 +19,8 @@ let carrinho = {};
 let currentUser = null;
 let processandoCheckout = false;
 
-// ========== CONSTANTES ==========
 const STORAGE_KEY = 'carrinho_papelaria';
 
-// ========== PERSISTÊNCIA DO CARRINHO ==========
 function salvarCarrinho() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -48,7 +44,6 @@ function carregarCarrinho() {
     
     const { itens, timestamp, userId } = JSON.parse(dados);
     
-    // Verifica se o carrinho não é muito antigo (24 horas)
     const agora = new Date().getTime();
     const umDia = 24 * 60 * 60 * 1000;
     
@@ -58,7 +53,6 @@ function carregarCarrinho() {
       return;
     }
     
-    // Se houver usuário logado, verifica se é o mesmo
     if (currentUser && userId && userId !== currentUser.uid) {
       console.log('👤 Carrinho de outro usuário, limpando...');
       limparCarrinho();
@@ -81,12 +75,10 @@ function limparCarrinho() {
   console.log('🗑️ Carrinho limpo');
 }
 
-// Carrega o carrinho ao iniciar
 window.addEventListener('DOMContentLoaded', () => {
   carregarCarrinho();
 });
 
-// Previne perda de dados ao recarregar
 window.addEventListener('beforeunload', (e) => {
   salvarCarrinho();
   
@@ -103,13 +95,11 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
-// ========== FEEDBACK VISUAL DE AUTENTICAÇÃO (NOVO) ==========
 function atualizarUIAutenticacao() {
   const authLinks = document.querySelector('.auth-links');
   if (!authLinks) return;
 
   if (currentUser) {
-    // Usuário logado - mostra e-mail e botão de logout
     const emailDisplay = currentUser.email.length > 25 
       ? currentUser.email.substring(0, 25) + '...' 
       : currentUser.email;
@@ -157,7 +147,6 @@ function atualizarUIAutenticacao() {
       });
     });
   } else {
-    // Usuário não logado - mostra botões de login e cadastro
     authLinks.innerHTML = `
       <a href="#" id="btnAbrirLogin" class="link-animated" 
          style="display: flex; align-items: center; gap: 5px;">
@@ -180,7 +169,6 @@ function atualizarUIAutenticacao() {
       </a>
     `;
     
-    // Reconecta eventos do modal
     document.getElementById('btnAbrirLogin')?.addEventListener('click', (e) => {
       e.preventDefault();
       abrirModal('login');
@@ -193,9 +181,7 @@ function atualizarUIAutenticacao() {
   }
 }
 
-// ========== NOTIFICAÇÕES (NOVO) ==========
 function mostrarNotificacao(mensagem, tipo = 'info') {
-  // Remove notificações anteriores
   const notificacoesAnteriores = document.querySelectorAll('.notificacao-toast');
   notificacoesAnteriores.forEach(n => n.remove());
   
@@ -232,7 +218,6 @@ function mostrarNotificacao(mensagem, tipo = 'info') {
   }, 3000);
 }
 
-// Adiciona CSS para animações
 if (!document.getElementById('toast-animations')) {
   const style = document.createElement('style');
   style.id = 'toast-animations';
@@ -249,14 +234,13 @@ if (!document.getElementById('toast-animations')) {
   document.head.appendChild(style);
 }
 
-// ========== GERENCIAMENTO DE AUTENTICAÇÃO ==========
 onAuthStateChanged(auth, (user) => {
   const usuarioAnterior = currentUser;
   currentUser = user;
   
   console.log("🔐 Status de autenticação:", user ? `Logado: ${user.email}` : "Não logado");
   
-  // Logout durante compra
+
   if (usuarioAnterior && !user) {
     console.log('👋 Usuário deslogou');
     
@@ -272,7 +256,6 @@ onAuthStateChanged(auth, (user) => {
     }
   }
   
-  // Usuário logou
   if (user && !usuarioAnterior) {
     mostrarNotificacao(`✅ Bem-vindo(a), ${user.email}!`, 'success');
     carregarCarrinho();
@@ -316,7 +299,6 @@ function abrirModal(tab = 'login') {
   }, 100);
 }
 
-// ========== PESQUISA DE PRODUTOS (CORRIGIDA) ==========
 const inputPesquisaLoja = document.getElementById("pesquisaLoja");
 if (inputPesquisaLoja) {
   console.log('🔍 Campo de pesquisa encontrado e inicializado');
@@ -343,7 +325,6 @@ if (inputPesquisaLoja) {
       }
     });
     
-    // Feedback de pesquisa
     if (termo !== "" && encontrados === 0) {
       if (!document.getElementById('mensagem-sem-resultados')) {
         const msg = document.createElement('p');
@@ -359,13 +340,11 @@ if (inputPesquisaLoja) {
     console.log(`✅ ${encontrados} produtos encontrados`);
   });
   
-  // Limpa pesquisa ao focar
   inputPesquisaLoja.addEventListener("focus", function() {
     this.select();
   });
 }
 
-// ========== CARREGAR PRODUTOS E CARROSSEL ==========
 async function carregarProdutos() {
   const produtosRef = collection(db, "produtos");
   onSnapshot(produtosRef, (snapshot) => {
@@ -440,7 +419,6 @@ async function carregarProdutos() {
   });
 }
 
-// ========== CARROSSEL AUTOMÁTICO ==========
 function iniciarCarrosselAutomatico(carousel) {
   const slides = carousel.querySelectorAll(".slide");
   let activeIndex = 0;
@@ -476,7 +454,6 @@ function iniciarCarrosselAutomatico(carousel) {
   });
 }
 
-// ========== ADICIONAR AO CARRINHO ==========
 listaProdutos.addEventListener("click", async (e) => {
   const button = e.target.closest('.btn-add-carrinho');
   if (!button) return;
@@ -538,7 +515,6 @@ listaProdutos.addEventListener("click", async (e) => {
   }
 });
 
-// ========== REMOVER DO CARRINHO ==========
 listaCarrinho.addEventListener("click", async (e) => {
   if (!e.target.classList.contains("btn-remover")) return;
 
@@ -587,7 +563,6 @@ listaCarrinho.addEventListener("click", async (e) => {
   }
 });
 
-// ========== RESUMO DO CARRINHO ==========
 function atualizarResumoCarrinho() {
   let contagem = 0;
   let total = 0;
@@ -636,7 +611,6 @@ function atualizarResumoCarrinho() {
   btnFinalizarCompra.disabled = false;
 }
 
-// ========== FINALIZAR COMPRA ==========
 btnFinalizarCompra.addEventListener("click", async () => {
   if (!verificarLogin("finalizar a compra")) {
     return;
@@ -672,7 +646,6 @@ btnFinalizarCompra.addEventListener("click", async () => {
   btnFinalizarCompra.textContent = '⏳ Processando...';
 
   try {
-    // Simula processamento de pagamento
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     if (!currentUser) {
@@ -705,7 +678,6 @@ btnFinalizarCompra.addEventListener("click", async () => {
   }
 });
 
-// ========== INICIALIZAÇÃO ==========
 console.log('🏪 Iniciando loja...');
 carregarProdutos();
 console.log('✅ Loja inicializada com todas as melhorias');

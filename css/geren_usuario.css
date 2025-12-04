@@ -1,6 +1,3 @@
-/* Estilos para Gerenciamento de Usuários */
-
-/* Container e Cabeçalho */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -15,7 +12,6 @@ h1 {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Tabela de Usuários */
 .tabela-usuarios {
   background-color: var(--color-gray-100);
   border-radius: var(--border-radius-lg);
@@ -60,7 +56,6 @@ td {
   color: var(--color-white);
 }
 
-/* Botões de Ação */
 .acoes-coluna {
   display: flex;
   gap: var(--spacing-sm);
@@ -109,8 +104,6 @@ td {
     box-shadow: var(--shadow-sm);
 }
 
-
-/* Formulário de Cadastro */
 .formulario {
   background-color: var(--color-gray-100);
   padding: 25px;
@@ -151,7 +144,6 @@ td {
   box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
 }
 
-/* Modal de Edição */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -220,7 +212,6 @@ td {
   margin-top: 20px;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .container {
     padding: 10px;
@@ -240,7 +231,6 @@ td {
   }
 }
 
-/* Animações */
 @keyframes slideUp {
   from {
     transform: translateY(20px);
@@ -270,4 +260,3 @@ td {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
-
