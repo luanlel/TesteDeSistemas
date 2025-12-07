@@ -1,46 +1,20 @@
-// ============================================
-// MENSAGENS ADMIN - FORÇAR SERVIDOR DIRETO
-// ============================================
-// Esta versão FORÇA busca DIRETO no servidor
-// Ignora completamente o cache offline
-// ============================================
+import { db, auth } from "./firebase-config.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
-  getFirestore, 
   collection, 
   getDocs,
-  getDocsFromServer,  // ← NOVO: Força servidor
+  getDocsFromServer,
   query,
   orderBy,
   doc,
   updateDoc,
   deleteDoc,
-  Timestamp,
-  disableNetwork,
-  enableNetwork
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  Timestamp
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 import { 
-  getAuth, 
   onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-// ============================================
-// CONFIGURAÇÃO FIREBASE
-// ============================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCBMASTLnc-YVN6AVQrfDm52P-IGtQe94zQ",
-  authDomain: "lanchonetetestedesistemas.firebaseapp.com",
-  projectId: "lanchonetetestedesistemas",
-  storageBucket: "lanchonetetestedesistemas.firebasestorage.app",
-  messagingSenderId: "983784344399",
-  appId: "1:983784344399:web:b2f6034e939f3dffcc533a"
-};
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // ============================================
 // VARIÁVEIS GLOBAIS
