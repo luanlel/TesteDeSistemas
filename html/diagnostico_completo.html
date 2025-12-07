@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Completo Firestore</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #111;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #0f0;
+        }
+        h1 {
+            color: #0ff;
+            text-align: center;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #222;
+            border-left: 4px solid #0f0;
+        }
+        .error {
+            border-left-color: #f00;
+            color: #f00;
+        }
+        .success {
+            border-left-color: #0f0;
+            color: #0f0;
+        }
+        .warning {
+            border-left-color: #ff0;
+            color: #ff0;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0ff;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .info-line {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 DIAGNÓSTICO COMPLETO FIRESTORE</h1>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="executarDiagnostico()">🚀 Executar Diagnóstico</button>
+            <button onclick="location.reload()">🔄 Resetar</button>
+        </div>
+        
+        <div id="resultado"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore,
+            collection,
+            getDocs,
+            doc,
+            getDoc,
+            query,
+            limit
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { 
+            getAuth,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBMASTLnc-YVN6AVQrfDm52P-IGtQe94zQ",
+            authDomain: "lanchonetetestesdesistemas.firebaseapp.com",
+            projectId: "lanchonetetestesdesistemas",
+            storageBucket: "lanchonetetestesdesistemas.firebasestorage.app",
+            messagingSenderId: "983784344399",
+            appId: "1:983784344399:web:b2f6034e939f3dffcc533a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const resultado = document.getElementById('resultado');
+
+        window.executarDiagnostico = async function() {
+            resultado.innerHTML = '';
+            
+            addSection('🔷 CONFIGURAÇÃO FIREBASE', [
+                `projectId: ${firebaseConfig.projectId}`,
+                `authDomain: ${firebaseConfig.authDomain}`,
+                `appId: ${firebaseConfig.appId}`
+            ], 'success');
+
+            addSection('🔷 FIRESTORE INTERNOS', [
+                `app.options.projectId: ${app.options.projectId}`,
+                `db._databaseId.projectId: ${db._databaseId?.projectId}`,
+                `db._databaseId.database: ${db._databaseId?.database}`,
+                `db.type: ${db.type}`,
+                `db.app.name: ${db.app.name}`
+            ], 'success');
+
+            const user = auth.currentUser;
+            
+            if (!user) {
+                addSection('❌ AUTENTICAÇÃO', [
+                    'NENHUM USUÁRIO LOGADO!',
+                    'Faça login primeiro: /html/login.html'
+                ], 'error');
+                return;
+            }
+
+            addSection('✅ AUTENTICAÇÃO', [
+                `Email: ${user.email}`,
+                `UID: ${user.uid}`,
+                `Provider: ${user.providerData[0]?.providerId}`,
+                `EmailVerified: ${user.emailVerified}`,
+                `CreationTime: ${user.metadata.creationTime}`
+            ], 'success');
+
+            // TESTE 1: Listar coleções
+            addSection('🔷 TESTE 1: Listar coleções disponíveis', [
+                'Tentando acessar coleção "feedbacks"...'
+            ], 'warning');
+
+            try {
+                const feedbacksRef = collection(db, 'feedbacks');
+                const q = query(feedbacksRef, limit(1));
+                const snapshot = await getDocs(q);
+                
+                addSection('✅ TESTE 1: SUCESSO!', [
+                    `Coleção acessível: feedbacks`,
+                    `Total documentos: ${snapshot.size}`,
+                    `Fonte: ${snapshot.metadata.fromCache ? 'CACHE' : 'SERVIDOR'}`,
+                    `Vazio: ${snapshot.empty}`
+                ], 'success');
+
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    addSection('📄 Primeiro documento encontrado:', [
+                        `ID: ${doc.id}`,
+                        `Dados: ${JSON.stringify(doc.data(), null, 2)}`
+                    ], 'success');
+                }
+
+            } catch (error) {
+                addSection('❌ TESTE 1: FALHOU!', [
+                    `Código: ${error.code}`,
+                    `Mensagem: ${error.message}`,
+                    ``,
+                    `🔍 DIAGNÓSTICO:`,
+                    error.code === 'permission-denied' ? 
+                        '→ As regras do Firestore estão BLOQUEANDO!' :
+                    error.code === 'unavailable' ?
+                        '→ Não conseguiu conectar ao servidor!' :
+                        '→ Erro desconhecido'
+                ], 'error');
+            }
+
+            // TESTE 2: Buscar documento específico
+            addSection('🔷 TESTE 2: Buscar documento específico', [
+                'Tentando buscar: feedbacks/F14mBOwH2eJe4G9Cy9C5'
+            ], 'warning');
+
+            try {
+                const docRef = doc(db, 'feedbacks', 'F14mBOwH2eJe4G9Cy9C5');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    addSection('✅ TESTE 2: DOCUMENTO ENCONTRADO!', [
+                        `ID: ${docSnap.id}`,
+                        `Existe: true`,
+                        `Fonte: ${docSnap.metadata.fromCache ? 'CACHE' : 'SERVIDOR'}`,
+                        `Dados: ${JSON.stringify(docSnap.data(), null, 2)}`
+                    ], 'success');
+                } else {
+                    addSection('⚠️ TESTE 2: Documento não existe', [
+                        'O documento F14mBOwH2eJe4G9Cy9C5 não foi encontrado',
+                        'Isso pode significar:',
+                        '→ Estamos no projeto/database ERRADO',
+                        '→ Ou o documento foi deletado'
+                    ], 'warning');
+                }
+
+            } catch (error) {
+                addSection('❌ TESTE 2: FALHOU!', [
+                    `Código: ${error.code}`,
+                    `Mensagem: ${error.message}`
+                ], 'error');
+            }
+
+            // TESTE 3: Tentar criar documento
+            addSection('🔷 TESTE 3: Verificar permissão de escrita', [
+                'Teste desabilitado (não vamos criar documentos de teste)',
+                'Mas se você quiser testar, descomente o código'
+            ], 'warning');
+
+            // RESUMO FINAL
+            addSection('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', [], 'success');
+            addSection('📊 RESUMO E PRÓXIMOS PASSOS', [
+                '',
+                '✅ SE TESTE 1 e 2 passaram:',
+                '   → Firestore está funcionando!',
+                '   → Problema é no código de mensagens_admin.js',
+                '   → Verifique o código',
+                '',
+                '❌ SE TESTE 1 deu permission-denied:',
+                '   → Regras estão bloqueando',
+                '   → Mesmo com "if true"',
+                '   → Possíveis soluções:',
+                '     1. Aguardar mais tempo (propagação)',
+                '     2. Usar modo teste com timestamp',
+                '     3. Criar novo database',
+                '',
+                '❌ SE TESTE 2 não encontrou documento:',
+                '   → Estamos no PROJETO ERRADO',
+                '   → Ou DATABASE ERRADO',
+                '   → Verificar Firebase Console',
+                ''
+            ], 'success');
+        };
+
+        function addSection(title, lines, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `section ${type}`;
+            div.innerHTML = `<strong>${title}</strong>`;
+            
+            if (lines.length > 0) {
+                const content = lines.map(line => 
+                    `<div class="info-line">${line}</div>`
+                ).join('');
+                div.innerHTML += content;
+            }
+            
+            resultado.appendChild(div);
+        }
+
+        // Auto-detectar usuário
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                addSection('✅ Usuário detectado', [
+                    `Email: ${user.email}`,
+                    'Clique em "Executar Diagnóstico" para começar'
+                ], 'success');
+            } else {
+                addSection('⚠️ Nenhum usuário logado', [
+                    'Faça login primeiro',
+                    'URL: /html/login.html'
+                ], 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

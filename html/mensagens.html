@@ -3,34 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensagens de Feedback - Painel Admin</title>
+    <title>💬 Mensagens de Feedback</title>
+    
+    <!-- CSS na ordem correta -->
+    <link rel="stylesheet" href="../css/pagina_adm.css">
+    <link rel="stylesheet" href="../css/papelaria.css">
     <link rel="stylesheet" href="../css/mensagens.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/melhorias_visuais.css">
+    
+    <!-- ✅ VERIFICAÇÃO DE AUTENTICAÇÃO (CRÍTICO) -->
+    <script type="module">
+        import { verificarLoginAdmin } from "../js/auth.js";
+        verificarLoginAdmin(() => {
+            document.body.classList.remove('invisible');
+        });
+    </script>
+    
+    <style>
+        /* Esconder página até verificar autenticação */
+        body.invisible {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body>
-    <header class="mensagens-header">
-        <div class="header-container">
-            <div class="header-left">
-                <button class="btn-voltar" id="btnVoltar">
-                    ← Voltar ao Painel
-                </button>
-            </div>
-            
-            <div class="header-center">
-                <h1>Mensagens de Feedback</h1>
-                <p class="header-subtitle">Gerencie o feedback dos usuários</p>
-            </div>
-            
-            <div class="header-right">
-                <button class="btn-atualizar" id="btnAtualizar">
-                    🔄 Atualizar
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <section class="estatisticas-section">
-        <div class="container">
+<!-- ✅ BODY COM CLASSE INVISIBLE -->
+<body class="invisible">
+    
+    <!-- Container Principal -->
+    <div class="container">
+        
+        <!-- Header -->
+        <header class="admin-header">
+            <div>
+                <h1>💬 Mensagens de Feedback</h1>
+                <h2>Gerencie o feedback dos usuários</h2>
+            </div>
+        </header>
+
+        <!-- Estatísticas -->
+        <section class="estatisticas-section">
             <div class="estatisticas-grid">
                 <div class="stat-card total">
                     <div class="stat-icon">📊</div>
@@ -56,11 +69,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="filtros-section">
-        <div class="container">
+        <!-- Filtros e Busca -->
+        <section class="filtros-section">
             <div class="filtros-container">
                 <div class="filtros-buttons">
                     <button class="filtro-btn active" data-filtro="todos">
@@ -79,31 +91,46 @@
                         type="text" 
                         id="buscaFeedback" 
                         class="busca-input" 
-                        placeholder="Buscar por nome, email ou mensagem..."
+                        placeholder="🔍 Buscar por nome, email ou mensagem..."
                     >
                 </div>
             </div>
+        </section>
+
+        <!-- Botões de Ação -->
+        <div class="acoes-container" style="margin-bottom: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <button class="btn btn-outline" id="btnAtualizar" style="display: flex; align-items: center; gap: 8px;">
+                🔄 Atualizar
+            </button>
+            <button class="btn btn-outline" id="btnVoltar" style="display: flex; align-items: center; gap: 8px;">
+                ← Voltar ao Painel
+            </button>
         </div>
-    </section>
 
-    <section class="feedbacks-section">
-        <div class="container">
-            <div id="loadingFeedbacks" class="loading-container">
-                <div class="loading-spinner"></div>
-                <p>Carregando feedbacks...</p>
+        <!-- Lista de Feedbacks -->
+        <section class="feedbacks-section">
+            <!-- Loading -->
+            <div id="loadingFeedbacks" class="loading-container" style="text-align: center; padding: 40px;">
+                <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                <p style="color: var(--color-gray-600);">Carregando feedbacks...</p>
             </div>
 
-            <div id="emptyState" class="empty-state" style="display: none;">
-                <div class="empty-icon">📭</div>
-                <h2>Nenhum feedback encontrado</h2>
-                <p>Quando os usuários enviarem feedbacks, eles aparecerão aqui.</p>
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 60px 20px; background: var(--color-gray-100); border-radius: var(--border-radius-lg);">
+                <div class="empty-icon" style="font-size: 4rem; margin-bottom: 20px;">📭</div>
+                <h2 style="color: var(--color-secondary); margin-bottom: 10px;">Nenhum feedback encontrado</h2>
+                <p style="color: var(--color-gray-600);">Quando os usuários enviarem feedbacks, eles aparecerão aqui.</p>
             </div>
 
-            <div id="feedbacksContainer" class="feedbacks-grid">
+            <!-- Container de Feedbacks -->
+            <div id="feedbacksContainer" class="feedbacks-grid" style="display: grid; gap: 20px;">
+                <!-- Feedbacks serão inseridos aqui via JavaScript -->
             </div>
-        </div>
-    </section>
+        </section>
+        
+    </div>
 
+    <!-- Scripts -->
     <script type="module" src="../js/mensagens_admin.js"></script>
 </body>
 </html>
