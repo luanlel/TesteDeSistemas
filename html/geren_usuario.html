@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Gerenciamento de Usuários</title>
+
   <link rel="stylesheet" href="../css/pagina_adm.css">
   <link rel="stylesheet" href="../css/papelaria.css">
   <link rel="stylesheet" href="../css/geren_usuario.css">
@@ -18,15 +19,17 @@
 
 <body class="hidden">
   <div class="container">
-    <h1>Gerenciamento de Usuário</h1>
+    <h1>Gerenciamento de Usuários</h1>
 
+    <!-- LISTA -->
     <div class="tabela-usuarios">
-      <p class="help-text">Clique em "Editar" para modificar dados do usuário.</p>
+      <p class="help-text">Clique em editar para modificar dados.</p>
+
       <table>
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nome Completo</th>
+            <th>Nome</th>
             <th>Email</th>
             <th>Telefone</th>
             <th>Ações</th>
@@ -36,51 +39,104 @@
       </table>
     </div>
 
+    <!-- CADASTRAR USUÁRIO -->
     <div class="formulario">
       <h3>Cadastro Usuário:</h3>
+
       <form id="cadastroForm">
         <div class="form-group">
-          <label>Nome Completo:</label>
-          <input type="text" id="nome" maxlength="100" required>
+          <label>Nome:</label>
+          <input type="text" id="nome" required>
         </div>
+
         <div class="form-group">
           <label>Email:</label>
-          <input type="email" id="email" maxlength="100" required>
+          <input type="email" id="email" required>
         </div>
+
         <div class="form-group">
           <label>Senha:</label>
-          <input type="password" id="senha" maxlength="20" required>
+          <input type="password" id="senha" required>
         </div>
+
         <div class="form-group">
           <label>Telefone:</label>
-          <input type="tel" id="telefone" inputmode="numeric" maxlength="15" placeholder="(00) 00000-0000" required>
+          <input type="tel" id="telefone" required>
         </div>
-        <button type="submit">Cadastrar</button>
+
+        <button type="submit">Cadastrar Usuário</button>
       </form>
     </div>
+
+    <!-- CADASTRAR ADM -->
+    <div class="formulario">
+      <h3>Cadastro Administrador:</h3>
+
+      <form id="cadastroAdmForm">
+        <div class="form-group">
+          <label>Nome:</label>
+          <input type="text" id="adm-nome" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="adm-email" required>
+        </div>
+
+        <div class="form-group">
+          <label>Senha:</label>
+          <input type="password" id="adm-senha" required>
+        </div>
+
+        <div class="form-group">
+          <label>Telefone:</label>
+          <input type="tel" id="adm-telefone" required>
+        </div>
+
+        <button type="submit">Cadastrar ADM</button>
+      </form>
+    </div>
+
   </div>
 
-  <div class="formulario">
-    <h3>Cadastro de Administrador:</h3>
-    <form id="cadastroAdmForm">
-      <div class="form-group">
-        <label>Nome Completo:</label>
-        <input type="text" id="adm-nome" maxlength="100" required>
+  <!-- MODAL -->
+  <div id="modalEdicao" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Editar Usuário</h3>
+        <button id="btnFecharModal" class="modal-close">X</button>
       </div>
-      <div class="form-group">
-        <label>Email:</label>
-        <input type="email" id="adm-email" maxlength="100" required>
-      </div>
-      <div class="form-group">
-        <label>Senha:</label>
-        <input type="password" id="adm-senha" maxlength="20" required>
-      </div>
-      <div class="form-group">
-        <label>Telefone:</label>
-        <input type="tel" id="adm-telefone" inputmode="numeric" maxlength="15" placeholder="(00) 00000-0000" required>
-      </div>
-      <button type="submit">Cadastrar ADM</button>
-    </form>
+
+      <form id="formEditarUsuario">
+        <div class="form-group">
+          <label>Nome:</label>
+          <input type="text" id="editNome" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="editEmail" required>
+        </div>
+
+        <div class="form-group">
+          <label>Telefone:</label>
+          <input type="text" id="editTelefone" required>
+        </div>
+
+        <div class="form-group">
+          <label>Função:</label>
+          <select id="editRole">
+            <option value="usuario">Usuário</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+
+        <div class="actions-right">
+          <button id="btnCancelarEdicao" type="button">Cancelar</button>
+          <button type="submit">Salvar</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script type="module" src="../js/geren_usuario.js"></script>
