@@ -9,7 +9,7 @@
   <title>Painel de ADM</title>
   <script src="https://www.google.com/recaptcha/api.js?render=6LcvSicsAAAAAHWearj0zp2oywaf_mkh9-oDsALe"></script>
   <script type="module">
-    import { verificarLoginAdmin } from "js/auth.js";
+    import { verificarLoginAdmin } from "/js/auth.js";
     verificarLoginAdmin(() => {
       document.body.classList.remove('invisible');
     });
