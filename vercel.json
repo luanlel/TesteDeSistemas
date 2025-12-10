@@ -24,11 +24,12 @@
       "dest": "/frontend/images/$1"
     },
     {
+      "src": "/imagens/(.*)",
+      "dest": "/frontend/imagens/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/frontend/html/$1"
     }
-  ],
-  "static": {
-    "directory": "frontend"
-  }
+  ]
 }
