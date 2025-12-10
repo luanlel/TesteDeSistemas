@@ -51,7 +51,7 @@
   </div>
   
   <script type="module">
-    import { verificarLoginAdmin, logout } from "js/auth.js";
+    import { verificarLoginAdmin, logout } from "/js/auth.js";
     verificarLoginAdmin(() => { document.body.classList.remove('invisible'); });
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('btnLogoutAdmin')?.addEventListener('click', async () => {
