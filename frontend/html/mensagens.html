@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💬 Mensagens de Feedback</title>
     
-    <!-- CSS na ordem correta -->
     <link rel="stylesheet" href="../css/pagina_adm.css">
     <link rel="stylesheet" href="../css/papelaria.css">
     <link rel="stylesheet" href="../css/mensagens.css">
     <link rel="stylesheet" href="../css/melhorias_visuais.css">
     
-    <!-- ✅ VERIFICAÇÃO DE AUTENTICAÇÃO (CRÍTICO) -->
     <script type="module">
         import { verificarLoginAdmin } from "../js/auth.js";
         verificarLoginAdmin(() => {
@@ -20,7 +18,6 @@
     </script>
     
     <style>
-        /* Esconder página até verificar autenticação */
         body.invisible {
             opacity: 0;
             pointer-events: none;
@@ -28,13 +25,10 @@
     </style>
 </head>
 
-<!-- ✅ BODY COM CLASSE INVISIBLE -->
 <body class="invisible">
     
-    <!-- Container Principal -->
     <div class="container">
         
-        <!-- Header -->
         <header class="admin-header">
             <div>
                 <h1>💬 Mensagens de Feedback</h1>
@@ -42,7 +36,6 @@
             </div>
         </header>
 
-        <!-- Estatísticas -->
         <section class="estatisticas-section">
             <div class="estatisticas-grid">
                 <div class="stat-card total">
@@ -71,7 +64,6 @@
             </div>
         </section>
 
-        <!-- Filtros e Busca -->
         <section class="filtros-section">
             <div class="filtros-container">
                 <div class="filtros-buttons">
@@ -97,7 +89,6 @@
             </div>
         </section>
 
-        <!-- Botões de Ação -->
         <div class="acoes-container" style="margin-bottom: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
             <button class="btn btn-outline" id="btnAtualizar" style="display: flex; align-items: center; gap: 8px;">
                 🔄 Atualizar
@@ -107,30 +98,24 @@
             </button>
         </div>
 
-        <!-- Lista de Feedbacks -->
         <section class="feedbacks-section">
-            <!-- Loading -->
             <div id="loadingFeedbacks" class="loading-container" style="text-align: center; padding: 40px;">
                 <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
                 <p style="color: var(--color-gray-600);">Carregando feedbacks...</p>
             </div>
 
-            <!-- Empty State -->
             <div id="emptyState" class="empty-state" style="display: none; text-align: center; padding: 60px 20px; background: var(--color-gray-100); border-radius: var(--border-radius-lg);">
                 <div class="empty-icon" style="font-size: 4rem; margin-bottom: 20px;">📭</div>
                 <h2 style="color: var(--color-secondary); margin-bottom: 10px;">Nenhum feedback encontrado</h2>
                 <p style="color: var(--color-gray-600);">Quando os usuários enviarem feedbacks, eles aparecerão aqui.</p>
             </div>
 
-            <!-- Container de Feedbacks -->
             <div id="feedbacksContainer" class="feedbacks-grid" style="display: grid; gap: 20px;">
-                <!-- Feedbacks serão inseridos aqui via JavaScript -->
             </div>
         </section>
         
     </div>
 
-    <!-- Scripts -->
     <script type="module" src="../js/mensagens_admin.js"></script>
 </body>
 </html>

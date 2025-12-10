@@ -1,22 +1,12 @@
-// =====================================================================================
-// CONFIG
-// =====================================================================================
 const API_URL = "http://localhost:3000/api/feedbacks";
 
-// Token salvo no login
 function getToken() {
     return localStorage.getItem("token");
 }
 
-// =====================================================================================
-// ESTADO GLOBAL
-// =====================================================================================
 let feedbacksAtuais = [];
 let filtroAtual = "todos";
 
-// =====================================================================================
-// CARREGAR FEEDBACKS DA API
-// =====================================================================================
 async function carregarFeedbacks() {
     console.log("📡 Buscando feedbacks via API...");
 
@@ -48,9 +38,6 @@ async function carregarFeedbacks() {
     }
 }
 
-// =====================================================================================
-// EXIBIR FEEDBACKS
-// =====================================================================================
 function exibirFeedbacks() {
     const container = document.getElementById("feedbacksContainer");
     const empty = document.getElementById("emptyState");
@@ -93,9 +80,6 @@ function exibirFeedbacks() {
     }).join("");
 }
 
-// =====================================================================================
-// ATUALIZAR STATUS (NOVO / LIDO)
-// =====================================================================================
 async function atualizarStatus(id, status) {
     const token = getToken();
 
@@ -123,18 +107,13 @@ async function atualizarStatus(id, status) {
 window.marcarComoLido = id => atualizarStatus(id, "lido");
 window.marcarComoNovo = id => atualizarStatus(id, "novo");
 
-// =====================================================================================
-// ESTATÍSTICAS
-// =====================================================================================
 function atualizarEstatisticas() {
     document.getElementById("totalFeedbacks").textContent = feedbacksAtuais.length;
     document.getElementById("novosFeedbacks").textContent = feedbacksAtuais.filter(f => f.status === "novo").length;
     document.getElementById("lidosFeedbacks").textContent = feedbacksAtuais.filter(f => f.status === "lido").length;
 }
 
-// =====================================================================================
-// FILTROS
-// =====================================================================================
+
 document.querySelectorAll("[data-filtro]").forEach(btn => {
     btn.addEventListener("click", () => {
         filtroAtual = btn.dataset.filtro;
@@ -142,19 +121,11 @@ document.querySelectorAll("[data-filtro]").forEach(btn => {
     });
 });
 
-// =====================================================================================
-// BOTÃO VOLTAR
-// =====================================================================================
+
 document.getElementById("btnVoltar").addEventListener("click", () => {
     window.location.href = "pag_adm.html";
 });
 
-// =====================================================================================
-// BOTÃO ATUALIZAR
-// =====================================================================================
 document.getElementById("btnAtualizar").addEventListener("click", carregarFeedbacks);
 
-// =====================================================================================
-// INICIALIZAÇÃO
-// =====================================================================================
 document.addEventListener("DOMContentLoaded", carregarFeedbacks);

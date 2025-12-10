@@ -13,9 +13,6 @@ import {
   getDoc,
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// ============================================
-// LOGIN
-// ============================================
 export async function login(email, senha) {
   try {
     console.log('🔐 Tentando login:', email);
@@ -49,7 +46,6 @@ export async function login(email, senha) {
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    // 🔥 PEGAR TOKEN JWT E SALVAR
     const token = await user.getIdToken();
     localStorage.setItem("token", token);
 
@@ -65,7 +61,6 @@ export async function login(email, senha) {
       return true;
     }
 
-    // Usuário comum
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
     if (userDoc.exists()) {
       localStorage.setItem("logado", "usuario");
@@ -82,9 +77,7 @@ export async function login(email, senha) {
 }
 
 
-// ============================================
-// LOGOUT
-// ============================================
+
 export async function logout() {
   console.log('👋 Fazendo logout...');
   await signOut(auth);
@@ -93,16 +86,14 @@ export async function logout() {
   window.location.href = "../html/index.html";
 }
 
-// ============================================
-// VERIFICAR LOGIN ADMIN - FINAL CORRIGIDO
-// ============================================
+
 export function verificarLoginAdmin(onSuccess) {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('🔍 verificarLoginAdmin() INICIADO');
   console.log('📍 URL:', window.location.href);
   console.log('📍 Pathname:', window.location.pathname);
   
-  // Verificar localStorage PRIMEIRO (mas NÃO redirecionar ainda)
+
   const logadoComo = localStorage.getItem("logado");
   console.log('📝 localStorage["logado"]:', logadoComo);
   
@@ -115,7 +106,6 @@ export function verificarLoginAdmin(onSuccess) {
   
   console.log('⏳ Aguardando resposta do Firebase Auth...');
   
-  // AGUARDAR Firebase Auth responder ANTES de tomar qualquer decisão
   onAuthStateChanged(auth, async (user) => {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🔥 Firebase Auth RESPONDEU!');
@@ -132,7 +122,6 @@ export function verificarLoginAdmin(onSuccess) {
     console.log('📧 Email:', user.email);
     console.log('🆔 UID:', user.uid);
     
-    // Agora verificar localStorage novamente
     const logadoComoAgora = localStorage.getItem("logado");
     console.log('📝 localStorage["logado"] atual:', logadoComoAgora);
     
@@ -140,7 +129,7 @@ export function verificarLoginAdmin(onSuccess) {
       console.log('❌ localStorage NÃO é "admin"');
       console.log('🔍 Verificando no banco de dados se é admin...');
       
-      // Verificar no banco se é admin
+
       try {
         const adminQuery = query(collection(db, "admins"), where("email", "==", user.email));
         const adminSnap = await getDocs(adminQuery);
@@ -174,9 +163,7 @@ export function verificarLoginAdmin(onSuccess) {
   });
 }
 
-// ============================================
-// VERIFICAR LOGIN USUÁRIO
-// ============================================
+
 export function verificarLoginUsuario(onSuccess) {
   console.log('🔍 verificarLoginUsuario() chamado');
   
@@ -191,9 +178,6 @@ export function verificarLoginUsuario(onSuccess) {
   });
 }
 
-// ============================================
-// IMPEDIR ADMIN DE ACESSAR LOJA
-// ============================================
 export function impedirAdminNaLoja() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('🛡️ impedirAdminNaLoja() chamado');

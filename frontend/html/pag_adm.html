@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="../css/melhorias_visuais.css">
   <link rel="stylesheet" href="../css/papelaria.css">
   <title>Painel de ADM</title>
-  <!-- reCAPTCHA v3: substitua YOUR_RECAPTCHA_SITE_KEY pelo seu site key -->
   <script src="https://www.google.com/recaptcha/api.js?render=6LcvSicsAAAAAHWearj0zp2oywaf_mkh9-oDsALe"></script>
   <script type="module">
     import { verificarLoginAdmin } from "../js/auth.js";
@@ -39,13 +38,13 @@
     </div>
     
     <div class="buttons">
-      <button onclick="window.location.href='geren_usuario.html'">
+      <button type="button" id="btnGerenciarUsuarios">
         <span>Gerenciamento de Usuários</span>
       </button>
-      <button onclick="window.location.href='geren_produtos.html'">
+      <button type="button" id="btnGerenciarProdutos">
         <span>Gerenciamento de Produtos</span>
       </button>
-      <button onclick="window.location.href='mensagens.html'" class="btn-mensagens-central">
+      <button type="button" id="btnVerMensagens" class="btn-mensagens-central">
         <span>Mensagens de Feedback</span>
       </button>
     </div>
@@ -57,6 +56,18 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('btnLogoutAdmin')?.addEventListener('click', async () => {
         if (confirm('Deseja sair?')) await logout();
+      });
+      
+      document.getElementById('btnGerenciarUsuarios')?.addEventListener('click', () => {
+        window.location.href = 'geren_usuario.html';
+      });
+      
+      document.getElementById('btnGerenciarProdutos')?.addEventListener('click', () => {
+        window.location.href = 'geren_produtos.html';
+      });
+      
+      document.getElementById('btnVerMensagens')?.addEventListener('click', () => {
+        window.location.href = 'mensagens.html';
       });
     });
   </script>

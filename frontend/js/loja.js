@@ -358,13 +358,17 @@ async function carregarProdutos() {
       const card = document.createElement("div");
       card.className = "produto-card fade-in";
 
-      const imagens = Array.isArray(produto.imagens)
-        ? produto.imagens
-        : produto.imagemDataUrl
-        ? [produto.imagemDataUrl]
-        : produto.imagem
-        ? [produto.imagem]
-        : ["../imagens/imagem_padrao.png"];
+      let imagens = [];
+      
+      if (Array.isArray(produto.imagens) && produto.imagens.length > 0) {
+        imagens = produto.imagens.filter(img => img && typeof img === 'string' && img.trim());
+      }
+      
+      if (imagens.length === 0) {
+        if (produto.imagemDataUrl) imagens = [produto.imagemDataUrl];
+        else if (produto.imagem) imagens = [produto.imagem];
+        else imagens = ["/imagens/imagem_padrao.svg"];
+      }
 
       let imagensHTML = "";
       if (imagens.length > 1) {
@@ -372,14 +376,16 @@ async function carregarProdutos() {
           <div class="carousel" data-produto="${produto.id}">
             ${imagens.map((img, i) => `
               <div class="slide ${i === 0 ? "active" : ""}">
-                <img src="${img}" alt="${produto.nome}" class="carousel-img">
+                <img src="${img || '/imagens/imagem_padrao.svg'}" alt="${produto.nome}" class="carousel-img" onerror="this.src='/imagens/imagem_padrao.svg'">
               </div>`).join("")}
             <button class="prev" aria-label="Imagem anterior">&#10094;</button>
             <button class="next" aria-label="Próxima imagem">&#10095;</button>
           </div>
         `;
+      } else if (imagens.length === 1) {
+        imagensHTML = `<img src="${imagens[0] || '/imagens/imagem_padrao.svg'}" alt="${produto.nome}" class="single-img" onerror="this.src='/imagens/imagem_padrao.svg'"/>`;
       } else {
-        imagensHTML = `<img src="${imagens[0]}" alt="${produto.nome}" class="single-img"/>`;
+        imagensHTML = `<img src="/imagens/imagem_padrao.svg" alt="${produto.nome}" class="single-img"/>`;
       }
 
       if (produto.quantidade > 0) {

@@ -1,17 +1,11 @@
-// frontend/js/geren_usuario.js
 import { auth } from "./firebase-config.js";
 
-// =====================================
-// 🔧 CONFIG BASE DA API
-// =====================================
 const API_BASE =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:3000/api"
     : "/api";
 
-// =====================================
-// 🔐 PEGAR TOKEN DO FIREBASE (ADMIN LOGADO)
-// =====================================
+
 function esperarUsuarioLogado() {
   return new Promise((resolve, reject) => {
     const atual = auth.currentUser;
@@ -30,7 +24,6 @@ async function getIdToken() {
   return user.getIdToken();
 }
 
-// Helper para chamadas na API com Authorization
 async function apiFetch(path, options = {}) {
   const token = await getIdToken();
 
@@ -57,14 +50,11 @@ async function apiFetch(path, options = {}) {
   return response.json();
 }
 
-// =====================================
-// 📌 ELEMENTOS DA TELA
-// =====================================
+
 const tabelaBody = document.getElementById("userTable");
 const formCadastro = document.getElementById("cadastroForm");
 const formCadastroAdm = document.getElementById("cadastroAdmForm");
 
-// Modal de edição
 const modalEdicao = document.getElementById("modalEdicao");
 const formEditarUsuario = document.getElementById("formEditarUsuario");
 const btnFecharModal = document.getElementById("btnFecharModal");
@@ -72,9 +62,6 @@ const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 
 let usuarioEditandoId = null;
 
-// =====================================
-// 🧾 LISTAR USUÁRIOS
-// =====================================
 async function carregarUsuarios() {
   tabelaBody.innerHTML = `
     <tr>
@@ -145,9 +132,6 @@ async function carregarUsuarios() {
   }
 }
 
-// =====================================
-// 🧱 MODAL DE EDIÇÃO
-// =====================================
 function abrirModalEditar(dados) {
   usuarioEditandoId = dados.id;
 
@@ -168,23 +152,18 @@ function fecharModal() {
 btnFecharModal?.addEventListener("click", fecharModal);
 btnCancelarEdicao?.addEventListener("click", fecharModal);
 
-// Fecha modal clicando fora
 modalEdicao?.addEventListener("click", (e) => {
   if (e.target === modalEdicao) {
     fecharModal();
   }
 });
 
-// ESC fecha modal
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !modalEdicao.classList.contains("hidden")) {
     fecharModal();
   }
 });
 
-// =====================================
-// 🟦 CLICK NA TABELA (EDITAR / EXCLUIR)
-// =====================================
 tabelaBody.addEventListener("click", async (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
@@ -218,9 +197,6 @@ tabelaBody.addEventListener("click", async (e) => {
   }
 });
 
-// =====================================
-// 💾 SALVAR EDIÇÃO
-// =====================================
 formEditarUsuario.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!usuarioEditandoId) return;
@@ -255,9 +231,6 @@ formEditarUsuario.addEventListener("submit", async (e) => {
   }
 });
 
-// =====================================
-// 🟩 CADASTRAR USUÁRIO COMUM (APENAS FIRESTORE)
-// =====================================
 formCadastro.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -279,8 +252,6 @@ formCadastro.addEventListener("submit", async (e) => {
         email,
         telefone,
         role: "usuario",
-        // senha está aqui só se no futuro você quiser usar,
-        // mas o backend atual não guarda a senha
       }),
     });
 
@@ -293,9 +264,6 @@ formCadastro.addEventListener("submit", async (e) => {
   }
 });
 
-// =====================================
-// 🟥 CADASTRAR ADMIN (USA /api/users/admin)
-// =====================================
 formCadastroAdm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -329,11 +297,7 @@ formCadastroAdm.addEventListener("submit", async (e) => {
   }
 });
 
-// =====================================
-// 🚀 INICIALIZAÇÃO
-// =====================================
 window.addEventListener("DOMContentLoaded", () => {
-  // Se chegar até aqui, o verificarLoginAdmin (no <head>) já bloqueou quem não é admin.
   carregarUsuarios();
   console.log("✅ Gerenciamento de usuários carregado usando a API.");
 });

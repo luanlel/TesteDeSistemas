@@ -1,5 +1,5 @@
 import { auth, db } from "./firebase-config.js";
-import { login } from "./auth.js"; // ⭐ IMPORTA A FUNÇÃO LOGIN QUE FAZ VERIFICAÇÃO DE ADMIN
+import { login } from "./auth.js";
 import { 
   createUserWithEmailAndPassword,
   sendPasswordResetEmail

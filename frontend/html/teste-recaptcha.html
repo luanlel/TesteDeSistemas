@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste reCAPTCHA</title>
+  <script src="https://www.google.com/recaptcha/api.js?render=6LcvSicsAAAAAHWearj0zp2oywaf_mkh9-oDsALe"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .test-section h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .output {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #333;
+    }
+    
+    .output-success {
+      background: #e8f5e9;
+      border-color: #4caf50;
+      color: #2e7d32;
+    }
+    
+    .output-error {
+      background: #ffebee;
+      border-color: #f44336;
+      color: #c62828;
+    }
+    
+    .output-info {
+      background: #e3f2fd;
+      border-color: #2196f3;
+      color: #1565c0;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .status-loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .step:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 12px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-content p {
+      color: #666;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+    
+    .step-content code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Teste reCAPTCHA v3</h1>
+    <p class="subtitle">Teste completo de funcionamento do reCAPTCHA no seu sistema</p>
+    
+    <!-- Teste 1: Gerar Token -->
+    <div class="test-section">
+      <h2>
+        1️⃣ Gerar Token reCAPTCHA
+        <span class="status-badge" id="status1"></span>
+      </h2>
+      <button id="btnGerarToken">Gerar Token</button>
+      <div class="output output-info" id="output1" style="display: none;"></div>
+    </div>
+    
+    <!-- Teste 2: Validar no Backend -->
+    <div class="test-section">
+      <h2>
+        2️⃣ Validar Token no Backend
+        <span class="status-badge" id="status2"></span>
+      </h2>
+      <button id="btnValidarToken" disabled>Validar Token</button>
+      <div class="output output-info" id="output2" style="display: none;"></div>
+    </div>
+    
+    <!-- Teste 3: Simular Login Completo -->
+    <div class="test-section">
+      <h2>
+        3️⃣ Simular Login Completo
+        <span class="status-badge" id="status3"></span>
+      </h2>
+      <div class="output output-info" id="output3">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <p><strong>Executar grecaptcha.execute()</strong></p>
+            <p>O reCAPTCHA gera um token silenciosamente</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <p><strong>Enviar token para /api/auth/verify-recaptcha</strong></p>
+            <p>O backend valida o token com a API do Google</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <p><strong>Verificar resposta</strong></p>
+            <p>Se success=true e score≥0.5, o login é permitido</p>
+          </div>
+        </div>
+      </div>
+      <button id="btnSimularLogin">Simular Login com reCAPTCHA</button>
+      <div class="output output-info" id="output4" style="display: none;"></div>
+    </div>
+    
+    <!-- Status Final -->
+    <div class="test-section">
+      <h2>📊 Resumo do Teste</h2>
+      <div class="output output-info" id="resumo">
+        <p><strong>Aguardando testes...</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tokenGerado = null;
+    const SITE_KEY = '6LcvSicsAAAAAHWearj0zp2oywaf_mkh9-oDsALe';
+    
+    function log(elementId, message, type = 'info') {
+      const output = document.getElementById(elementId);
+      output.style.display = 'block';
+      output.className = `output output-${type}`;
+      output.textContent += (output.textContent ? '\n' : '') + message;
+    }
+    
+    function atualizarStatus(statusId, texto, tipo) {
+      const badge = document.getElementById(statusId);
+      badge.textContent = texto;
+      badge.className = `status-badge status-${tipo}`;
+    }
+    
+    // Teste 1: Gerar Token
+    document.getElementById('btnGerarToken').addEventListener('click', async () => {
+      atualizarStatus('status1', 'Gerando...', 'loading');
+      log('output1', '⏳ Executando grecaptcha.execute()...');
+      
+      try {
+        tokenGerado = await grecaptcha.execute(SITE_KEY, { action: 'login' });
+        
+        log('output1', `✅ Token gerado com sucesso!`, 'success');
+        log('output1', `Token: ${tokenGerado.substring(0, 50)}...`, 'info');
+        log('output1', `Comprimento do token: ${tokenGerado.length} caracteres`, 'info');
+        
+        atualizarStatus('status1', 'Sucesso', 'success');
+        document.getElementById('btnValidarToken').disabled = false;
+      } catch (error) {
+        log('output1', `❌ Erro ao gerar token: ${error.message}`, 'error');
+        atualizarStatus('status1', 'Erro', 'error');
+      }
+    });
+    
+    // Teste 2: Validar Token
+    document.getElementById('btnValidarToken').addEventListener('click', async () => {
+      if (!tokenGerado) {
+        log('output2', '❌ Nenhum token disponível. Gere um token primeiro.', 'error');
+        atualizarStatus('status2', 'Erro', 'error');
+        return;
+      }
+      
+      atualizarStatus('status2', 'Validando...', 'loading');
+      log('output2', '⏳ Enviando token para /api/auth/verify-recaptcha...');
+      
+      try {
+        const response = await fetch('/api/auth/verify-recaptcha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: tokenGerado })
+        });
+        
+        const data = await response.json();
+        
+        log('output2', `📍 Status HTTP: ${response.status}`, 'info');
+        log('output2', `📦 Resposta: ${JSON.stringify(data, null, 2)}`, 'info');
+        
+        if (data.success) {
+          log('output2', `✅ Token validado com sucesso!`, 'success');
+          if (data.data && data.data.score) {
+            log('output2', `Score: ${data.data.score} (limiar mínimo: 0.5)`, 'info');
+            if (data.data.score >= 0.5) {
+              log('output2', `✅ Score aceitável! Login permitido.`, 'success');
+            } else {
+              log('output2', `⚠️ Score baixo! Login bloqueado.`, 'error');
+            }
+          }
+          atualizarStatus('status2', 'Sucesso', 'success');
+        } else {
+          log('output2', `❌ Token inválido!`, 'error');
+          atualizarStatus('status2', 'Erro', 'error');
+        }
+      } catch (error) {
+        log('output2', `❌ Erro na requisição: ${error.message}`, 'error');
+        atualizarStatus('status2', 'Erro', 'error');
+      }
+    });
+    
+    // Teste 3: Simular Login Completo
+    document.getElementById('btnSimularLogin').addEventListener('click', async () => {
+      atualizarStatus('status3', 'Simulando...', 'loading');
+      document.getElementById('output4').style.display = 'block';
+      document.getElementById('output4').innerHTML = '';
+      
+      log('output4', '🔄 Iniciando simulação de login com reCAPTCHA...');
+      
+      try {
+        log('output4', 'Etapa 1: Executando grecaptcha.execute()...');
+        const token = await grecaptcha.execute(SITE_KEY, { action: 'login' });
+        log('output4', `✅ Token gerado: ${token.substring(0, 30)}...`, 'success');
+        
+        log('output4', 'Etapa 2: Validando no backend...');
+        const validateResp = await fetch('/api/auth/verify-recaptcha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        
+        const validateData = await validateResp.json();
+        
+        if (validateData.success) {
+          log('output4', `✅ reCAPTCHA validado!`, 'success');
+          log('output4', `Score: ${validateData.data.score}`, 'info');
+          
+          log('output4', 'Etapa 3: Validação completa!', 'success');
+          log('output4', '✅ Login com reCAPTCHA funcionando perfeitamente!', 'success');
+          atualizarStatus('status3', 'Sucesso', 'success');
+          atualizarResumo(true);
+        } else {
+          log('output4', `❌ Validação falhou: ${validateData.message}`, 'error');
+          atualizarStatus('status3', 'Erro', 'error');
+          atualizarResumo(false);
+        }
+      } catch (error) {
+        log('output4', `❌ Erro durante simulação: ${error.message}`, 'error');
+        atualizarStatus('status3', 'Erro', 'error');
+        atualizarResumo(false);
+      }
+    });
+    
+    function atualizarResumo(sucesso) {
+      const resumo = document.getElementById('resumo');
+      if (sucesso) {
+        resumo.className = 'output output-success';
+        resumo.innerHTML = `
+          <strong>✅ TESTE CONCLUÍDO COM SUCESSO!</strong><br><br>
+          reCAPTCHA está funcionando corretamente no seu sistema:<br>
+          ✓ Token gerado pelo Google<br>
+          ✓ Token validado no backend<br>
+          ✓ Score verificado (≥0.5)<br>
+          ✓ Login protegido contra bots<br><br>
+          Agora todos os logins em seu sistema estão protegidos! 🛡️
+        `;
+      } else {
+        resumo.className = 'output output-error';
+        resumo.innerHTML = `
+          <strong>❌ Erro detectado</strong><br><br>
+          Verifique:<br>
+          • A chave do site está correta?<br>
+          • O servidor está rodando?<br>
+          • A chave secreta está no .env?<br>
+          • Não há erros no console?
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

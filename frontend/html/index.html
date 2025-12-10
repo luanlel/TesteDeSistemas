@@ -8,14 +8,11 @@
   <link rel="stylesheet" href="../css/login.css">
   <link rel="stylesheet" href="../css/melhorias_visuais.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- reCAPTCHA v3: substitua YOUR_RECAPTCHA_SITE_KEY pelo seu site key -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LcvSicsAAAAAHWearj0zp2oywaf_mkh9-oDsALe"></script>
   
-  <!-- ✅ IMPEDIR ADMIN DE ACESSAR LOJA -->
   <script type="module">
     import { impedirAdminNaLoja } from "../js/auth.js";
     
-    // EXECUTAR IMEDIATAMENTE
     impedirAdminNaLoja();
   </script>
 </head>

@@ -2,12 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// ============================================
-// ✅ CONFIGURAÇÃO CORRETA DO FIREBASE
-// ============================================
-// Valores obtidos do Firebase Console
-// Screenshot: 07/12/2025 14:09
-// ============================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyC8MASTlWG-rYMdAVQGfDm5zP-IGtdp42Q",

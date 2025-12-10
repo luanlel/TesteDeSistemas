@@ -14,9 +14,6 @@ const modal = document.getElementById("modalEditar");
 
 let produtoEditandoId = null;
 
-// ------------------------------
-// CARREGAR PRODUTOS
-// ------------------------------
 async function carregarProdutos() {
   tabela.innerHTML = "<tr><td colspan='6'>Carregando...</td></tr>";
 
@@ -44,9 +41,6 @@ async function carregarProdutos() {
   ativarBotoes();
 }
 
-// ------------------------------
-// ATIVAR BOTÕES
-// ------------------------------
 function ativarBotoes() {
   document.querySelectorAll(".btn-excluir").forEach((btn) => {
     btn.onclick = async () => {
@@ -61,9 +55,7 @@ function ativarBotoes() {
   });
 }
 
-// ------------------------------
-// ABRIR MODAL DE EDIÇÃO
-// ------------------------------
+
 async function abrirModalEditar(id) {
   produtoEditandoId = id;
 
@@ -79,9 +71,7 @@ async function abrirModalEditar(id) {
   document.body.style.overflow = "hidden";
 }
 
-// ------------------------------
-// FECHAR MODAL
-// ------------------------------
+
 document.getElementById("btnFecharModal").onclick = fecharModal;
 
 function fecharModal() {
@@ -89,9 +79,6 @@ function fecharModal() {
   document.body.style.overflow = "auto";
 }
 
-// ------------------------------
-// SALVAR EDIÇÃO
-// ------------------------------
 document.getElementById("editarForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -106,9 +93,7 @@ document.getElementById("editarForm").addEventListener("submit", async (e) => {
   carregarProdutos();
 });
 
-// ------------------------------
-// CADASTRAR NOVO PRODUTO
-// ------------------------------
+
 document.getElementById("produtoForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
