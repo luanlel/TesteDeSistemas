@@ -57,14 +57,14 @@ export async function login(email, senha) {
 
     if (!adminSnap.empty) {
       localStorage.setItem("logado", "admin");
-      window.location.href = "../html/pag_adm.html";
+      window.location.href = "/html/pag_adm.html";
       return true;
     }
 
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
     if (userDoc.exists()) {
       localStorage.setItem("logado", "usuario");
-      window.location.href = "../html/index.html";
+      window.location.href = "/html/index.html";
       return true;
     }
 
@@ -83,7 +83,7 @@ export async function logout() {
   await signOut(auth);
   localStorage.removeItem("logado");
   console.log('✅ Logout completo');
-  window.location.href = "../html/index.html";
+  window.location.href = "/html/index.html";
 }
 
 
