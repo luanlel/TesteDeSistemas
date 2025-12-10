@@ -19,7 +19,33 @@ import {
 export async function login(email, senha) {
   try {
     console.log('🔐 Tentando login:', email);
-    
+    // ===== Verificação reCAPTCHA (chame o endpoint do backend) =====
+    try {
+      if (window.grecaptcha && typeof grecaptcha.execute === 'function') {
+        const SITE_KEY = '6LcvSicsAAAAAHWearj0zp2oywaf_mkh9-oDsALe'; // reCAPTCHA v3
+        const token = await grecaptcha.execute(SITE_KEY, { action: 'login' });
+
+        const verifyResp = await fetch('/api/auth/verify-recaptcha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+
+        const verifyJson = await verifyResp.json();
+        if (!verifyJson.success) {
+          console.error('❌ reCAPTCHA falhou:', verifyJson);
+          alert('reCAPTCHA falhou. Tente novamente.');
+          return false;
+        }
+      } else {
+        console.warn('⚠️ grecaptcha não disponível. Pulando verificação reCAPTCHA.');
+      }
+    } catch (recapErr) {
+      console.error('Erro durante verificação reCAPTCHA:', recapErr);
+      alert('Erro ao validar reCAPTCHA. Tente novamente.');
+      return false;
+    }
+
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
