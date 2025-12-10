@@ -4,7 +4,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Rotas
+// Rotas da API
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -17,28 +17,48 @@ app.use(cors());
 app.use(express.json());
 
 // ======================
-// Servir Frontend
+// 📌 Servir o Frontend
 // ======================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const FRONTEND_DIR = path.join(__dirname, "..", "..", "frontend", "html");
+// Pasta onde ficam os HTML
+const FRONTEND_HTML = path.join(__dirname, "..", "..", "frontend", "html");
 
-// Servir arquivos estáticos (css, js, imagens)
+// Pasta de arquivos estáticos (css, js, imagens)
 app.use(express.static(path.join(__dirname, "..", "..", "frontend")));
 
-// Página inicial
+// ======================
+// 📌 Página inicial
+// ======================
 app.get("/", (req, res) => {
-  res.sendFile(path.join(FRONTEND_DIR, "index.html"));
+  res.sendFile(path.join(FRONTEND_HTML, "index.html"));
 });
 
 // ======================
-// Rotas da API
+// 📌 Servir automaticamente TODAS as páginas HTML
+// ======================
+const paginas = [
+  "pag_adm.html",
+  "geren_usuario.html",
+  "geren_produtos.html",
+  "mensagens.html",
+  "teste-recaptcha.html"
+];
+
+paginas.forEach((arquivo) => {
+  app.get(`/${arquivo}`, (req, res) => {
+    res.sendFile(path.join(FRONTEND_HTML, arquivo));
+  });
+});
+
+// ======================
+// 📌 Rotas da API
 // ======================
 app.get("/api", (req, res) => {
   res.json({
     status: "OK",
-    message: "API do Mercadinho",
+    message: "API do projeto"
   });
 });
 

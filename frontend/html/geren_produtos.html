@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <title>Gerenciamento de Produtos</title>
 
-  <link rel="stylesheet" href="css/pagina_adm.css">
-  <link rel="stylesheet" href="css/papelaria.css">
-  <link rel="stylesheet" href="css/geren_produto.css">
+  <link rel="stylesheet" href="/css/pagina_adm.css">
+  <link rel="stylesheet" href="/css/papelaria.css">
+  <link rel="stylesheet" href="/css/geren_produto.css">
 
   <script type="module">
-    import { verificarLoginAdmin } from "js/auth.js";
+    import { verificarLoginAdmin } from "/js/auth.js";
     verificarLoginAdmin(() => document.body.classList.remove("hidden"));
   </script>
 </head>
@@ -101,8 +101,8 @@
       </div>
   </div>
 
-  <script type="module" src="js/firebase-config.js"></script>
-  <script type="module" src="js/geren_produtos.js"></script>
+  <script type="module" src="/js/firebase-config.js"></script>
+  <script type="module" src="/js/geren_produtos.js"></script>
 
 </body>
 </html>
