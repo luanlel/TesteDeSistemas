@@ -10,11 +10,13 @@ import { requireAdmin } from "../middlewares/requireAdmin.js";
 
 const router = express.Router();
 
-// Usuário logado pode criar feedback
+// Usuário logado pode enviar feedback
 router.post("/", authMiddleware, createFeedback);
 
-// Admin pode listar e atualizar status
+// Admin pode listar feedbacks
 router.get("/", authMiddleware, requireAdmin, getAllFeedbacks);
+
+// Admin pode atualizar status
 router.patch("/:id/status", authMiddleware, requireAdmin, updateFeedbackStatus);
 
 export default router;

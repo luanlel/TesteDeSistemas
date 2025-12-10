@@ -11,12 +11,16 @@ import { requireAdmin } from "../middlewares/requireAdmin.js";
 
 const router = express.Router();
 
-// GET público (lista produtos)
+// Produtos disponíveis → público
 router.get("/", getAllProducts);
 
-// Rotas abaixo: somente admin
+// Criar produto (admin)
 router.post("/", authMiddleware, requireAdmin, createProduct);
+
+// Atualizar produto (admin)
 router.put("/:id", authMiddleware, requireAdmin, updateProduct);
+
+// Excluir produto (admin)
 router.delete("/:id", authMiddleware, requireAdmin, deleteProduct);
 
 export default router;

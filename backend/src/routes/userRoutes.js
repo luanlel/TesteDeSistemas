@@ -5,31 +5,31 @@ import {
   createUser,
   updateUser,
   deleteUser,
-  createAdmin,
 } from "../controllers/userController.js";
+
+import { createAdmin } from "../controllers/adminController.js";
+
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { requireAdmin } from "../middlewares/requireAdmin.js";
 
 const router = express.Router();
 
-// Todas as rotas daqui exigem:
-// 1) Token válido (authMiddleware)
-// 2) Usuário ser admin (requireAdmin)
+// Todas as rotas exigem admin autenticado
 router.use(authMiddleware, requireAdmin);
 
-// 🔹 Lista todos os usuários
+// Listar todos os usuários
 router.get("/", getAllUsers);
 
-// 🔹 Cria usuário comum (apenas Firestore)
+// Criar usuário normal
 router.post("/", createUser);
 
-// 🔹 Cria ADMIN completo (Auth + admins + usuarios)
+// Criar novo admin
 router.post("/admin", createAdmin);
 
-// 🔹 Atualiza usuário
+// Atualizar usuário
 router.put("/:id", updateUser);
 
-// 🔹 Deleta usuário
+// Deletar usuário
 router.delete("/:id", deleteUser);
 
 export default router;
