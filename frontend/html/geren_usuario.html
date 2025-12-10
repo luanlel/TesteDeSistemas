@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <title>Gerenciamento de Usuários</title>
 
-  <link rel="stylesheet" href="css/pagina_adm.css">
-  <link rel="stylesheet" href="css/papelaria.css">
-  <link rel="stylesheet" href="css/geren_usuario.css">
-  <link rel="stylesheet" href="css/melhorias_visuais.css">
+  <link rel="stylesheet" href="/css/pagina_adm.css">
+  <link rel="stylesheet" href="/css/papelaria.css">
+  <link rel="stylesheet" href="/css/geren_usuario.css">
+  <link rel="stylesheet" href="/css/melhorias_visuais.css">
 
   <script type="module">
-    import { verificarLoginAdmin } from "js/auth.js";
+    import { verificarLoginAdmin } from "/js/auth.js";
     verificarLoginAdmin(() => {
       document.body.classList.remove('hidden');
     });
@@ -136,6 +136,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/geren_usuario.js"></script>
+  <script type="module" src="/js/geren_usuario.js"></script>
 </body>
 </html>
