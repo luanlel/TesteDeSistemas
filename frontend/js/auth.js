@@ -22,47 +22,39 @@ export async function login(email, senha) {
     
     const userCredential = await signInWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
-    
-    console.log('✅ Autenticação Firebase OK, UID:', user.uid);
 
-    // Verificar se é admin
+    // 🔥 PEGAR TOKEN JWT E SALVAR
+    const token = await user.getIdToken();
+    localStorage.setItem("token", token);
+
+    console.log("🟢 Token JWT salvo no localStorage.");
+
+    // Verificar admin
     const adminQuery = query(collection(db, "admins"), where("email", "==", email));
     const adminSnap = await getDocs(adminQuery);
 
     if (!adminSnap.empty) {
-      console.log('👑 ADMIN DETECTADO!');
-      console.log('📝 Setando localStorage: logado = admin');
       localStorage.setItem("logado", "admin");
-      
-      // VERIFICAR SE FOI SETADO
-      const verificacao = localStorage.getItem("logado");
-      console.log('✅ Verificação localStorage:', verificacao);
-      
-      console.log('🔀 Redirecionando para: ../html/pag_adm.html');
       window.location.href = "../html/pag_adm.html";
       return true;
     }
 
-    // Verificar se é usuário comum
+    // Usuário comum
     const userDoc = await getDoc(doc(db, "usuarios", user.uid));
     if (userDoc.exists()) {
-      console.log('👤 Usuário comum detectado');
-      console.log('📝 Setando localStorage: logado = usuario');
       localStorage.setItem("logado", "usuario");
-      
-      console.log('🔀 Redirecionando para: ../html/index.html');
       window.location.href = "../html/index.html";
       return true;
     }
 
-    console.warn('⚠️ Usuário não encontrado em admins nem usuarios');
     return false;
-    
+
   } catch (error) {
     console.error("❌ Erro no login:", error);
     return false;
   }
 }
+
 
 // ============================================
 // LOGOUT

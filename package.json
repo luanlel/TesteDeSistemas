@@ -1,19 +1,21 @@
 {
-  "dependencies": {
-    "bootstrap": "^5.3.8",
-    "firebase": "^12.4.0"
-  },
-  "name": "mercadinho",
+  "name": "mercadinho-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "jest.config.js",
+  "description": "Backend do sistema Mercadinho com Express + Firebase Admin",
+  "type": "module",
   "scripts": {
-    "test": "jest"
+    "dev": "nodemon backend/src/server.js",
+    "start": "node backend/src/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.5.0",
+    "multer": "^2.0.2"
+  },
   "devDependencies": {
-    "jest": "^30.2.0"
+    "nodemon": "^3.1.0"
   }
 }
